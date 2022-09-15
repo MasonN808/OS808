@@ -26,6 +26,18 @@ natively support TypeScript-to-JavaScript compilation and have tools for debuggi
 If your development environment lacks these then you'll have to compile your code from the command line, which is not a bad thing. 
 (In fact, I kind of like that option.) Just make sure you configure `tsconfig.json` correctly and test it out.
 
+
+How To Run
+===========
+1. To compile typescript into JS
+```
+> tsc
+```
+2. To load the index.html in browser
+```
+> load ./index.html
+```
+
 A Few Notes
 ===========
 
@@ -38,3 +50,5 @@ This will be especially helpful for an OS or a Compiler that may need to run in 
 
 **Where can I get more info on TypeScript**
 [Right this way!](http://www.typescriptlang.org/)
+
+

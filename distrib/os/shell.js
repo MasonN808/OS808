@@ -45,6 +45,9 @@ var TSOS;
             // prompt <string>
             sc = new TSOS.ShellCommand(this.shellPrompt, "prompt", "<string> - Sets the prompt.");
             this.commandList[this.commandList.length] = sc;
+            // prompt
+            sc = new TSOS.ShellCommand(this.shellDate, "date", "- Outputs the current date and time");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             // Display the initial prompt.
@@ -193,7 +196,24 @@ var TSOS;
                     case "help":
                         _StdOut.putText("Help displays a list of (hopefully) valid commands.");
                         break;
-                    // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
+                    case "shutdown":
+                        _StdOut.putText("Shuts down the Kernel");
+                        break;
+                    case "cls":
+                        _StdOut.putText("clears the screen");
+                        break;
+                    case "trace":
+                        _StdOut.putText("Switches the host log on and off");
+                        break;
+                    case "rot13":
+                        _StdOut.putText("Encrypts a string into another string");
+                        break;
+                    case "prompt":
+                        _StdOut.putText("Changes the prompt of the console");
+                        break;
+                    case "date":
+                        _StdOut.putText("Outputs the current date and time");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -243,6 +263,10 @@ var TSOS;
             else {
                 _StdOut.putText("Usage: prompt <string>  Please supply a string.");
             }
+        }
+        shellDate() {
+            const date_time = new Date();
+            _StdOut.putText(date_time);
         }
     }
     TSOS.Shell = Shell;

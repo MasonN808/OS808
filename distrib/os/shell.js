@@ -265,7 +265,7 @@ var TSOS;
             }
         }
         shellDate() {
-            const date_time = new Date();
+            const date_time = new Date().toLocaleString();
             _StdOut.putText(date_time);
         }
     }

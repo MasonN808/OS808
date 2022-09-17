@@ -73,10 +73,22 @@ module TSOS {
                                   "<string> - Sets the prompt.");
             this.commandList[this.commandList.length] = sc;
 
-            // prompt
+            // date
             sc = new ShellCommand(this.shellDate,
                                   "date",
                                   "- Outputs the current date and time");
+            this.commandList[this.commandList.length] = sc;
+
+            // whereamei
+            sc = new ShellCommand(this.shellWhereami,
+                                  "whereami",
+                                  "- Displays the current geographical location");
+            this.commandList[this.commandList.length] = sc;
+
+            // howareu
+            sc = new ShellCommand(this.shellHowareu,
+                                  "howareu",
+                                  "- Displays the current current status of the OS");
             this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs
@@ -266,6 +278,14 @@ module TSOS {
                         _StdOut.putText("Outputs the current date and time")
                         break;
 
+                    case "whereami":
+                        _StdOut.putText("Gives an insightful message about the user's location")
+                        break;
+                    
+                    case "howareu":
+                        _StdOut.putText("Gives insightful information about the OS")
+                        break;
+
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -318,6 +338,14 @@ module TSOS {
         public shellDate() {
             const date_time = new Date().toLocaleString();
             _StdOut.putText(date_time)
+        }
+
+        public shellWhereami() {
+            _StdOut.putText("Potentially in a simulation")
+        }
+
+        public shellHowareu() {
+            _StdOut.putText("I am sentient; and this was not a hardcoded message")
         }
 
     }

@@ -45,8 +45,14 @@ var TSOS;
             // prompt <string>
             sc = new TSOS.ShellCommand(this.shellPrompt, "prompt", "<string> - Sets the prompt.");
             this.commandList[this.commandList.length] = sc;
-            // prompt
+            // date
             sc = new TSOS.ShellCommand(this.shellDate, "date", "- Outputs the current date and time");
+            this.commandList[this.commandList.length] = sc;
+            // whereamei
+            sc = new TSOS.ShellCommand(this.shellWhereami, "whereami", "- Displays the current geographical location");
+            this.commandList[this.commandList.length] = sc;
+            // howareu
+            sc = new TSOS.ShellCommand(this.shellHowareu, "howareu", "- Displays the current geographical location");
             this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -214,6 +220,12 @@ var TSOS;
                     case "date":
                         _StdOut.putText("Outputs the current date and time");
                         break;
+                    case "whereami":
+                        _StdOut.putText("Gives an insightful message about the user's location");
+                        break;
+                    case "howareu":
+                        _StdOut.putText("Gives insightful information about the OS");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -267,6 +279,12 @@ var TSOS;
         shellDate() {
             const date_time = new Date().toLocaleString();
             _StdOut.putText(date_time);
+        }
+        shellWhereami() {
+            _StdOut.putText("Potentially in a simulation");
+        }
+        shellHowareu() {
+            _StdOut.putText("I am sentient; and this was not a hardcoded message");
         }
     }
     TSOS.Shell = Shell;

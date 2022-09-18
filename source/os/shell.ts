@@ -90,12 +90,19 @@ module TSOS {
                                   "howareu",
                                   "- Displays the current current status of the OS");
             this.commandList[this.commandList.length] = sc;
+
+            // whoismason
+            sc = new ShellCommand(this.shellWhoismason,
+                                "whoismason",
+                                "- a website url to Mason");
+            this.commandList[this.commandList.length] = sc;
             
-            // howareu
+            // status
             sc = new ShellCommand(this.shellStatus,
                                 "status",
                                 "- a message status to display");
-      this.commandList[this.commandList.length] = sc;
+            this.commandList[this.commandList.length] = sc;
+
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -291,6 +298,13 @@ module TSOS {
                         _StdOut.putText("Gives insightful information about the OS")
                         break;
 
+                    case "whoismason":
+                        _StdOut.putText("Gives website url of Mason")
+                        break;
+
+                    case "status":
+                        _StdOut.putText("Pastes a status message provided by the user to the display")
+
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -342,20 +356,25 @@ module TSOS {
 
         public shellDate() {
             const date_time = new Date().toLocaleString();
-            _StdOut.putText(date_time)
+            _StdOut.putText(date_time);
         }
 
         public shellWhereami() {
-            _StdOut.putText("Potentially in a simulation")
+            _StdOut.putText("Potentially in a simulation");
         }
 
         public shellHowareu() {
-            _StdOut.putText("I am sentient; and this was not a hardcoded message")
+            _StdOut.putText("I am sentient; and this was not a hardcoded message");
+        }
+
+        public shellWhoismason() {
+            _StdOut.putText("See https://www.masonnakamura.com/");
         }
 
         public shellStatus(args: string[]) {
-            // TODO: 
-            // pass
+            TSOS.Control.statusUpdate(args.join(' '));
+
+            _StdOut.putText("Status changed...");
         }
 
     }

@@ -2,7 +2,7 @@
 
 body {
   background: #909193 url(https://cutewallpaper.org/21/nyan-cat-background-gif/Background-from-Nyan-Cat-Imgur.png) repeat;
-  background-size: 100vw, 100vh;
+  background-size: 100vw, 100%;
   font-family: Helvetica, Verdana, Arial, sans-serif;
   font-size: 12pt;
   font-weight: normal;
@@ -52,8 +52,9 @@ h3 {
   /* text-align: center;
   width: 50%; */
   /* position: relative; */
-  top: 30px;
-  width:80%;
+  /* top: 30px; */
+  width: 60%;
+  height: 100%;
   margin: auto;
 }
 
@@ -75,12 +76,14 @@ h3 {
 
 #left {
   width: 50%;
+  height: 100%;
   display: inline-block;
   /* float: left; */
 }
 
 #right {
   width: 49%;
+  height: 100%;
   /* vertical-align:top; */
   display: inline-block;
 

@@ -54,7 +54,10 @@ var TSOS;
             // howareu
             sc = new TSOS.ShellCommand(this.shellHowareu, "howareu", "- Displays the current current status of the OS");
             this.commandList[this.commandList.length] = sc;
-            // howareu
+            // whoismason
+            sc = new TSOS.ShellCommand(this.shellWhoismason, "whoismason", "- a website url to Mason");
+            this.commandList[this.commandList.length] = sc;
+            // status
             sc = new TSOS.ShellCommand(this.shellStatus, "status", "- a message status to display");
             this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
@@ -229,6 +232,11 @@ var TSOS;
                     case "howareu":
                         _StdOut.putText("Gives insightful information about the OS");
                         break;
+                    case "whoismason":
+                        _StdOut.putText("Gives website url of Mason");
+                        break;
+                    case "status":
+                        _StdOut.putText("Pastes a status message provided by the user to the display");
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -289,9 +297,12 @@ var TSOS;
         shellHowareu() {
             _StdOut.putText("I am sentient; and this was not a hardcoded message");
         }
+        shellWhoismason() {
+            _StdOut.putText("See https://www.masonnakamura.com/");
+        }
         shellStatus(args) {
-            // TODO: 
-            // pass
+            TSOS.Control.statusUpdate(args.join(' '));
+            _StdOut.putText("Status changed...");
         }
     }
     TSOS.Shell = Shell;

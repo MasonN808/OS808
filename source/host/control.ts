@@ -53,6 +53,32 @@ module TSOS {
             dateLog.innerHTML = date_time;
         }
 
+        public static statusInit(): void {
+            // Get a global reference to the canvas.
+            _Canvas = <HTMLCanvasElement>document.getElementById('display');
+
+            // Get a global reference to the drawing context.
+            _DrawingContext = _Canvas.getContext("2d");
+
+            //Enable the added-in canvas text functions (see canvastext.ts for provenance and details).
+            CanvasTextFunctions.enable(_DrawingContext);   // Text functionality is now built in to the HTML5 canvas. But this is old-school, and fun, so we'll keep it.
+            
+            // Use the TypeScript cast to HTMLInputElement
+            (<HTMLInputElement> document.getElementById("taStatus")).innerHTML="";
+
+            // Set focus on the start button.
+            // Use the TypeScript cast to HTMLInputElement
+            (<HTMLInputElement> document.getElementById("btnStartOS")).focus();
+        }
+
+        public static statusUpdate(s: string): void {
+            // This is called from index.html's onLoad event via the onDocumentLoad function pointer.
+
+            // Update the status message on display
+            var status = <HTMLInputElement> document.getElementById("taStatus");
+            status.innerHTML = s;
+        }
+
         public static hostInit(): void {
             // This is called from index.html's onLoad event via the onDocumentLoad function pointer.
 

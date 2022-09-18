@@ -81,8 +81,7 @@ var TSOS;
                 this.clearScreen();
                 _DrawingContext.putImageData(context_data, 0, 0);
                 // Keep the Y position at the bottom
-                this.currentYPosition = this.MAX_Y_POSITION - _DefaultFontSize -
-                    _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) - _FontHeightMargin;
+                this.currentYPosition = this.MAX_Y_POSITION - offset;
             }
         }
     }

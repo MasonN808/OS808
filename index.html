@@ -32,13 +32,13 @@
    <script type="text/javascript" src="distrib/utils.js"></script>
    
    <!-- Uncomment the line below to enable GLaDOS testing. -->
-   <script type="text/javascript" src="http://alanclasses.github.io/TSOS/test/glados-ip0.js"></script>
+   <!-- <script type="text/javascript" src="http://alanclasses.github.io/TSOS/test/glados-ip0.js"></script> -->
    
 </head>
 
 <body onload="onDocumentLoad()">
 
-<div id="divMain" style="width:50%; margin: auto;">
+<div id="divMain">
    <div id="divButtonBar" style="margin:4px;">
       <input type="button"
              id = "btnStartOS"
@@ -67,38 +67,52 @@
              onclick="TSOS.Control.hostBtnReset_click(this);">
    </div>
 
-   <div id="divConsole" style="margin:4px; width:500px; height:500px; float: left;">
-      <canvas id="display"
-              width="500px"
-              height="500px"
-              tabindex="3">
-      </canvas>
-   </div>
+   <div id="left">
+      <div id="divConsole">
+         <canvas id="display"
+               width="500px"
+               height="500px"
+               tabindex="3">
+         </canvas>
+      </div>
+      <div id="date">
+         <label class="label">
+            Date/Time:
+         </label>
+      </div>
 
-   <div id="divLog" style="margin-left:520px;">
-      <label>
-         Host Log
-         <br>
-         <textarea name="taHostLog"
-                   id  ="taHostLog"
-                   rows="26"
-                   cols="48"
-         ></textarea>
-      </label>
-   </div>
+      <div id="status">
+         <label class="label">
+            Status:
+         </label>
+      </div>
+   </div>  
 
-   <div id="divUserProgramInput" style="margin-left:520px;">
-      <label>
-         User Program Input
-         <br>
-         <textarea name="taProgramInput"
-                   id  ="taProgramInput"
-                   rows="8"
-                   cols="48"
-         ></textarea>
-      </label>
-   </div>
+   <div id="right">
+      <div id="divLog">
+         <label class="label">
+            Host Log
+            <br>
+            <textarea name="taHostLog"
+                     id  ="taHostLog"
+                     rows="26"
+                     cols="48"
+            ></textarea>
+         </label>
+      </div>
 
+      <div id="divUserProgramInput">
+         <label class="label">
+            User Program Input
+            <br>
+            <textarea name="taProgramInput"
+                     id  ="taProgramInput"
+                     rows="8"
+                     cols="48"
+            ></textarea>
+         </label>
+      </div>
+   </div>   
 </div>
 
 <p class="footerText" style="clear:both;">

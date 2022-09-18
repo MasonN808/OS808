@@ -145,6 +145,7 @@ var TSOS;
                 else {
                     TSOS.Control.hostLog(msg, "OS");
                 }
+                TSOS.Control.dateLog();
             }
         }
         krnTrapError(msg) {

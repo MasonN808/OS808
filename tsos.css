@@ -57,7 +57,12 @@ h3 {
   margin: auto;
 }
 
-.label {
+#btnHaltOS, #btnReset, #btnStartOS {
+  color: black;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.label, #taDate {
   color: white;
   padding: 0px;
   font-family: 'Courier New', Courier, monospace;

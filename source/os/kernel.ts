@@ -164,6 +164,9 @@ module TSOS {
                 } else {
                     Control.hostLog(msg, "OS");
                 }
+
+                Control.dateLog();
+                
              }
         }
 

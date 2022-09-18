@@ -23,13 +23,34 @@ module TSOS {
     export class Control {
 
         public static dateInit(): void {
+            // Get a global reference to the canvas.
+            _Canvas = <HTMLCanvasElement>document.getElementById('display');
+
+            // Get a global reference to the drawing context.
+            _DrawingContext = _Canvas.getContext("2d");
+
+            //Enable the added-in canvas text functions (see canvastext.ts for provenance and details).
+            CanvasTextFunctions.enable(_DrawingContext);   // Text functionality is now built in to the HTML5 canvas. But this is old-school, and fun, so we'll keep it.
+
+            var date_time = new Date().toLocaleString();
+
+            // Use the TypeScript cast to HTMLInputElement
+            (<HTMLInputElement> document.getElementById("taDate")).innerHTML=date_time;
+
+            // Set focus on the start button.
+            // Use the TypeScript cast to HTMLInputElement
+            (<HTMLInputElement> document.getElementById("btnStartOS")).focus();
+        }
+
+        public static dateLog(): void {
+            // Log the date according to the CPU clock global param
             // This is called from index.html's onLoad event via the onDocumentLoad function pointer.
             
             var date_time = new Date().toLocaleString();
 
             // Update the log console.
-            var dateLog = <HTMLInputElement> document.getElementById("date");
-            dateLog.value = date_time + dateLog.value;
+            var dateLog = <HTMLInputElement> document.getElementById("taDate");
+            dateLog.innerHTML = date_time;
         }
 
         public static hostInit(): void {

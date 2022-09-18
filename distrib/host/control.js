@@ -20,9 +20,16 @@
 var TSOS;
 (function (TSOS) {
     class Control {
+        static dateInit() {
+            // This is called from index.html's onLoad event via the onDocumentLoad function pointer.
+            var date_time = new Date().toLocaleString();
+            // Update the log console.
+            var dateLog = document.getElementById("date");
+            dateLog.value = date_time + dateLog.value;
+        }
         static hostInit() {
             // This is called from index.html's onLoad event via the onDocumentLoad function pointer.
-            // Get a global reference to the canvas.  TODO: Should we move this stuff into a Display Device Driver?
+            // Get a global reference to the canvas.
             _Canvas = document.getElementById('display');
             // Get a global reference to the drawing context.
             _DrawingContext = _Canvas.getContext("2d");

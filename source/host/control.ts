@@ -22,10 +22,20 @@ module TSOS {
 
     export class Control {
 
+        public static dateInit(): void {
+            // This is called from index.html's onLoad event via the onDocumentLoad function pointer.
+            
+            var date_time = new Date().toLocaleString();
+
+            // Update the log console.
+            var dateLog = <HTMLInputElement> document.getElementById("date");
+            dateLog.value = date_time + dateLog.value;
+        }
+
         public static hostInit(): void {
             // This is called from index.html's onLoad event via the onDocumentLoad function pointer.
 
-            // Get a global reference to the canvas.  TODO: Should we move this stuff into a Display Device Driver?
+            // Get a global reference to the canvas.
             _Canvas = <HTMLCanvasElement>document.getElementById('display');
 
             // Get a global reference to the drawing context.

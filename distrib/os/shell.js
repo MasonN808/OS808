@@ -52,7 +52,10 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellWhereami, "whereami", "- Displays the current geographical location");
             this.commandList[this.commandList.length] = sc;
             // howareu
-            sc = new TSOS.ShellCommand(this.shellHowareu, "howareu", "- Displays the current geographical location");
+            sc = new TSOS.ShellCommand(this.shellHowareu, "howareu", "- Displays the current current status of the OS");
+            this.commandList[this.commandList.length] = sc;
+            // howareu
+            sc = new TSOS.ShellCommand(this.shellStatus, "status", "- a message status to display");
             this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -285,6 +288,10 @@ var TSOS;
         }
         shellHowareu() {
             _StdOut.putText("I am sentient; and this was not a hardcoded message");
+        }
+        shellStatus(args) {
+            // TODO: 
+            // pass
         }
     }
     TSOS.Shell = Shell;

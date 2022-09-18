@@ -90,7 +90,12 @@ module TSOS {
                                   "howareu",
                                   "- Displays the current current status of the OS");
             this.commandList[this.commandList.length] = sc;
-
+            
+            // howareu
+            sc = new ShellCommand(this.shellStatus,
+                                "status",
+                                "- a message status to display");
+      this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -346,6 +351,11 @@ module TSOS {
 
         public shellHowareu() {
             _StdOut.putText("I am sentient; and this was not a hardcoded message")
+        }
+
+        public shellStatus(args: string[]) {
+            // TODO: 
+            // pass
         }
 
     }

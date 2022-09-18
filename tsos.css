@@ -1,7 +1,8 @@
 /* TSOS.css */
 
 body {
-  background: #909193 url(distrib/images/linen.png) repeat;
+  background: #909193 url(https://cutewallpaper.org/21/nyan-cat-background-gif/Background-from-Nyan-Cat-Imgur.png) repeat;
+  background-size: 100vw, 100vh;
   font-family: Helvetica, Verdana, Arial, sans-serif;
   font-size: 12pt;
   font-weight: normal;
@@ -45,4 +46,19 @@ h3 {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 8pt;
   text-align: center;
+}
+
+.divMain {
+  text-align: center;
+  width: 50%;
+}
+
+.Center {
+  width:200px;
+  height:200px;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin-top: -100px;
+  margin-left: -100px;
 }

@@ -9,6 +9,8 @@ module TSOS {
 
     export class Console {
 
+        public MAX_Y_POSITION = 500;
+
         constructor(public currentFont = _DefaultFontFamily,
                     public currentFontSize = _DefaultFontSize,
                     public currentXPosition = 0,
@@ -79,8 +81,18 @@ module TSOS {
             this.currentYPosition += _DefaultFontSize + 
                                      _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
                                      _FontHeightMargin;
+            
+            if (this.currentYPosition >= this.MAX_Y_POSITION){
 
-            // TODO: Handle scrolling. (iProject 1)
+                // Shift the CLI up
+                var context_data = _DrawingContext.getImageData(0, _DefaultFontSize, _DrawingContext.canvas.width, _DrawingContext.canvas.height-_DefaultFontSize);
+                this.clearScreen();
+                _DrawingContext.putImageData(context_data, 0, 0);
+                
+                // Keep the Y position at the bottom
+                this.currentYPosition = this.MAX_Y_POSITION - _DefaultFontSize;
+            }
+
         }
     }
  }

@@ -7,12 +7,13 @@
 var TSOS;
 (function (TSOS) {
     class Console {
-        constructor(currentFont = _DefaultFontFamily, currentFontSize = _DefaultFontSize, currentXPosition = 0, currentYPosition = _DefaultFontSize, buffer = "") {
+        constructor(currentFont = _DefaultFontFamily, currentFontSize = _DefaultFontSize, currentXPosition = 0, currentYPosition = _DefaultFontSize, buffer = "", previous_character = "") {
             this.currentFont = currentFont;
             this.currentFontSize = currentFontSize;
             this.currentXPosition = currentXPosition;
             this.currentYPosition = currentYPosition;
             this.buffer = buffer;
+            this.previous_character = previous_character;
             this.MAX_Y_POSITION = 500;
         }
         init() {
@@ -38,7 +39,16 @@ var TSOS;
                     // ... and reset our buffer.
                     this.buffer = "";
                 }
+                else if (chr === String.fromCharCode(8)) { // the backspace
+                    var removed_chr = this.buffer.substring(this.buffer.length - 1, this.buffer.length);
+                    this.previous_character = removed_chr;
+                    // Remove one char from screen
+                    this.removeText();
+                    // Also remove it from the buffer
+                    this.buffer = this.buffer.slice(0, -1);
+                }
                 else {
+                    this.previous_character = chr;
                     // This is a "normal" character, so ...
                     // ... draw it on the screen...
                     this.putText(chr);
@@ -63,6 +73,16 @@ var TSOS;
                 var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
                 this.currentXPosition = this.currentXPosition + offset;
             }
+        }
+        removeText() {
+            var vertical_offset = _DefaultFontSize +
+                _DrawingContext.fontDescent(this.currentFont, this.currentFontSize);
+            var horizontal_offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, this.previous_character);
+            // Remove the text at the current X and Y coordinates.
+            _DrawingContext.clearRect(this.currentXPosition - horizontal_offset, this.currentYPosition - vertical_offset, this.currentXPosition, this.currentYPosition);
+            // Move the current X position.
+            this.currentXPosition = this.currentXPosition - horizontal_offset;
+            // this.currentYPosition = this.currentYPosition - vertical_offset;
         }
         advanceLine() {
             this.currentXPosition = 0;

@@ -15,7 +15,8 @@ module TSOS {
                     public currentFontSize = _DefaultFontSize,
                     public currentXPosition = 0,
                     public currentYPosition = _DefaultFontSize,
-                    public buffer = "") {
+                    public buffer = "",
+                    public previous_character = "") {
         }
 
         public init(): void {
@@ -36,20 +37,39 @@ module TSOS {
             while (_KernelInputQueue.getSize() > 0) {
                 // Get the next character from the kernel input queue.
                 var chr = _KernelInputQueue.dequeue();
+                
                 // Check to see if it's "special" (enter or ctrl-c) or "normal" (anything else that the keyboard device driver gave us).
                 if (chr === String.fromCharCode(13)) { // the Enter key
                     // The enter key marks the end of a console command, so ...
                     // ... tell the shell ...
                     _OsShell.handleInput(this.buffer);
+
                     // ... and reset our buffer.
                     this.buffer = "";
+
+                } else if (chr === String.fromCharCode(8)) { // the backspace
+                    var removed_chr = this.buffer.substring(this.buffer.length - 1, this.buffer.length);
+
+                    this.previous_character = removed_chr;
+
+                    // Remove one char from screen
+                    this.removeText();
+
+
+                    // Also remove it from the buffer
+                    this.buffer = this.buffer.slice(0, -1);
+
                 } else {
+                    this.previous_character = chr;
+
                     // This is a "normal" character, so ...
                     // ... draw it on the screen...
                     this.putText(chr);
+
                     // ... and add it to our buffer.
                     this.buffer += chr;
                 }
+
                 // TODO: Add a case for Ctrl-C that would allow the user to break the current program.
             }
         }
@@ -69,6 +89,21 @@ module TSOS {
                 var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
                 this.currentXPosition = this.currentXPosition + offset;
             }
+         }
+
+         public removeText(): void {
+
+            var vertical_offset = _DefaultFontSize + 
+                                _DrawingContext.fontDescent(this.currentFont, this.currentFontSize);
+                                
+            var horizontal_offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, this.previous_character);
+
+            // Remove the text at the current X and Y coordinates.
+            _DrawingContext.clearRect(this.currentXPosition - horizontal_offset, this.currentYPosition - vertical_offset, this.currentXPosition, this.currentYPosition);
+
+            // Move the current X position.
+            this.currentXPosition = this.currentXPosition - horizontal_offset;
+
          }
 
         public advanceLine(): void {

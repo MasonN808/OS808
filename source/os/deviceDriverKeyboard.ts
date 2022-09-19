@@ -44,83 +44,10 @@ module TSOS {
                 }
                 // TODO: Check for caps-lock and handle as shifted if so.
                 _KernelInputQueue.enqueue(chr);
-
-            // } else if ((keyCode == 32)       ||   // space ( )
-            //             (keyCode == 13)      ||   // enter
-            //             (keyCode == 189)      ||   // minus (-)
-            //             (keyCode == 61)      ||   // equals (=)
-            //             (keyCode == 91)      ||   // left bracket (])
-            //             (keyCode == 93)      ||   // right bracket ([)
-            //             (keyCode == 59)      ||   // semi-colon ()
-            //             (keyCode == 39)      ||   // apostrophe (')
-            //             (keyCode == 44)      ||   // comma (,)
-            //             (keyCode == 46)      ||   // period (.)
-            //             (keyCode == 47)      ||   // forward slash (/)
-            //             (keyCode == 92)      ||   // back slash (\)
-            //             (keyCode == 96)) {        // backtick (`)
-
-            //     if (isShifted === true) {
-            //         switch (keyCode) {
-            //             case 45: // -
-            //                 chr = String.fromCharCode(95); // _
-            //                 break;
-
-            //             case 61: // =
-            //                 chr = String.fromCharCode(43); // +
-            //                 break;
-
-            //             case 91: // [
-            //                 chr = String.fromCharCode(123); // {
-            //                 break;
-
-            //             case 93: // ]
-            //                 chr = String.fromCharCode(125); // }
-            //                 break;
-
-            //             case 59: // ;
-            //                 chr = String.fromCharCode(58); // :
-            //                 break;
-
-            //             case 39: // '
-            //                 chr = String.fromCharCode(34); // "
-            //                 break;
-
-            //             case 44: // ,
-            //                 chr = String.fromCharCode(60); // <
-            //                 break;
-
-            //             case 46: // .
-            //                 chr = String.fromCharCode(62); // >
-            //                 break;
-
-            //             case 47: // /
-            //                 chr = String.fromCharCode(63); // ?
-            //                 break;
-
-            //             case 92: // \
-            //                 chr = String.fromCharCode(124); // |
-            //                 break;
-
-            //             case 96: // `
-            //                 chr = String.fromCharCode(126); // ~
-            //                 break;
-                        
-            //             default:
-            //                 chr = String.fromCharCode(keyCode);
-
-            //         }
-            //     }
-                
-            //     else {
-            //         chr = String.fromCharCode(keyCode);
-            //     }
-                
-            //     _KernelInputQueue.enqueue(chr);
-
-            // } 
             
-            } else if ((keyCode == 32)       ||   // space ( )
-                        (keyCode == 13)      ||   // enter
+            } else if ((keyCode == 32)        ||   // space ( )
+                        (keyCode == 13)       ||   // enter
+                        (keyCode == 8)        ||   // backspace
                         (keyCode == 189)      ||   // minus (-)
                         (keyCode == 187)      ||   // equals (=)
                         (keyCode == 219)      ||   // left bracket ([)
@@ -242,12 +169,6 @@ module TSOS {
                 _KernelInputQueue.enqueue(chr);
 
             }
-            
-            
-            
-            
-            
-            
             
             else if (((keyCode >= 48) && (keyCode <= 57))) {  // numbers
                 if (isShifted === true) { // symbols

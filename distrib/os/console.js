@@ -149,6 +149,27 @@ var TSOS;
                 this.currentXPosition = this.currentXPosition + offset;
             }
         }
+        putTextCenter(text) {
+            if (text !== "") {
+                // clear the scrren for BSOD
+                this.clearScreen();
+                // make the scree blue
+                _DrawingContext.beginPath();
+                _DrawingContext.rect(0, 0, _Canvas.width, _Canvas.height);
+                _DrawingContext.fillStyle = "#1c74a6";
+                _DrawingContext.fill();
+                var vertical_offset = _DefaultFontSize +
+                    _DrawingContext.fontDescent(this.currentFont, this.currentFontSize);
+                var horizontal_offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
+                // Draw the sadf face above the current X and Y coordinates.
+                _DrawingContext.drawText(50, 50, (_Canvas.width - horizontal_offset) / 2 - 7, (_Canvas.height - vertical_offset) / 2 - 20, ":(");
+                // Draw the text at the current X and Y coordinates.
+                _DrawingContext.drawText(this.currentFont, this.currentFontSize, (_Canvas.width - horizontal_offset) / 2, (_Canvas.height - vertical_offset) / 2 + 30, text);
+                // Move the current X position.
+                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
+                this.currentXPosition = this.currentXPosition + offset;
+            }
+        }
         lightPutText(text) {
             /*  My first inclination here was to write two functions: putChar() and putString().
                 Then I remembered that JavaScript is (sadly) untyped and it won't differentiate
@@ -182,8 +203,6 @@ var TSOS;
             var horizontal_offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, this.previous_light_text);
             // Remove the text at the current X and Y coordinates.
             _DrawingContext.clearRect(this.currentXPosition, this.currentYPosition - vertical_offset, this.currentXPosition + horizontal_offset, this.currentYPosition);
-            // // Move the current X position.
-            // this.currentXPosition = this.currentXPosition - horizontal_offset;
         }
         removeLine() {
             var vertical_offset = _DefaultFontSize +

@@ -28,7 +28,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellHelp, "help", "- This is the help command. Seek help.");
             this.commandList[this.commandList.length] = sc;
             // shutdown
-            sc = new TSOS.ShellCommand(this.shellShutdown, "shutdown", "- Shuts down the virtual OS but leaves the underlying host / hardware simulation running.");
+            sc = new TSOS.ShellCommand(this.shellShutdown, "shutdown", "- Shuts down OS808");
             this.commandList[this.commandList.length] = sc;
             // cls
             sc = new TSOS.ShellCommand(this.shellCls, "cls", "- Clears the screen and resets the cursor position.");
@@ -59,6 +59,9 @@ var TSOS;
             this.commandList[this.commandList.length] = sc;
             // status
             sc = new TSOS.ShellCommand(this.shellStatus, "status", "- a message status to display");
+            this.commandList[this.commandList.length] = sc;
+            // bsod
+            sc = new TSOS.ShellCommand(this.shellBsod, "bsod", "- blue screen of death");
             this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -123,7 +126,9 @@ var TSOS;
                 _StdOut.advanceLine();
             }
             // ... and finally write the prompt again.
-            this.putPrompt();
+            if (fn !== this.shellBsod) {
+                this.putPrompt();
+            }
         }
         parseInput(buffer) {
             var retVal = new TSOS.UserCommand();
@@ -238,6 +243,10 @@ var TSOS;
                         break;
                     case "status":
                         _StdOut.putText("Pastes a status message provided by the user to the display");
+                        break;
+                    case "bsod":
+                        _StdOut.putText("Blue screen of death");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -304,6 +313,11 @@ var TSOS;
         shellStatus(args) {
             TSOS.Control.statusUpdate(args.join(' '));
             _StdOut.putText("Status changed...");
+        }
+        shellBsod() {
+            _StdOut.putTextCenter("Shutting down OS...");
+            // Call Kernel shutdown routine.
+            _Kernel.krnShutdown();
         }
     }
     TSOS.Shell = Shell;

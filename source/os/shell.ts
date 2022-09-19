@@ -142,6 +142,7 @@ module TSOS {
             }
             if (found) {
                 this.execute(fn, args);  // Note that args is always supplied, though it might be empty.
+                _CmdHist.push(cmd);  // Add the command to our command history
             } else {
                 // It's not found, so check for curses and apologies before declaring the command invalid.
                 if (this.curses.indexOf("[" + Utils.rot13(cmd) + "]") >= 0) {     // Check for curses.

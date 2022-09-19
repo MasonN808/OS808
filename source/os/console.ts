@@ -21,7 +21,9 @@ module TSOS {
                     public currentYPosition = _DefaultFontSize,
                     public buffer = "",
                     public previous_character = "",
-                    public previous_light_text = "") {
+                    public previous_light_text = "",
+                    public command_hist_index = null,
+                    public command_hist_length = 0) {
         }
 
         public init(): void {
@@ -48,6 +50,11 @@ module TSOS {
                     this.removeLightText();
                 }
 
+                if (_CmdHist.length != this.command_hist_length){
+                    this.command_hist_length = _CmdHist.length;
+                    this.command_hist_index = this.command_hist_length;
+                }
+
                 // Check to see if it's "special" (enter or ctrl-c) or "normal" (anything else that the keyboard device driver gave us).
                 if (chr === String.fromCharCode(13)) { // the Enter key
                     // The enter key marks the end of a console command, so ...
@@ -58,6 +65,7 @@ module TSOS {
                     this.buffer = "";
 
                 } else if (chr === String.fromCharCode(8)) { // the backspace key
+                    // (Handles chr deletion)
                     var removed_chr = this.buffer.substring(this.buffer.length - 1, this.buffer.length);
 
                     this.previous_character = removed_chr;
@@ -69,12 +77,53 @@ module TSOS {
                     this.buffer = this.buffer.slice(0, -1);
 
                 } else if (chr === String.fromCharCode(9)) { // the tab key
+                    // (Handles autocompletion)
                     const text = this.previous_light_text;
                     for (let index = 0; index < text.length; index++){
                         const chr = text.charAt(index);
 
                         // Put the suggested text into the queue
                         _KernelInputQueue.enqueue(chr);
+                    }
+                
+                } else if (chr === String.fromCharCode(38)) { // the up-arrow key 
+                    // (Handles command history)
+                    if (this.command_hist_index > this.command_hist_length){
+                        this.command_hist_index = this.command_hist_length
+                    } else if (this.command_hist_index <= 0){
+                        this.command_hist_index = 1;
+                    }
+                    if (this.command_hist_index !== null && (this.command_hist_index <= this.command_hist_length) && (this.command_hist_index > 0)){
+                        this.removeLine();
+                        this.buffer = "";
+                        const text = _CmdHist[this.command_hist_index-1]
+                        for (let index = 0; index < text.length; index++){
+                            const chr = text.charAt(index);
+    
+                            // Put the suggested text into the queue
+                            _KernelInputQueue.enqueue(chr);
+                        }
+                        this.command_hist_index -= 1;
+                    }
+                    
+                } else if (chr === String.fromCharCode(40)) { // the down-arrow key
+                    // (Handles command history)
+                    if (this.command_hist_index > this.command_hist_length){
+                        this.command_hist_index = this.command_hist_length
+                    } else if (this.command_hist_index <= 0){
+                        this.command_hist_index = 1;
+                    }
+                    if (this.command_hist_index !== null && (this.command_hist_index <= this.command_hist_length) && (this.command_hist_index > 0)){
+                        this.removeLine();
+                        this.buffer = "";
+                        const text = _CmdHist[this.command_hist_index-1]
+                        for (let index = 0; index < text.length; index++){
+                            const chr = text.charAt(index);
+    
+                            // Put the suggested text into the queue
+                            _KernelInputQueue.enqueue(chr);
+                        }
+                        this.command_hist_index += 1;
                     }
 
                 } else {
@@ -173,6 +222,22 @@ module TSOS {
             // // Move the current X position.
             // this.currentXPosition = this.currentXPosition - horizontal_offset;
 
+         }
+
+         public removeLine(): void {
+
+            var vertical_offset = _DefaultFontSize + 
+                                _DrawingContext.fontDescent(this.currentFont, this.currentFontSize);
+
+            var horizontal_offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, this.previous_character);
+
+            // Remove the text at the current X and Y coordinates.
+            _DrawingContext.clearRect(0, this.currentYPosition - vertical_offset, this.currentXPosition, this.currentYPosition);
+
+            // Move the current X position.
+            this.currentXPosition = 0;
+
+            _OsShell.putPrompt();
          }
 
         public advanceLine(): void {

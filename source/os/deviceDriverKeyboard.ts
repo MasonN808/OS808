@@ -49,6 +49,8 @@ module TSOS {
                         (keyCode == 13)       ||   // enter
                         (keyCode == 8)        ||   // backspace
                         (keyCode == 9)        ||   // tab
+                        (keyCode == 38)       ||   // up-arrow key
+                        (keyCode == 40)       ||   // down-arrow key
                         (keyCode == 189)      ||   // minus (-)
                         (keyCode == 187)      ||   // equals (=)
                         (keyCode == 219)      ||   // left bracket ([)

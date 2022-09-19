@@ -48,6 +48,7 @@ module TSOS {
             } else if ((keyCode == 32)        ||   // space ( )
                         (keyCode == 13)       ||   // enter
                         (keyCode == 8)        ||   // backspace
+                        (keyCode == 9)        ||   // tab
                         (keyCode == 189)      ||   // minus (-)
                         (keyCode == 187)      ||   // equals (=)
                         (keyCode == 219)      ||   // left bracket ([)

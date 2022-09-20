@@ -9,11 +9,10 @@ module TSOS {
 
     export class Console {
 
-        public MAX_Y_POSITION = 500;
         // For command completion
         public possible_commands = ["ver", "help", "shutdown", "cls", "man",
                                     "trace", "rot13", "prompt", "date", "whereami",
-                                    "howareu", "whoismason", "status"];
+                                    "howareu", "whoismason", "status", "bsod", "load"];
 
         constructor(public currentFont = _DefaultFontFamily,
                     public currentFontSize = _DefaultFontSize,
@@ -23,7 +22,8 @@ module TSOS {
                     public previous_character = "",
                     public previous_light_text = "",
                     public command_hist_index = null,
-                    public command_hist_length = 0) {
+                    public command_hist_length = 0,
+                    public line_wrap_x_difference = 0) {
         }
 
         public init(): void {
@@ -166,11 +166,34 @@ module TSOS {
                 decided to write one function and use the term "text" to connote string or char.
             */
             if (text !== "") {
-                // Draw the text at the current X and Y coordinates.
-                _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
-                // Move the current X position.
-                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
-                this.currentXPosition = this.currentXPosition + offset;
+                const horizontal_offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
+
+                // Line-wrap
+                if (this.currentXPosition >= _Canvas.width - horizontal_offset){
+                    console.log(this.currentXPosition)
+                    this.line_wrap_x_difference = this.currentXPosition;
+
+                    const vertical_offset = _DefaultFontSize + 
+                                _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
+                                _FontHeightMargin;
+
+                                
+                    // Draw the text at the current X and Y coordinates.
+                    _DrawingContext.drawText(this.currentFont, this.currentFontSize, 0, this.currentYPosition + vertical_offset, text);
+
+                    this.currentXPosition = horizontal_offset;
+                    this.currentYPosition += vertical_offset;
+                }
+
+                else {
+                    var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
+
+                    // Draw the text at the current X and Y coordinates.
+                    _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
+
+                    // Move the current X position.
+                    this.currentXPosition += offset;
+                }
             }
          }
 
@@ -215,26 +238,36 @@ module TSOS {
                 _DrawingContext.font = '${this.currentFontSize} , ${this.currentFont}';
                 _DrawingContext.fillStyle = "#808080";
                 _DrawingContext.fillText(text, this.currentXPosition, this.currentYPosition);
-
-                // Move the current X position.
-                // var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
-                // this.currentXPosition = this.currentXPosition + offset;
             }
          }
 
          public removeText(): void {
+            const horizontal_offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, this.previous_character);
 
-            var vertical_offset = _DefaultFontSize + 
-                                _DrawingContext.fontDescent(this.currentFont, this.currentFontSize);
+            // Line-wrap
+            if (this.currentXPosition <= horizontal_offset){
+                const vertical_offset = _DefaultFontSize + 
+                                        _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
+                                        _FontHeightMargin;
 
-            var horizontal_offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, this.previous_character);
+                // Remove the text at the current X and Y coordinates.
+                _DrawingContext.clearRect(this.line_wrap_x_difference - horizontal_offset, this.currentYPosition - (2 * vertical_offset), _Canvas.width, this.currentYPosition - vertical_offset);
 
-            // Remove the text at the current X and Y coordinates.
-            _DrawingContext.clearRect(this.currentXPosition - horizontal_offset, this.currentYPosition - vertical_offset, this.currentXPosition, this.currentYPosition);
+                // Move current X and Y positions
+                this.currentXPosition = this.line_wrap_x_difference - horizontal_offset;
+                this.currentYPosition -= vertical_offset;
+            }
+            
+            else {
+                const vertical_offset = _DefaultFontSize + 
+                                    _DrawingContext.fontDescent(this.currentFont, this.currentFontSize);
 
-            // Move the current X position.
-            this.currentXPosition = this.currentXPosition - horizontal_offset;
-
+                // Remove the text at the current X and Y coordinates.
+                _DrawingContext.clearRect(this.currentXPosition - horizontal_offset, this.currentYPosition - vertical_offset, this.currentXPosition, this.currentYPosition);
+    
+                // Move the current X position.
+                this.currentXPosition -= horizontal_offset;
+            }
          }
 
          public removeLightText(): void {
@@ -253,8 +286,6 @@ module TSOS {
 
             var vertical_offset = _DefaultFontSize + 
                                 _DrawingContext.fontDescent(this.currentFont, this.currentFontSize);
-
-            var horizontal_offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, this.previous_character);
 
             // Remove the text at the current X and Y coordinates.
             _DrawingContext.clearRect(0, this.currentYPosition - vertical_offset, this.currentXPosition, this.currentYPosition);
@@ -275,20 +306,23 @@ module TSOS {
             var offset = _DefaultFontSize + 
                         _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
                         _FontHeightMargin;
-
-            this.currentYPosition += offset;
-
-            if (this.currentYPosition >= this.MAX_Y_POSITION){
-
+            
+            // Check if the y position is beyond canvas
+            if (this.currentYPosition + offset >= _Canvas.height){
                 // Shift the CLI up
-                var context_data = _DrawingContext.getImageData(0, offset, _DrawingContext.canvas.width, _DrawingContext.canvas.height-offset);
+                var context_data = _DrawingContext.getImageData(0, offset, _Canvas.width, _Canvas.height - offset + _DefaultFontSize);
+
                 this.clearScreen();
+
                 _DrawingContext.putImageData(context_data, 0, 0);
                 
                 // Keep the Y position at the bottom
-                this.currentYPosition = this.MAX_Y_POSITION - offset;
+                this.currentYPosition = _Canvas.height - _DefaultFontSize;
             }
 
+            else {
+                this.currentYPosition += offset;
+            }
         }
     }
  }

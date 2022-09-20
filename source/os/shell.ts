@@ -448,9 +448,7 @@ module TSOS {
                 if (!found_invalid) {
                     _StdOut.putText("Hex valid");
                 }
-
             }
         }
-
     }
 }

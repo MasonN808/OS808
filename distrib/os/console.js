@@ -7,7 +7,7 @@
 var TSOS;
 (function (TSOS) {
     class Console {
-        constructor(currentFont = _DefaultFontFamily, currentFontSize = _DefaultFontSize, currentXPosition = 0, currentYPosition = _DefaultFontSize, buffer = "", previous_character = "", previous_light_text = "", command_hist_index = null, command_hist_length = 0) {
+        constructor(currentFont = _DefaultFontFamily, currentFontSize = _DefaultFontSize, currentXPosition = 0, currentYPosition = _DefaultFontSize, buffer = "", previous_character = "", previous_light_text = "", command_hist_index = null, command_hist_length = 0, line_wrap_x_difference = 0) {
             this.currentFont = currentFont;
             this.currentFontSize = currentFontSize;
             this.currentXPosition = currentXPosition;
@@ -17,11 +17,11 @@ var TSOS;
             this.previous_light_text = previous_light_text;
             this.command_hist_index = command_hist_index;
             this.command_hist_length = command_hist_length;
-            this.MAX_Y_POSITION = 500;
+            this.line_wrap_x_difference = line_wrap_x_difference;
             // For command completion
             this.possible_commands = ["ver", "help", "shutdown", "cls", "man",
                 "trace", "rot13", "prompt", "date", "whereami",
-                "howareu", "whoismason", "status"];
+                "howareu", "whoismason", "status", "bsod", "load"];
         }
         init() {
             this.clearScreen();
@@ -142,11 +142,26 @@ var TSOS;
                 decided to write one function and use the term "text" to connote string or char.
             */
             if (text !== "") {
-                // Draw the text at the current X and Y coordinates.
-                _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
-                // Move the current X position.
-                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
-                this.currentXPosition = this.currentXPosition + offset;
+                const horizontal_offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
+                // Line-wrap
+                if (this.currentXPosition >= _Canvas.width - horizontal_offset) {
+                    console.log(this.currentXPosition);
+                    this.line_wrap_x_difference = this.currentXPosition;
+                    const vertical_offset = _DefaultFontSize +
+                        _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
+                        _FontHeightMargin;
+                    // Draw the text at the current X and Y coordinates.
+                    _DrawingContext.drawText(this.currentFont, this.currentFontSize, 0, this.currentYPosition + vertical_offset, text);
+                    this.currentXPosition = horizontal_offset;
+                    this.currentYPosition += vertical_offset;
+                }
+                else {
+                    var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
+                    // Draw the text at the current X and Y coordinates.
+                    _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
+                    // Move the current X position.
+                    this.currentXPosition += offset;
+                }
             }
         }
         putTextCenter(text) {
@@ -183,19 +198,29 @@ var TSOS;
                 _DrawingContext.font = '${this.currentFontSize} , ${this.currentFont}';
                 _DrawingContext.fillStyle = "#808080";
                 _DrawingContext.fillText(text, this.currentXPosition, this.currentYPosition);
-                // Move the current X position.
-                // var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
-                // this.currentXPosition = this.currentXPosition + offset;
             }
         }
         removeText() {
-            var vertical_offset = _DefaultFontSize +
-                _DrawingContext.fontDescent(this.currentFont, this.currentFontSize);
-            var horizontal_offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, this.previous_character);
-            // Remove the text at the current X and Y coordinates.
-            _DrawingContext.clearRect(this.currentXPosition - horizontal_offset, this.currentYPosition - vertical_offset, this.currentXPosition, this.currentYPosition);
-            // Move the current X position.
-            this.currentXPosition = this.currentXPosition - horizontal_offset;
+            const horizontal_offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, this.previous_character);
+            // Line-wrap
+            if (this.currentXPosition <= horizontal_offset) {
+                const vertical_offset = _DefaultFontSize +
+                    _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
+                    _FontHeightMargin;
+                // Remove the text at the current X and Y coordinates.
+                _DrawingContext.clearRect(this.line_wrap_x_difference - horizontal_offset, this.currentYPosition - 2 * vertical_offset, _Canvas.width, this.currentYPosition - vertical_offset);
+                // Move current X and Y positions
+                this.currentXPosition = this.line_wrap_x_difference - horizontal_offset;
+                this.currentYPosition -= vertical_offset;
+            }
+            else {
+                const vertical_offset = _DefaultFontSize +
+                    _DrawingContext.fontDescent(this.currentFont, this.currentFontSize);
+                // Remove the text at the current X and Y coordinates.
+                _DrawingContext.clearRect(this.currentXPosition - horizontal_offset, this.currentYPosition - vertical_offset, this.currentXPosition, this.currentYPosition);
+                // Move the current X position.
+                this.currentXPosition -= horizontal_offset;
+            }
         }
         removeLightText() {
             var vertical_offset = _DefaultFontSize +
@@ -207,7 +232,6 @@ var TSOS;
         removeLine() {
             var vertical_offset = _DefaultFontSize +
                 _DrawingContext.fontDescent(this.currentFont, this.currentFontSize);
-            var horizontal_offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, this.previous_character);
             // Remove the text at the current X and Y coordinates.
             _DrawingContext.clearRect(0, this.currentYPosition - vertical_offset, this.currentXPosition, this.currentYPosition);
             // Move the current X position.
@@ -224,14 +248,17 @@ var TSOS;
             var offset = _DefaultFontSize +
                 _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
                 _FontHeightMargin;
-            this.currentYPosition += offset;
-            if (this.currentYPosition >= this.MAX_Y_POSITION) {
+            // Check if the y position is beyond canvas
+            if (this.currentYPosition + offset >= _Canvas.height) {
                 // Shift the CLI up
-                var context_data = _DrawingContext.getImageData(0, offset, _DrawingContext.canvas.width, _DrawingContext.canvas.height - offset);
+                var context_data = _DrawingContext.getImageData(0, offset, _Canvas.width, _Canvas.height - offset + _DefaultFontSize);
                 this.clearScreen();
                 _DrawingContext.putImageData(context_data, 0, 0);
                 // Keep the Y position at the bottom
-                this.currentYPosition = this.MAX_Y_POSITION - offset;
+                this.currentYPosition = _Canvas.height - _DefaultFontSize;
+            }
+            else {
+                this.currentYPosition += offset;
             }
         }
     }

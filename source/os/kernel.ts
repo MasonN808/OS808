@@ -171,8 +171,11 @@ module TSOS {
         }
 
         public krnTrapError(msg) {
+            // Display BSOD
+            _StdOut.putTextCenter("Shutting down OS...");
+            
             Control.hostLog("OS ERROR - TRAP: " + msg);
-            // TODO: Display error on console, perhaps in some sort of colored screen. (Maybe blue?)
+            // Call Kernel shutdown routine.
             this.krnShutdown();
         }
     }

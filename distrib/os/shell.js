@@ -63,6 +63,9 @@ var TSOS;
             // bsod
             sc = new TSOS.ShellCommand(this.shellBsod, "bsod", "- blue screen of death");
             this.commandList[this.commandList.length] = sc;
+            // lload
+            sc = new TSOS.ShellCommand(this.shellLoad, "load", "- Loads and validates the input code");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             // Display the initial prompt.
@@ -245,7 +248,10 @@ var TSOS;
                         _StdOut.putText("Pastes a status message provided by the user to the display");
                         break;
                     case "bsod":
-                        _StdOut.putText("Blue screen of death");
+                        _StdOut.putText("Does blue screen of death");
+                        break;
+                    case "load":
+                        _StdOut.putText("Loads and validates the input code");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -318,6 +324,38 @@ var TSOS;
             _StdOut.putTextCenter("Shutting down OS...");
             // Call Kernel shutdown routine.
             _Kernel.krnShutdown();
+        }
+        shellLoad() {
+            // Get the data from the input area
+            var taProgramInput = document.getElementById("taProgramInput");
+            var input_text = taProgramInput.value;
+            // const uppercased_input_text = input_text.toUpperCase();
+            const removed_white_space_input_text = input_text.replace(/\s/g, '');
+            if (input_text === "") {
+                _StdOut.putText("Empty input: populate program input");
+            }
+            else if (removed_white_space_input_text.length % 2 !== 0) {
+                _StdOut.putText("Hex data in program input is incomplete");
+            }
+            else {
+                const reg_ex = /[0-9a-fA-F]{2}/g;
+                var found_invalid = false;
+                for (let index = 0; index < removed_white_space_input_text.length; index += 2) {
+                    // Reset the index for restest
+                    reg_ex.lastIndex = 0;
+                    const sampled_input = removed_white_space_input_text.substring(index, index + 2);
+                    // const sampled_input_to_int = Number(sampled_input);
+                    if (!reg_ex.test(sampled_input)) {
+                        found_invalid = true;
+                        _StdOut.putText("Invalid hex");
+                        console.log(sampled_input);
+                        break;
+                    }
+                }
+                if (!found_invalid) {
+                    _StdOut.putText("Hex valid");
+                }
+            }
         }
     }
     TSOS.Shell = Shell;

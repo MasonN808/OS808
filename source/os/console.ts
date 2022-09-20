@@ -23,7 +23,8 @@ module TSOS {
                     public previous_light_text = "",
                     public command_hist_index = null,
                     public command_hist_length = 0,
-                    public line_wrap_x_difference = 0) {
+                    public line_wrap_x_difference = 0,
+                    public chopped_context_data = null) {
         }
 
         public init(): void {
@@ -179,6 +180,21 @@ module TSOS {
                                 _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
                                 _FontHeightMargin;
 
+                    if (this.currentYPosition + (vertical_offset) >= _Canvas.height){
+                        // Shift the CLI up
+                        var context_data = _DrawingContext.getImageData(0, vertical_offset, _Canvas.width, _Canvas.height - vertical_offset + _DefaultFontSize);
+                        
+                        // Get the chopped data for scrolling back up
+                        this.chopped_context_data = _DrawingContext.getImageData(0, 0, _Canvas.width, vertical_offset + _DefaultFontSize);
+
+                        this.clearScreen();
+        
+                        _DrawingContext.putImageData(context_data, 0, 0);
+                        
+                        // Keep the Y position at the bottom
+                        this.currentYPosition = _Canvas.height - _DefaultFontSize - vertical_offset;
+                    }
+
 
                     // Draw the text at the current X and Y coordinates.
                     _DrawingContext.drawText(this.currentFont, this.currentFontSize, 0, this.currentYPosition + vertical_offset, text);
@@ -204,7 +220,7 @@ module TSOS {
                 // clear the scrren for BSOD
                 this.clearScreen();
 
-                // make the scree blue
+                // make the screen blue
                 _DrawingContext.beginPath();
                 _DrawingContext.rect(0,0, _Canvas.width, _Canvas.height);
                 _DrawingContext.fillStyle = "#1c74a6";
@@ -259,6 +275,23 @@ module TSOS {
                 // Move current X and Y positions
                 this.currentXPosition = this.line_wrap_x_difference - horizontal_offset;
                 this.currentYPosition -= vertical_offset;
+                
+                // Scroll back down if Y position was already beyond canvas
+                // Check if the y position was beyond the canvas, then scroll
+                if (this.currentYPosition + (2*vertical_offset) >= _Canvas.height){
+                    // Shift the CLI down
+                    var context_data = _DrawingContext.getImageData(0, 0, _Canvas.width, _Canvas.height + vertical_offset - _DefaultFontSize);
+
+                    this.clearScreen();
+
+                    _DrawingContext.putImageData(context_data, 0, vertical_offset);
+
+                    // Add the previous chopped off data
+                    _DrawingContext.putImageData(this.chopped_context_data, 0, 0);
+
+                    // Keep the Y position at the bottom
+                    this.currentYPosition = _Canvas.height - _DefaultFontSize;
+                }
             }
             
             else {
@@ -288,7 +321,6 @@ module TSOS {
          }
 
          public removeLine(): void {
-
             var vertical_offset = _DefaultFontSize + 
                                 _DrawingContext.fontDescent(this.currentFont, this.currentFontSize);
 
@@ -312,7 +344,7 @@ module TSOS {
                         _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
                         _FontHeightMargin;
             
-            // Check if the y position is beyond canvas
+            // Check if the y position is beyond canvas, then scroll
             if (this.currentYPosition + offset >= _Canvas.height){
                 // Shift the CLI up
                 var context_data = _DrawingContext.getImageData(0, offset, _Canvas.width, _Canvas.height - offset + _DefaultFontSize);

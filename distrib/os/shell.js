@@ -138,7 +138,8 @@ var TSOS;
             // 1. Remove leading and trailing spaces.
             buffer = TSOS.Utils.trim(buffer);
             // 2. Lower-case it.
-            buffer = buffer.toLowerCase();
+            // DONT lower-case for status message with uppercase
+            // buffer = buffer.toLowerCase();
             // 3. Separate on spaces so we can determine the command and command-line args, if any.
             var tempList = buffer.split(" ");
             // 4. Take the first (zeroth) element and use that as the command.
@@ -190,23 +191,23 @@ var TSOS;
         }
         // Although args is unused in some of these functions, it is always provided in the 
         // actual parameter list when this function is called, so I feel like we need it.
-        shellVer(args) {
+        shellVer() {
             _StdOut.putText(APP_NAME + " version " + APP_VERSION);
         }
-        shellHelp(args) {
+        shellHelp() {
             _StdOut.putText("Commands:");
             for (var i in _OsShell.commandList) {
                 _StdOut.advanceLine();
                 _StdOut.putText("  " + _OsShell.commandList[i].command + " " + _OsShell.commandList[i].description);
             }
         }
-        shellShutdown(args) {
+        shellShutdown() {
             _StdOut.putText("Shutting down...");
             // Call Kernel shutdown routine.
             _Kernel.krnShutdown();
             // TODO: Stop the final prompt from being displayed. If possible. Not a high priority. (Damn OCD!)
         }
-        shellCls(args) {
+        shellCls() {
             _StdOut.clearScreen();
             _StdOut.resetXY();
         }
@@ -214,6 +215,9 @@ var TSOS;
             if (args.length > 0) {
                 var topic = args[0];
                 switch (topic) {
+                    case "ver":
+                        _StdOut.putText("Outputs current OS version");
+                        break;
                     case "help":
                         _StdOut.putText("Help displays a list of (hopefully) valid commands.");
                         break;
@@ -318,7 +322,7 @@ var TSOS;
         }
         shellStatus(args) {
             TSOS.Control.statusUpdate(args.join(' '));
-            _StdOut.putText("Status changed...");
+            _StdOut.putText("Status updated...");
         }
         shellBsod() {
             _StdOut.putTextCenter("Shutting down OS...");

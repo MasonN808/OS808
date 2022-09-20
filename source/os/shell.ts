@@ -192,7 +192,8 @@ module TSOS {
             buffer = Utils.trim(buffer);
 
             // 2. Lower-case it.
-            buffer = buffer.toLowerCase();
+            // DONT lower-case for status shell message with uppercase
+            // buffer = buffer.toLowerCase();
 
             // 3. Separate on spaces so we can determine the command and command-line args, if any.
             var tempList = buffer.split(" ");
@@ -250,11 +251,11 @@ module TSOS {
         // Although args is unused in some of these functions, it is always provided in the 
         // actual parameter list when this function is called, so I feel like we need it.
 
-        public shellVer(args: string[]) {
+        public shellVer() {
             _StdOut.putText(APP_NAME + " version " + APP_VERSION);
         }
 
-        public shellHelp(args: string[]) {
+        public shellHelp() {
             _StdOut.putText("Commands:");
             for (var i in _OsShell.commandList) {
                 _StdOut.advanceLine();
@@ -262,14 +263,14 @@ module TSOS {
             }
         }
 
-        public shellShutdown(args: string[]) {
+        public shellShutdown() {
              _StdOut.putText("Shutting down...");
              // Call Kernel shutdown routine.
             _Kernel.krnShutdown();
             // TODO: Stop the final prompt from being displayed. If possible. Not a high priority. (Damn OCD!)
         }
 
-        public shellCls(args: string[]) {         
+        public shellCls() {         
             _StdOut.clearScreen();     
             _StdOut.resetXY();
         }
@@ -278,6 +279,9 @@ module TSOS {
             if (args.length > 0) {
                 var topic = args[0];
                 switch (topic) {
+                    case "ver":
+                        _StdOut.putText("Outputs current OS version");
+                        break;
 
                     case "help":
                         _StdOut.putText("Help displays a list of (hopefully) valid commands.");
@@ -400,7 +404,7 @@ module TSOS {
         public shellStatus(args: string[]) {
             TSOS.Control.statusUpdate(args.join(' '));
 
-            _StdOut.putText("Status changed...");
+            _StdOut.putText("Status updated...");
         }
 
         public shellBsod() {

@@ -138,7 +138,7 @@ var TSOS;
             // 1. Remove leading and trailing spaces.
             buffer = TSOS.Utils.trim(buffer);
             // 2. Lower-case it.
-            // DONT lower-case for status message with uppercase
+            // DONT lower-case for status shell message with uppercase
             // buffer = buffer.toLowerCase();
             // 3. Separate on spaces so we can determine the command and command-line args, if any.
             var tempList = buffer.split(" ");

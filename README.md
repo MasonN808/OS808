@@ -10,7 +10,7 @@
 
 What To Grade
 =============
-**Grade branch iProject1**
+**Grade branch iProject2**
 
 How To Run
 ===========

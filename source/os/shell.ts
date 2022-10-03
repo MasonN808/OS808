@@ -109,7 +109,7 @@ module TSOS {
                                 "- blue screen of death");
             this.commandList[this.commandList.length] = sc;
 
-            // lload
+            // load
             sc = new ShellCommand(this.shellLoad,
                             "load",
                             "- Loads and validates the input code");
@@ -426,10 +426,10 @@ module TSOS {
                 _StdOut.putText("Empty input: populate program input");
 
             } else if (removed_white_space_input_text.length % 2 !== 0){
-
                 _StdOut.putText("Hex data in program input is incomplete");
 
             } else {
+                // Check that the Hex is valid
                 const reg_ex = /[0-9a-fA-F]{2}/g;
                 var found_invalid = false;
 
@@ -438,7 +438,6 @@ module TSOS {
                     reg_ex.lastIndex = 0;
 
                     const sampled_input = removed_white_space_input_text.substring(index, index + 2);
-                    // const sampled_input_to_int = Number(sampled_input);
 
                     if (!reg_ex.test(sampled_input))  {
                         found_invalid = true;
@@ -450,7 +449,8 @@ module TSOS {
                 }
                 
                 if (!found_invalid) {
-                    _StdOut.putText("Hex valid");
+                    // TODO: Put it in memory
+
                 }
             }
         }

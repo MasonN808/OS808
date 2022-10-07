@@ -15,6 +15,8 @@
    <script type="text/javascript" src="distrib/host/control.js"></script>
    <script type="text/javascript" src="distrib/host/devices.js"></script>
    <script type="text/javascript" src="distrib/host/cpu.js"></script>
+   <script type="text/javascript" src="distrib/host/memory.js"></script>
+   <script type="text/javascript" src="distrib/host/memoryAccessor.js"></script>
 
    <!-- Virtual OS Routines: Make sure Kernel code is last, since it needs those above it. -->
    <script type="text/javascript" src="distrib/os/interrupt.js"></script>
@@ -27,6 +29,8 @@
    <script type="text/javascript" src="distrib/os/shellCommand.js"></script>
    <script type="text/javascript" src="distrib/os/userCommand.js"></script>
    <script type="text/javascript" src="distrib/os/kernel.js"></script>
+   <script type="text/javascript" src="distrib/os/memoryManager.js"></script>
+   <script type="text/javascript" src="distrib/os/pcb.js"></script>
 
    <!-- Other Routines -->
    <script type="text/javascript" src="distrib/utils.js"></script>
@@ -75,9 +79,22 @@
                tabindex="3">
          </canvas>
       </div>
+
       <div id="date">
          <span class="label">Date/Time:</span>
          <div id="taDate"></div>
+      </div>
+
+      <div id="divMemory">
+         <label class="label">
+            Memory
+            <br>
+            <textarea name="taMemory"
+                     id  ="taMemory"
+                     rows="8"
+                     cols="48"
+            ></textarea>
+         </label>
       </div>
 
       <div id="status">
@@ -95,7 +112,7 @@
             <br>
             <textarea name="taHostLog"
                      id  ="taHostLog"
-                     rows="26"
+                     rows="8"
                      cols="48"
             ></textarea>
          </label>
@@ -107,6 +124,18 @@
             <br>
             <textarea name="taProgramInput"
                      id  ="taProgramInput"
+                     rows="8"
+                     cols="48"
+            ></textarea>
+         </label>
+      </div>
+
+      <div id="divProcesses">
+         <label class="label">
+            Processes
+            <br>
+            <textarea name="taProcesses"
+                     id  ="taProcesses"
                      rows="8"
                      cols="48"
             ></textarea>

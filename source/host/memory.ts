@@ -11,7 +11,7 @@ module TSOS {
             this.limit = 256;
             // Initialize an array of length limit; this will be the 
             // max size of the sum of the loaded programs
-            this.source = new Array<string>(this.limit*3);
+            this.source = new Array<string>(this.limit).fill("00");
         }
     }
 }

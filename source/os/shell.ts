@@ -418,8 +418,8 @@ module TSOS {
             // Get the data from the input area
             var taProgramInput = <HTMLInputElement> document.getElementById("taProgramInput");
             var input_text = taProgramInput.value;
-            
-            // const uppercased_input_text = input_text.toUpperCase();
+
+            // Remove all whitespace from text
             const removed_white_space_input_text = input_text.replace(/\s/g, '');
 
             if (input_text === "") {
@@ -442,15 +442,28 @@ module TSOS {
                     if (!reg_ex.test(sampled_input))  {
                         found_invalid = true;
                         _StdOut.putText("Invalid hex");
-                        console.log(sampled_input);
                         break;
                     }
 
                 }
                 
                 if (!found_invalid) {
-                    // TODO: Put it in memory
+                    // Check that the loaded number of OP codes
+                    // Do /2 since its counting single character length
+                    if (removed_white_space_input_text.length / 2 > _Memory.limit) {
+                        // Display warning
+                        _StdOut.putText("Program too large");
+                    }
 
+                    // Initialize the array to overwrite the source pointer in _Memory instance
+                    var loadedSource;
+
+                    // Populate an array with the OP codes
+                    for (let index = 0; index < removed_white_space_input_text.length; index += 2){
+                        loadedSource.push(removed_white_space_input_text.substring(index, index + 2))
+                    }
+
+                    _Memory.source = loadedSource
                 }
             }
         }

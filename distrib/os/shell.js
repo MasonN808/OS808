@@ -63,7 +63,7 @@ var TSOS;
             // bsod
             sc = new TSOS.ShellCommand(this.shellBsod, "bsod", "- blue screen of death");
             this.commandList[this.commandList.length] = sc;
-            // lload
+            // load
             sc = new TSOS.ShellCommand(this.shellLoad, "load", "- Loads and validates the input code");
             this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
@@ -333,7 +333,7 @@ var TSOS;
             // Get the data from the input area
             var taProgramInput = document.getElementById("taProgramInput");
             var input_text = taProgramInput.value;
-            // const uppercased_input_text = input_text.toUpperCase();
+            // Remove all whitespace from text
             const removed_white_space_input_text = input_text.replace(/\s/g, '');
             if (input_text === "") {
                 _StdOut.putText("Empty input: populate program input");
@@ -342,22 +342,33 @@ var TSOS;
                 _StdOut.putText("Hex data in program input is incomplete");
             }
             else {
+                // Check that the Hex is valid
                 const reg_ex = /[0-9a-fA-F]{2}/g;
                 var found_invalid = false;
                 for (let index = 0; index < removed_white_space_input_text.length; index += 2) {
                     // Reset the index for restest
                     reg_ex.lastIndex = 0;
                     const sampled_input = removed_white_space_input_text.substring(index, index + 2);
-                    // const sampled_input_to_int = Number(sampled_input);
                     if (!reg_ex.test(sampled_input)) {
                         found_invalid = true;
                         _StdOut.putText("Invalid hex");
-                        console.log(sampled_input);
                         break;
                     }
                 }
                 if (!found_invalid) {
-                    _StdOut.putText("Hex valid");
+                    // Check that the loaded number of OP codes
+                    // Do /2 since its counting single character length
+                    if (removed_white_space_input_text.length / 2 > _Memory.limit) {
+                        // Display warning
+                        _StdOut.putText("Program too large");
+                    }
+                    // Initialize the array to overwrite the source pointer in _Memory instance
+                    var loadedSource;
+                    // Populate an array with the OP codes
+                    for (let index = 0; index < removed_white_space_input_text.length; index += 2) {
+                        loadedSource.push(removed_white_space_input_text.substring(index, index + 2));
+                    }
+                    _Memory.source = loadedSource;
                 }
             }
         }

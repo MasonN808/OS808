@@ -126,6 +126,33 @@ module TSOS {
             // TODO in the future: Optionally update a log database or some streaming service.
         }
 
+        public static hostMemory(): void {
+            // Access the memory and display it
+            // TODO: _Memory or TSOS.memory?
+            const memoryArray = _Memory.source;
+            var rowIndex = 0;
+            const columnSpace = 3;
+            const spaceStr = " ".repeat(columnSpace)
+            var leadingZeros = "";
+
+            var taMemory = <HTMLInputElement> document.getElementById("taMemory");
+
+            // Loop through the memory array to display it
+            while (rowIndex < Math.ceil(memoryArray.length/8)){
+                // Check the length to decide whether to add leading zeros
+                if ((rowIndex*8).toString(16).length === 1) {
+                    leadingZeros = "0";
+                }
+                // Use .toString(16) to turn int into hex
+                const str = spaceStr + leadingZeros + (rowIndex*8).toString(16) + spaceStr + memoryArray.slice(rowIndex*8, rowIndex*8 + 8).join(" ") + "\n";
+                // Update the Memory console; Do taMemory.value first to keep inserted data at top
+                taMemory.value = taMemory.value + str;
+                rowIndex += 1;
+                // Reset the leading zero pointer
+                leadingZeros = "";
+            }
+        }
+
 
         //
         // Host Events
@@ -155,6 +182,9 @@ module TSOS {
             // .. and call the OS Kernel Bootstrap routine.
             _Kernel = new Kernel();
             _Kernel.krnBootstrap();  // _GLaDOS.afterStartup() will get called in there, if configured.
+
+            // Initialize the memory
+            Control.hostMemory();
         }
 
         public static hostBtnHaltOS_click(btn): void {

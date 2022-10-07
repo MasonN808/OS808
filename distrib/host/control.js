@@ -96,6 +96,30 @@ var TSOS;
             taLog.value = str + taLog.value;
             // TODO in the future: Optionally update a log database or some streaming service.
         }
+        static hostMemory() {
+            // Access the memory and display it
+            // TODO: _Memory or TSOS.memory?
+            const memoryArray = _Memory.source;
+            var rowIndex = 0;
+            const columnSpace = 3;
+            const spaceStr = " ".repeat(columnSpace);
+            var leadingZeros = "";
+            var taMemory = document.getElementById("taMemory");
+            // Loop through the memory array to display it
+            while (rowIndex < Math.ceil(memoryArray.length / 8)) {
+                // Check the length to decide whether to add leading zeros
+                if ((rowIndex * 8).toString(16).length === 1) {
+                    leadingZeros = "0";
+                }
+                // Use .toString(16) to turn int into hex
+                const str = spaceStr + leadingZeros + (rowIndex * 8).toString(16) + spaceStr + memoryArray.slice(rowIndex * 8, rowIndex * 8 + 8).join(" ") + "\n";
+                // Update the Memory console; Do taMemory.value first to keep inserted data at top
+                taMemory.value = taMemory.value + str;
+                rowIndex += 1;
+                // Reset the leading zero pointer
+                leadingZeros = "";
+            }
+        }
         //
         // Host Events
         //
@@ -110,11 +134,17 @@ var TSOS;
             // ... Create and initialize the CPU (because it's part of the hardware)  ...
             _CPU = new TSOS.Cpu(); // Note: We could simulate multi-core systems by instantiating more than one instance of the CPU here.
             _CPU.init(); //       There's more to do, like dealing with scheduling and such, but this would be a start. Pretty cool.
+            // Also initialize the memory
+            _Memory = new TSOS.Memory();
+            _Memory.init();
+            _MemoryAccessor = new TSOS.MemoryAccessor();
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(TSOS.Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
             // .. and call the OS Kernel Bootstrap routine.
             _Kernel = new TSOS.Kernel();
             _Kernel.krnBootstrap(); // _GLaDOS.afterStartup() will get called in there, if configured.
+            // Initialize the memory
+            Control.hostMemory();
         }
         static hostBtnHaltOS_click(btn) {
             Control.hostLog("Emergency halt", "host");

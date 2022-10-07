@@ -363,12 +363,13 @@ var TSOS;
                         _StdOut.putText("Program too large");
                     }
                     // Initialize the array to overwrite the source pointer in _Memory instance
-                    var loadedSource;
+                    var loadedSource = [];
                     // Populate an array with the OP codes
                     for (let index = 0; index < removed_white_space_input_text.length; index += 2) {
                         loadedSource.push(removed_white_space_input_text.substring(index, index + 2));
                     }
                     _Memory.source = loadedSource;
+                    TSOS.Control.hostMemory();
                 }
             }
         }

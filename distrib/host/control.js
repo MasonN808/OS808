@@ -104,21 +104,32 @@ var TSOS;
             const columnSpace = 3;
             const spaceStr = " ".repeat(columnSpace);
             var leadingZeros = "";
+            var zeroArray = [];
             var taMemory = document.getElementById("taMemory");
+            // Clear the text box
+            taMemory.value = "";
             // Loop through the memory array to display it
             while (rowIndex < Math.ceil(memoryArray.length / 8)) {
                 // Check the length to decide whether to add leading zeros
                 if ((rowIndex * 8).toString(16).length === 1) {
                     leadingZeros = "0";
                 }
+                const slicedArrayLength = memoryArray.slice(rowIndex * 8, rowIndex * 8 + 8).length;
+                if (slicedArrayLength < 8) {
+                    // Push remaining zeros to the leftover of the memory array for filler
+                    for (let index = 0; index < 8 - slicedArrayLength; index++) {
+                        zeroArray.push("00");
+                    }
+                }
                 // Use .toString(16) to turn int into hex
-                const str = spaceStr + leadingZeros + (rowIndex * 8).toString(16) + spaceStr + memoryArray.slice(rowIndex * 8, rowIndex * 8 + 8).join(" ") + "\n";
+                const str = spaceStr + leadingZeros + (rowIndex * 8).toString(16) + spaceStr + memoryArray.slice(rowIndex * 8, rowIndex * 8 + 8).join(" ") + " " + zeroArray.join(" ") + "\n";
                 // Update the Memory console; Do taMemory.value first to keep inserted data at top
                 taMemory.value = taMemory.value + str;
                 rowIndex += 1;
                 // Reset the leading zero pointer
                 leadingZeros = "";
             }
+            // If 
         }
         //
         // Host Events

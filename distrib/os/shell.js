@@ -369,7 +369,12 @@ var TSOS;
                         loadedSource.push(removed_white_space_input_text.substring(index, index + 2));
                     }
                     _Memory.source = loadedSource;
+                    // Display the memory
                     TSOS.Control.hostMemory();
+                    // Assign a PID
+                    _MemoryManager.assignPID();
+                    // Output the PID
+                    _StdOut.putText("Process ID: " + (_MemoryManager.maxPID - 1));
                 }
             }
         }

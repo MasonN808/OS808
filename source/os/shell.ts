@@ -444,7 +444,6 @@ module TSOS {
                         _StdOut.putText("Invalid hex");
                         break;
                     }
-
                 }
                 
                 if (!found_invalid) {
@@ -464,7 +463,15 @@ module TSOS {
                     }
 
                     _Memory.source = loadedSource;
+
+                    // Display the memory
                     TSOS.Control.hostMemory();
+
+                    // Assign a PID
+                    _MemoryManager.assignPID();
+                    
+                    // Output the PID
+                    _StdOut.putText("Process ID: " + (_MemoryManager.maxPID - 1));
                 }
             }
         }

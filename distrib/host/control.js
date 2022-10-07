@@ -105,11 +105,12 @@ var TSOS;
             const spaceStr = " ".repeat(columnSpace);
             var leadingZeros = "";
             var zeroArray = [];
+            var str = "";
             var taMemory = document.getElementById("taMemory");
             // Clear the text box
             taMemory.value = "";
             // Loop through the memory array to display it
-            while (rowIndex < Math.ceil(memoryArray.length / 8)) {
+            while (rowIndex < Math.ceil(_Memory.limit / 8)) {
                 // Check the length to decide whether to add leading zeros
                 if ((rowIndex * 8).toString(16).length === 1) {
                     leadingZeros = "0";
@@ -122,12 +123,20 @@ var TSOS;
                     }
                 }
                 // Use .toString(16) to turn int into hex
-                const str = spaceStr + leadingZeros + (rowIndex * 8).toString(16) + spaceStr + memoryArray.slice(rowIndex * 8, rowIndex * 8 + 8).join(" ") + " " + zeroArray.join(" ") + "\n";
+                str = spaceStr + leadingZeros + (rowIndex * 8).toString(16) + spaceStr + memoryArray.slice(rowIndex * 8, rowIndex * 8 + 8).join(" ");
+                if (slicedArrayLength === 0) {
+                    // Get rid of singel char leading white space
+                    str += zeroArray.join(" ") + "\n";
+                }
+                else {
+                    str += " " + zeroArray.join(" ") + "\n";
+                }
                 // Update the Memory console; Do taMemory.value first to keep inserted data at top
                 taMemory.value = taMemory.value + str;
                 rowIndex += 1;
-                // Reset the leading zero pointer
+                // Reset pointers for next line
                 leadingZeros = "";
+                zeroArray = [];
             }
             // If 
         }

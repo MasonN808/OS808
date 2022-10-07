@@ -178,8 +178,11 @@ module TSOS {
                 leadingZeros = "";
                 zeroArray = [];
             }
+        }
+        
+        // TODO: Finish this
+        public static hostProcesses(): void {
 
-            // If 
         }
 
 

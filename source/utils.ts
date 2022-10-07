@@ -43,5 +43,9 @@ module TSOS {
             }
             return retVal;
         }
+
+        public static isInt(str) {
+            return !isNaN(str) && Number.isInteger(parseFloat(str));
+        }
     }
 }

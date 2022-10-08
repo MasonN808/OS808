@@ -381,7 +381,7 @@ var TSOS;
                         // Assign a PID
                         _MemoryManager.assignPID();
                         // Output the PID
-                        _StdOut.putText("Process ID: " + (_MemoryManager.maxPID - 1));
+                        _StdOut.putText("Process ID: " + (_MemoryManager.PIDCounter - 1));
                     }
                 }
             }
@@ -392,7 +392,7 @@ var TSOS;
                     const inputPid = parseInt(args[0]);
                     // Try and find the input PID in the hashtable
                     if (_MemoryManager.PIDMap.has(inputPid)) {
-                        TSOS.Control.hostProcesses();
+                        TSOS.Control.hostProcesses(inputPid);
                     }
                     else {
                         _StdOut.putText("Undefined Process ID: " + inputPid);

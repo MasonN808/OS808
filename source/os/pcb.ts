@@ -1,24 +1,28 @@
 
 module TSOS {
     export class Pcb {
-        public processState: string = "";
+        public processId;
         public programCounter: number = 0;
-        public intermediateRepresentation: string = "";
+        public intermediateRepresentation: string = "0";
+        public accounting: number = 0;
         public Xreg: number = 0;
         public Yreg: number = 0;
         public Zreg: number = 0;
-        public location: string = "";
-        public priority: string = "";
+        public priority: string = "0";
+        public processState: string = "Ready";
+        public location: string = "Memory";
 
-        constructor(){
-            this.processState = "";
+        constructor(processId: number){
+            this.processId = processId;
             this.programCounter = 0;
-            this.intermediateRepresentation = "";
+            this.intermediateRepresentation = "0";
+            this.accounting = 0;
             this.Xreg = 0;
             this.Yreg = 0;
             this.Zreg = 0;
-            this.location = "";
-            this.priority = "";
+            this.priority = "0";
+            this.processState = "Ready";
+            this.location = "Memory";
         }
     }
 }

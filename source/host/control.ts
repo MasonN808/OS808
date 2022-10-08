@@ -182,32 +182,42 @@ module TSOS {
         }
 
         public static hostProcessesInit(): void {
-            // To Display the pointers in the PCB on load
+            // To display the heading on screen load
             const columnSpace = 2;
             const spaceStr = " ".repeat(columnSpace)
-            // const canvas = <HTMLCanvasElement> document.getElementById("taProcesses");
             const taProcesses = <HTMLInputElement> document.getElementById("taProcesses");
 
-            
-            const element = document.getElementById("taProcesses");
-
-            // var ctx = canvas.getContext('2d');
-
-            // To draw a horizontal line to serperate processes
-            // let totalWidth = canvas.width;
-
-            // let middle = canvas.width / 2;
-
-            const str = "PID" + spaceStr + "PC" + spaceStr + " IR" + spaceStr + "ACC" + spaceStr + "X" + spaceStr +
+            const heading = "PID" + spaceStr + "PC" + spaceStr + " IR" + spaceStr + "ACC" + spaceStr + "X" + spaceStr +
             "Y" + spaceStr + "Z" + spaceStr + "Priority" + spaceStr + "State" + spaceStr + "Location";
 
-            taProcesses.value = str;
-
+            taProcesses.value = heading;
         }
 
         // TODO: Finish this
-        public static hostProcesses(): void {
+        public static hostProcesses(inputPid: number): void {
+            // To display the pointers in the PCB on load with heading
+            const columnSpace = 2;
+            const spaceStr = " ".repeat(columnSpace)
+            const taProcesses = <HTMLInputElement> document.getElementById("taProcesses");
+
+            // reset the block
+            taProcesses.value = "";
             
+            const heading = "PID" + spaceStr + "PC" + spaceStr + " IR" + spaceStr + "ACC" + spaceStr + "X" + spaceStr +
+            "Y" + spaceStr + "Z" + spaceStr + "Priority" + spaceStr + "State" + spaceStr + "Location \n";
+
+            // Get the memory from the input PID in the hashtable
+            const memory = _MemoryManager.PIDMap.get(inputPid)[0];
+
+            // Get the PCB from the input PID in the hashtable
+            var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
+            
+            // Pull pointers from the PCB to display
+            const str = pcb.processId + spaceStr + pcb.programCounter + spaceStr + pcb.intermediateRepresentation + spaceStr +
+                        pcb.accounting + spaceStr + pcb.Xreg + spaceStr + pcb.Yreg + spaceStr + pcb.Zreg + spaceStr +
+                        pcb.priority + spaceStr + pcb.processState + spaceStr + pcb.location
+
+            taProcesses.value = heading + str;
         }
 
 

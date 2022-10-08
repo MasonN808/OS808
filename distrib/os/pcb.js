@@ -1,23 +1,26 @@
 var TSOS;
 (function (TSOS) {
     class Pcb {
-        constructor() {
-            this.processState = "";
+        constructor(processId) {
             this.programCounter = 0;
-            this.intermediateRepresentation = "";
+            this.intermediateRepresentation = "0";
+            this.accounting = 0;
             this.Xreg = 0;
             this.Yreg = 0;
             this.Zreg = 0;
-            this.location = "";
-            this.priority = "";
-            this.processState = "";
+            this.priority = "0";
+            this.processState = "Ready";
+            this.location = "Memory";
+            this.processId = processId;
             this.programCounter = 0;
-            this.intermediateRepresentation = "";
+            this.intermediateRepresentation = "0";
+            this.accounting = 0;
             this.Xreg = 0;
             this.Yreg = 0;
             this.Zreg = 0;
-            this.location = "";
-            this.priority = "";
+            this.priority = "0";
+            this.processState = "Ready";
+            this.location = "Memory";
         }
     }
     TSOS.Pcb = Pcb;

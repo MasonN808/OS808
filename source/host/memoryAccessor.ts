@@ -1,12 +1,25 @@
 module TSOS {
 
     export class MemoryAccessor {
-        public base: number = 0;
-        public limit: number = 256;
         public source: Array<string>;
         
-        public static query_memory(pid: number, index: number) {
-            // TODO: finish this
+        public static read_memory(pid: number, pc: number): string{
+            // We assume here that the given pid is valid
+            const memory = _MemoryManager.PIDMap.get(pid)[0]
+
+            // check number is valid
+            if ((pc < _Memory.base) || (pc > _Memory.limit)) {
+                // Do BSOD
+                _StdOut.putTextCenter("Shutting down OS...");
+                // Call Kernel shutdown routine.
+                _Kernel.krnShutdown();
+            }
+            return memory[pc]
+        }
+
+        public static writeMemory(pid: number, pc: number, code: string): void {
+            // We assume here that the given pid is valid
+            _MemoryManager.PIDMap.get(pid)[0][pc] = code;
         }
     }
 }

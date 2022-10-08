@@ -191,7 +191,7 @@ module TSOS {
             row.insertCell(3).innerHTML = pcb.Acc;
             row.insertCell(4).innerHTML = pcb.Xreg;
             row.insertCell(5).innerHTML = pcb.Yreg;
-            row.insertCell(6).innerHTML = pcb.Zreg;
+            row.insertCell(6).innerHTML = pcb.Zflag;
             row.insertCell(7).innerHTML = pcb.priority;
             row.insertCell(8).innerHTML = pcb.processState;
             row.insertCell(9).innerHTML = pcb.location;
@@ -210,7 +210,7 @@ module TSOS {
             table.rows[pcb.rowIndex].cells[3].innerHTML = pcb.Acc;
             table.rows[pcb.rowIndex].cells[4].innerHTML = pcb.Xreg;
             table.rows[pcb.rowIndex].cells[5].innerHTML = pcb.Yreg;
-            table.rows[pcb.rowIndex].cells[6].innerHTML = pcb.Zreg;
+            table.rows[pcb.rowIndex].cells[6].innerHTML = pcb.Zflag;
             table.rows[pcb.rowIndex].cells[7].innerHTML = pcb.priority;
             table.rows[pcb.rowIndex].cells[8].innerHTML = pcb.processState;
             table.rows[pcb.rowIndex].cells[9].innerHTML = pcb.location;

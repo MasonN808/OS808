@@ -70,7 +70,7 @@ module TSOS {
                     // Update the Accumulator in CPU and PCB
                     this.updateAcc(constantInMemory)
 
-                    this.increasePC(2);
+                    this.increasePC(3);
                     break;
 
                 // Store the accumulator in memory
@@ -90,6 +90,21 @@ module TSOS {
                     TSOS.MemoryAccessor.writeMemory(this.PID, storageLocation, hexAcc)
 
                     // Increase the PC in CPU and PCB
+                    this.increasePC(3);
+                    break;
+
+                // Add with carry...
+                // Adds contents of an address to the contents of the accumulator and keeps the result in the accumulator
+                case ("6D"):
+                    // Get the storage location one op code above current PC (i.e, do one op code lookahead)
+                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1), 16);
+                    
+                    // Query constant from memory location
+                    var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation);
+
+                    // Update the Accumulator by accumulating the accumulator in CPU and PCB
+                    this.updateAcc(constantInMemory, true);
+
                     this.increasePC(3);
                     break;
                 
@@ -112,10 +127,10 @@ module TSOS {
                     // Query constant from memory location
                     var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation);
                         
-                    // Update the Accumulator in CPU and PCB
+                    // Update the X-register in CPU and PCB
                     this.updateX(constantInMemory);
 
-                    this.increasePC(2);
+                    this.increasePC(3);
                     break;
                 
                 // Load the Y-register with a constant
@@ -137,10 +152,10 @@ module TSOS {
                     // Query constant from memory location
                     var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation);
                         
-                    // Update the Accumulator in CPU and PCB
+                    // Update the Y-register in CPU and PCB
                     this.updateY(constantInMemory);
 
-                    this.increasePC(2);
+                    this.increasePC(3);
                     break;
                 
                 // No operation
@@ -149,7 +164,63 @@ module TSOS {
                     break;
 
                 // Compare a byte in memory to the X-register;  Sets the Z (zero) flag if equal
-                // case ("EC"):
+                case ("EC"):
+                    // Get the storage location one op code above current PC (i.e, do one op code lookahead)
+                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1), 16);
+
+                    // Query constant from memory location
+                    var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation);
+
+                    // Parse to compare with X-register
+                    var parsedConstantInMemory = parseInt(constantInMemory, 16);
+                    
+                    if (parsedConstantInMemory === this.Xreg) {
+                        this.updateZ(1);
+                    }
+                    else {
+                        this.updateZ(0);
+                    }
+
+                    this.increasePC(3);
+                    break;
+
+                
+
+                // Increment the value of a byte
+                case ("EE"):
+                    // Get the storage location one op code above current PC (i.e, do one op code lookahead)
+                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1), 16);
+
+                    // Query constant from memory location
+                    var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation);
+                    
+                    // Increment the byte and write to same memory location
+                    TSOS.MemoryAccessor.writeMemory(this.PID, storageLocation, (parseInt(constantInMemory, 16) + 1).toString(16));
+
+                    this.increasePC(3);
+                    break;
+
+                // System Call
+                // #$01 in X reg = print the integer stored in the Y-register
+                // #$02 in X reg = print the 00-terminated string stored at the address in the Y-register
+                case ("FF"):
+                    // Check the X reg
+                    if (this.Xreg === 1) {
+                        _StdOut.putText(this.Yreg.toString(16));
+                    }
+                    else if (this.Xreg === 2) {
+                        var memoryIndex = this.Yreg;
+                        var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, memoryIndex);
+                        while (constantInMemory != "00") {
+                            _StdOut.putText(parseInt(constantInMemory, 16));
+                            memoryIndex += 1;
+                            constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, memoryIndex);
+                        }
+                    }
+                    
+                    this.increasePC(1);
+                    break;
+
 
             }
             // Now update the displayed PCB
@@ -163,28 +234,43 @@ module TSOS {
             pcb.programCounter += pcIncrease;
         }
 
-        private updateAcc(newAccAsHex: string): void {
+        private updateAcc(newAccAsHex: string, accumulate = false): void {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
-
-            // parse string to an int to store in accumulator
-            this.Acc = parseInt(newAccAsHex, 16);
-            pcb.Acc = parseInt(newAccAsHex, 16);
+            
+            // If we are adding to the accumulator rather than replacing
+            if (accumulate) {
+                // parse string to an int to store in accumulator
+                this.Acc = this.Acc + parseInt(newAccAsHex, 16);
+                pcb.Acc = pcb.Acc + parseInt(newAccAsHex, 16);
+            }
+            else {
+                this.Acc = parseInt(newAccAsHex, 16);
+                pcb.Acc = parseInt(newAccAsHex, 16);
+            }
         }
 
         private updateX(newXAsHex: string): void {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
 
             // parse string to an int to store in accumulator
-            this.Acc = parseInt(newXAsHex, 16);
-            pcb.Acc = parseInt(newXAsHex, 16);
+            this.Xreg = parseInt(newXAsHex, 16);
+            pcb.Xreg = parseInt(newXAsHex, 16);
         }
 
         private updateY(newYAsHex: string): void {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
 
             // parse string to an int to store in accumulator
-            this.Acc = parseInt(newYAsHex, 16);
+            this.Yreg = parseInt(newYAsHex, 16);
             pcb.Acc = parseInt(newYAsHex, 16);
+        }
+
+        private updateZ(newZ: number): void {
+            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+
+            // parse string to an int to store in accumulator
+            this.Zflag = newZ;
+            pcb.Zflag = newZ;
         }
     }
 }

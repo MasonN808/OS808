@@ -7,7 +7,7 @@ module TSOS {
         public Acc: number = 0;
         public Xreg: number = 0;
         public Yreg: number = 0;
-        public Zreg: number = 0;
+        public Zflag: number = 0;
         public priority: string = "0";
         public processState: string = "Ready";
         public location: string = "Memory";
@@ -20,7 +20,7 @@ module TSOS {
             this.Acc = 0;
             this.Xreg = 0;
             this.Yreg = 0;
-            this.Zreg = 0;
+            this.Zflag = 0;
             this.priority = "0";
             this.processState = "Ready";
             this.location = "Memory";

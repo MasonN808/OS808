@@ -7,12 +7,15 @@ table {
     background-color: aliceblue;
     height: 150px;
   }
+
+td, th{
+    text-align: center;
+}
   
 tr {
     /* For row height */
     display: block;
     vertical-align:top;
-
     line-height: 22.5px;
 }
 

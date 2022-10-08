@@ -75,8 +75,6 @@ var TSOS;
             // Set focus on the start button.
             // Use the TypeScript cast to HTMLInputElement
             document.getElementById("btnStartOS").focus();
-            // Initialize the PCB headings
-            this.hostProcessesInit();
             // Check for our testing and enrichment core, which
             // may be referenced here (from index.html) as function Glados().
             if (typeof Glados === "function") {
@@ -151,46 +149,26 @@ var TSOS;
         //     taProcesses.value = heading;
         //     taProcesses.insertAdjacentHTML("beforeend", "<hr>")
         // }
-        static hostProcessesInit() {
-            // To display the heading on screen load
-            const columnSpace = 2;
-            const spaceStr = " ".repeat(columnSpace);
-            const table = document.getElementById("taProcesses");
-            var row = table.insertRow(-1);
-            row.insertCell(0).innerHTML = "PID";
-            row.insertCell(1).innerHTML = "PC";
-            row.insertCell(2).innerHTML = "IR";
-            row.insertCell(3).innerHTML = "ACC";
-            row.insertCell(4).innerHTML = "X";
-            row.insertCell(5).innerHTML = "Y";
-            row.insertCell(6).innerHTML = "Z";
-            row.insertCell(7).innerHTML = "Priority";
-            row.insertCell(8).innerHTML = "State";
-            row.insertCell(9).innerHTML = "Location";
-            // const heading = "PID" + spaceStr + "PC" + spaceStr + " IR" + spaceStr + "ACC" + spaceStr + "X" + spaceStr +
-            // "Y" + spaceStr + "Z" + spaceStr + "Priority" + spaceStr + "State" + spaceStr + "Location";
-            // taProcesses.value = heading;
-            // taProcesses.insertAdjacentHTML("beforeend", "<hr>")
-        }
         // TODO: Finish this
         static hostProcesses(inputPid) {
             // To display the pointers in the PCB on load with heading
-            const columnSpace = 2;
-            const spaceStr = " ".repeat(columnSpace);
-            const taProcesses = document.getElementById("taProcesses");
-            // reset the block
-            taProcesses.value = "";
-            const heading = "PID" + spaceStr + "PC" + spaceStr + " IR" + spaceStr + "ACC" + spaceStr + "X" + spaceStr +
-                "Y" + spaceStr + "Z" + spaceStr + "Priority" + spaceStr + "State" + spaceStr + "Location \n";
+            const table = document.getElementById("taProcesses");
             // Get the memory from the input PID in the hashtable
             const memory = _MemoryManager.PIDMap.get(inputPid)[0];
             // Get the PCB from the input PID in the hashtable
             var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
-            // Pull pointers from the PCB to display
-            const str = pcb.processId + spaceStr + pcb.programCounter + spaceStr + pcb.intermediateRepresentation + spaceStr +
-                pcb.accounting + spaceStr + pcb.Xreg + spaceStr + pcb.Yreg + spaceStr + pcb.Zreg + spaceStr +
-                pcb.priority + spaceStr + pcb.processState + spaceStr + pcb.location;
-            taProcesses.value = heading + str;
+            // insert the row at the ver bottom relative to all other rows
+            var row = table.insertRow(-1);
+            row.insertCell(0).innerHTML = pcb.processId;
+            row.insertCell(1).innerHTML = pcb.programCounter;
+            row.insertCell(2).innerHTML = pcb.intermediateRepresentation;
+            row.insertCell(3).innerHTML = pcb.accounting;
+            row.insertCell(4).innerHTML = pcb.Xreg;
+            row.insertCell(5).innerHTML = pcb.Yreg;
+            row.insertCell(6).innerHTML = pcb.Zreg;
+            row.insertCell(7).innerHTML = pcb.priority;
+            row.insertCell(8).innerHTML = pcb.processState;
+            row.insertCell(9).innerHTML = pcb.location;
         }
         //
         // Host Events

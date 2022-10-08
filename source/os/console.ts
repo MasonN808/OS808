@@ -12,7 +12,7 @@ module TSOS {
         // For command completion
         public possible_commands = ["ver", "help", "shutdown", "cls", "man",
                                     "trace", "rot13", "prompt", "date", "whereami",
-                                    "howareu", "whoismason", "status", "bsod", "load"];
+                                    "howareu", "whoismason", "status", "bsod", "load", "run"];
 
         constructor(public currentFont = _DefaultFontFamily,
                     public currentFontSize = _DefaultFontSize,

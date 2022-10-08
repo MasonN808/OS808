@@ -112,3 +112,10 @@ h3 {
   margin-right: auto;
   /* width: 50%; */
 }
+
+
+
+textarea {
+  border: #DFDBC3;
+  width: 394px;
+}

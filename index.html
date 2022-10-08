@@ -3,11 +3,15 @@
 <head>
    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
    <meta name="author"             content="Alan G. Labouseur" />
+   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
    <link rel="stylesheet" href="tsos.css" type="text/css" media="screen" />
+   <link rel="stylesheet" href="tables.css" type="text/css" media="screen" />
    <title>
       TSOS - a browser-based virtual Operating System in TypeScript
    </title>
 
+   <!-- bootstrap v4 -->
+   <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
    <!-- Globals CONSTANTS and _Variables. Must included be first. -->
    <script type="text/javascript" src="distrib/globals.js"></script>
 
@@ -40,7 +44,7 @@
    
 </head>
 
-<body onload="onDocumentLoad()">
+<body id="bootstrap-overrides" onload="onDocumentLoad()">
 
 <div id="divMain">
    <div id="divButtonBar" style="margin:4px;">
@@ -94,55 +98,70 @@
    </div>  
 
    <div id="right">
-      <div id="divLog">
-         <label class="label">
-            Host Log
-            <br>
-            <textarea name="taHostLog"
-                     id  ="taHostLog"
-                     rows="8"
-                     cols="48"
-            ></textarea>
-         </label>
-      </div>
+      <div class="container-fluid content-column">
+         <div class="column">
+               <div class="card h-100">
+                  <div class="card-header">Host Log</div>
+                     <div class="card-body">
+                        <textarea name="taHostLog"
+                              id  ="taHostLog"
+                              rows="8"
+                              cols="48"
+                        ></textarea>
+                     </div>
+                  </div>
+               </div>
 
-      <div id="divUserProgramInput">
-         <label class="label">
-            User Program Input
-            <br>
-            <textarea name="taProgramInput"
-                     id  ="taProgramInput"
-                     rows="8"
-                     cols="48"
-            ></textarea>
-         </label>
-      </div>
+            <div class="card h-100">
+               <div class="card-header">User Program Input</div>
+                  <div class="card-body">
+                     <textarea name="taProgramInput"
+                           id  ="taProgramInput"
+                           rows="8"
+                           cols="48"
+                     ></textarea>
+                  </div>
+               </div>
+            </div>
 
-      <div id="divProcesses">
-         <label class="label">
-            Processes
-            <br>
-            <textarea name="taProcesses"
-                     id  ="taProcesses"
-                     rows="8"
-                     cols="51"
-            ></textarea>
-         </label>
-      </div>
-      
-      <div id="divMemory">
-         <label class="label">
-            Memory
-            <br>
-            <textarea name="taMemory"
+            <div class="card h-100">
+               <div class="card-header">Processes</div>
+                  <div class="card-body">
+                     <span>
+                        <table name="taProcesses"
+                        id  ="taProcesses">
+                           <tr class="tableHeader">
+                              <th>PID</th>
+                              <th>PC</th>
+                              <th>IR</th>
+                              <th>ACC</th>
+                              <th>X</th>
+                              <th>Y</th>
+                              <th>Z</th>
+                              <th>Priority</th>
+                              <th>State</th>
+                              <th>Location</th>
+                           </tr>
+                        </table>
+                     </span>
+                  </div>
+               </div>
+            </div>
+
+            <div class="card h-100">
+               <div class="card-header">Memory</div>
+                  <div class="card-body">
+                     <textarea name="taMemory"
                      id  ="taMemory"
                      rows="8"
                      cols="48"
-            ></textarea>
-         </label>
+                     ></textarea>
+                  </div>
+               </div>
+            </div>
+         </div>
       </div>
-   </div>   
-</div>
+   </div>
 
 <p class="footerText" style="clear:both;">
    <br>

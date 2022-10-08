@@ -1,0 +1,71 @@
+table {
+    font-size: small;
+    color: #000000;
+    border-color: #000000;
+    border-collapse: separate;
+    border-radius: 10px; 
+    background-color: aliceblue;
+    height: 150px;
+  }
+  
+td, th {
+/* height: 22.5px; */
+/* width: 50px; */
+}
+
+tr {
+    /* For row height */
+    display: block;
+    vertical-align:top;
+
+    line-height: 22.5px;
+}
+
+tr:nth-child(even) {
+background-color: #dddddd;
+}
+
+.card{
+width: 395px;
+}
+
+/* For the column widths */
+.tableHeader th:nth-child(1){
+    width: 30px;
+}
+  
+.tableHeader th:nth-child(2){
+    width: 30px;
+}
+
+.tableHeader th:nth-child(3){
+    width: 30px;
+}
+
+.tableHeader th:nth-child(4){
+    width: 45px;
+}
+
+.tableHeader th:nth-child(5){
+    width: 20px;
+}
+
+.tableHeader th:nth-child(6){
+    width: 20px;
+}
+
+.tableHeader th:nth-child(7){
+    width: 20px;
+}
+
+.tableHeader th:nth-child(8){
+    width: 60px;
+}
+
+.tableHeader th:nth-child(9){
+    width: 70px;
+}
+
+.tableHeader th:nth-child(10){
+    width: 70px;
+}

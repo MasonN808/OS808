@@ -22,7 +22,7 @@ var TSOS;
             // For command completion
             this.possible_commands = ["ver", "help", "shutdown", "cls", "man",
                 "trace", "rot13", "prompt", "date", "whereami",
-                "howareu", "whoismason", "status", "bsod", "load"];
+                "howareu", "whoismason", "status", "bsod", "load", "run"];
         }
         init() {
             this.clearScreen();

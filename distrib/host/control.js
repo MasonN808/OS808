@@ -141,14 +141,36 @@ var TSOS;
                 zeroArray = [];
             }
         }
+        // public static hostProcessesInit(): void {
+        //     // To display the heading on screen load
+        //     const columnSpace = 2;
+        //     const spaceStr = " ".repeat(columnSpace)
+        //     const taProcesses = <HTMLInputElement> document.getElementById("taProcesses");
+        //     const heading = "PID" + spaceStr + "PC" + spaceStr + " IR" + spaceStr + "ACC" + spaceStr + "X" + spaceStr +
+        //     "Y" + spaceStr + "Z" + spaceStr + "Priority" + spaceStr + "State" + spaceStr + "Location";
+        //     taProcesses.value = heading;
+        //     taProcesses.insertAdjacentHTML("beforeend", "<hr>")
+        // }
         static hostProcessesInit() {
             // To display the heading on screen load
             const columnSpace = 2;
             const spaceStr = " ".repeat(columnSpace);
-            const taProcesses = document.getElementById("taProcesses");
-            const heading = "PID" + spaceStr + "PC" + spaceStr + " IR" + spaceStr + "ACC" + spaceStr + "X" + spaceStr +
-                "Y" + spaceStr + "Z" + spaceStr + "Priority" + spaceStr + "State" + spaceStr + "Location";
-            taProcesses.value = heading;
+            const table = document.getElementById("taProcesses");
+            var row = table.insertRow(-1);
+            row.insertCell(0).innerHTML = "PID";
+            row.insertCell(1).innerHTML = "PC";
+            row.insertCell(2).innerHTML = "IR";
+            row.insertCell(3).innerHTML = "ACC";
+            row.insertCell(4).innerHTML = "X";
+            row.insertCell(5).innerHTML = "Y";
+            row.insertCell(6).innerHTML = "Z";
+            row.insertCell(7).innerHTML = "Priority";
+            row.insertCell(8).innerHTML = "State";
+            row.insertCell(9).innerHTML = "Location";
+            // const heading = "PID" + spaceStr + "PC" + spaceStr + " IR" + spaceStr + "ACC" + spaceStr + "X" + spaceStr +
+            // "Y" + spaceStr + "Z" + spaceStr + "Priority" + spaceStr + "State" + spaceStr + "Location";
+            // taProcesses.value = heading;
+            // taProcesses.insertAdjacentHTML("beforeend", "<hr>")
         }
         // TODO: Finish this
         static hostProcesses(inputPid) {

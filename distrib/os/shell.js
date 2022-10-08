@@ -393,6 +393,8 @@ var TSOS;
                     // Try and find the input PID in the hashtable
                     if (_MemoryManager.PIDMap.has(inputPid)) {
                         TSOS.Control.hostProcesses(inputPid);
+                        // Tell the CPU that is is executing
+                        _CPU.isExecuting = true;
                     }
                     else {
                         _StdOut.putText("Undefined Process ID: " + inputPid);
@@ -401,7 +403,6 @@ var TSOS;
                 else {
                     _StdOut.putText("Invalid arguement.  Usage: run <pid>.");
                 }
-                const pId = args[0];
             }
             else {
                 _StdOut.putText("Usage: run <pid>");

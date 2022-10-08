@@ -13,13 +13,14 @@
 var TSOS;
 (function (TSOS) {
     class Cpu {
-        constructor(PC = 0, Acc = 0, Xreg = 0, Yreg = 0, Zflag = 0, isExecuting = false) {
+        constructor(PC = 0, Acc = 0, Xreg = 0, Yreg = 0, Zflag = 0, isExecuting = false, PID = null) {
             this.PC = PC;
             this.Acc = Acc;
             this.Xreg = Xreg;
             this.Yreg = Yreg;
             this.Zflag = Zflag;
             this.isExecuting = isExecuting;
+            this.PID = PID;
         }
         init() {
             this.PC = 0;
@@ -28,11 +29,20 @@ var TSOS;
             this.Yreg = 0;
             this.Zflag = 0;
             this.isExecuting = false;
+            this.PID = null;
         }
         cycle() {
             _Kernel.krnTrace('CPU cycle');
             // TODO: Accumulate CPU usage and profiling statistics here.
             // Do the real work here. Be sure to set this.isExecuting appropriately.
+            // Get the Op code given the pid and pc
+            var opCode = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
+            // Have a massive switch statement for all possible Op codes
+            switch (opCode) {
+                // Load the accumulator with a constant
+                case ("A9"):
+                    break;
+            }
         }
     }
     TSOS.Cpu = Cpu;

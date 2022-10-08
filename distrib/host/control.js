@@ -96,65 +96,119 @@ var TSOS;
             taLog.value = str + taLog.value;
             // TODO in the future: Optionally update a log database or some streaming service.
         }
-        static hostMemory() {
-            // Access the memory and display it
-            // TODO: _Memory or TSOS.memory?
-            const memoryArray = _Memory.source;
+        // public static hostMemory(): void {
+        //     // Access the memory and display it
+        //     // TODO: _Memory or TSOS.memory?
+        //     const memoryArray = _Memory.source;
+        //     var rowIndex = 0;
+        //     const columnSpace = 3;
+        //     const spaceStr = " ".repeat(columnSpace)
+        //     var leadingZeros = "";
+        //     var zeroArray = [];
+        //     var str = "";
+        //     var taMemory = <HTMLInputElement> document.getElementById("taMemory");
+        //     // Clear the text box
+        //     taMemory.value = "";
+        //     // Loop through the memory array to display it
+        //     while (rowIndex < Math.ceil(_Memory.limit/8)){
+        //         // Check the length to decide whether to add leading zeros
+        //         if ((rowIndex*8).toString(16).length === 1) {
+        //             leadingZeros = "0";
+        //         }
+        //         const slicedArrayLength = memoryArray.slice(rowIndex*8, rowIndex*8 + 8).length
+        //         if (slicedArrayLength < 8){
+        //             // Push remaining zeros to the leftover of the memory array for filler
+        //             for (let index=0; index < 8 - slicedArrayLength; index++){
+        //                 zeroArray.push("00");
+        //             }
+        //         }
+        //         // Use .toString(16) to turn int into hex
+        //         str = spaceStr + leadingZeros + (rowIndex*8).toString(16) + spaceStr + memoryArray.slice(rowIndex*8, rowIndex*8 + 8).join(" ");
+        //         if (slicedArrayLength === 0) {
+        //             // Get rid of singel char leading white space
+        //             str += zeroArray.join(" ")+ "\n";
+        //         }
+        //         else {
+        //             str += " " + zeroArray.join(" ")+ "\n";
+        //         }
+        //         // Update the Memory console; Do taMemory.value first to keep inserted data at top
+        //         taMemory.value = taMemory.value + str;
+        //         rowIndex += 1;
+        //         // Reset pointers for next line
+        //         leadingZeros = "";
+        //         zeroArray = [];
+        //     }
+        // }
+        static hostMemoryInit() {
+            // Display memory of 00s
+            const table = document.getElementById("taMemory");
             var rowIndex = 0;
-            const columnSpace = 3;
-            const spaceStr = " ".repeat(columnSpace);
             var leadingZeros = "";
             var zeroArray = [];
-            var str = "";
-            var taMemory = document.getElementById("taMemory");
-            // Clear the text box
-            taMemory.value = "";
             // Loop through the memory array to display it
             while (rowIndex < Math.ceil(_Memory.limit / 8)) {
                 // Check the length to decide whether to add leading zeros
                 if ((rowIndex * 8).toString(16).length === 1) {
                     leadingZeros = "0";
                 }
-                const slicedArrayLength = memoryArray.slice(rowIndex * 8, rowIndex * 8 + 8).length;
-                if (slicedArrayLength < 8) {
-                    // Push remaining zeros to the leftover of the memory array for filler
-                    for (let index = 0; index < 8 - slicedArrayLength; index++) {
-                        zeroArray.push("00");
-                    }
+                var row = table.insertRow(-1);
+                // Use .toString(16) to turn int into hex 
+                row.insertCell(0).innerHTML = leadingZeros + (rowIndex * 8).toString(16);
+                for (let columnIndex = 1; columnIndex < 9; columnIndex++) {
+                    row.insertCell(columnIndex).innerHTML = "00";
                 }
-                // Use .toString(16) to turn int into hex
-                str = spaceStr + leadingZeros + (rowIndex * 8).toString(16) + spaceStr + memoryArray.slice(rowIndex * 8, rowIndex * 8 + 8).join(" ");
-                if (slicedArrayLength === 0) {
-                    // Get rid of singel char leading white space
-                    str += zeroArray.join(" ") + "\n";
-                }
-                else {
-                    str += " " + zeroArray.join(" ") + "\n";
-                }
-                // Update the Memory console; Do taMemory.value first to keep inserted data at top
-                taMemory.value = taMemory.value + str;
                 rowIndex += 1;
                 // Reset pointers for next line
                 leadingZeros = "";
                 zeroArray = [];
             }
         }
-        // public static hostProcessesInit(): void {
-        //     // To display the heading on screen load
-        //     const columnSpace = 2;
-        //     const spaceStr = " ".repeat(columnSpace)
-        //     const taProcesses = <HTMLInputElement> document.getElementById("taProcesses");
-        //     const heading = "PID" + spaceStr + "PC" + spaceStr + " IR" + spaceStr + "ACC" + spaceStr + "X" + spaceStr +
-        //     "Y" + spaceStr + "Z" + spaceStr + "Priority" + spaceStr + "State" + spaceStr + "Location";
-        //     taProcesses.value = heading;
-        //     taProcesses.insertAdjacentHTML("beforeend", "<hr>")
-        // }
-        // TODO: Finish this
+        static hostMemory() {
+            // Access the memory and display it
+            const table = document.getElementById("taMemory");
+            const memoryArray = _Memory.source;
+            var rowIndex = 0;
+            var leadingZeros = "";
+            // var zeroArray = [];
+            // Delete all rows before writing new rows
+            // for (let rowIndex=0; rowIndex < table.rows.length; rowIndex++) {
+            //     table.deleteRow(0);
+            // }
+            // Loop through the memory array to display it
+            while (rowIndex < Math.ceil(_Memory.limit / 8)) {
+                const slicedArrayLength = memoryArray.slice(rowIndex * 8, rowIndex * 8 + 8).length;
+                // Check if the memory line didnt reach the end, in which case, we add "00"s
+                // if (slicedArrayLength < 8){
+                //     // Push remaining zeros to the leftover of the memory array for filler
+                //     for (let index=0; index < 8 - slicedArrayLength; index++){
+                //         zeroArray.push("00");
+                //     }
+                // }
+                // Use .toString(16) to turn int into hex
+                // str = spaceStr + leadingZeros + (rowIndex*8).toString(16) + spaceStr + memoryArray.slice(rowIndex*8, rowIndex*8 + 8).join(" ");
+                // var row = table.insertRow(-1);
+                // row.insertCell(0).innerHTML = leadingZeros + (rowIndex*8).toString(16);
+                for (let columnIndex = 1; columnIndex < slicedArrayLength + 1; columnIndex++) {
+                    var cell = table.rows[rowIndex].cells[columnIndex];
+                    cell.innerText = memoryArray[rowIndex * 8 + columnIndex - 1];
+                }
+                // Fill in the rest of the cells in the row with zeros
+                // if (zeroArray) {
+                //     for (let columnIndex=slicedArrayLength; columnIndex <  slicedArrayLength; columnIndex--) {
+                //         row.insertCell(columnIndex).innerHTML = zeroArray[slicedArrayLength-columnIndex];
+                //     }
+                // }
+                // Update the Memory console; Do taMemory.value first to keep inserted data at top
+                // taMemory.value = taMemory.value + str;
+                rowIndex += 1;
+                // Reset pointers for next line
+                // leadingZeros = "";
+                // zeroArray = [];
+            }
+        }
         static hostProcesses(inputPid) {
             // To display the pointers in the PCB on load with heading
             const table = document.getElementById("taProcesses");
-            // Get the memory from the input PID in the hashtable
-            const memory = _MemoryManager.PIDMap.get(inputPid)[0];
             // Get the PCB from the input PID in the hashtable
             var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
             // insert the row at the ver bottom relative to all other rows
@@ -169,6 +223,8 @@ var TSOS;
             row.insertCell(7).innerHTML = pcb.priority;
             row.insertCell(8).innerHTML = pcb.processState;
             row.insertCell(9).innerHTML = pcb.location;
+            var cell = table.rows[1].cells[0];
+            cell.innerText = "CHANGED";
         }
         //
         // Host Events
@@ -194,7 +250,7 @@ var TSOS;
             _Kernel = new TSOS.Kernel();
             _Kernel.krnBootstrap(); // _GLaDOS.afterStartup() will get called in there, if configured.
             // Initialize the memory
-            Control.hostMemory();
+            Control.hostMemoryInit();
         }
         static hostBtnHaltOS_click(btn) {
             Control.hostLog("Emergency halt", "host");

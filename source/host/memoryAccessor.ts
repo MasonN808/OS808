@@ -3,7 +3,7 @@ module TSOS {
     export class MemoryAccessor {
         public source: Array<string>;
         
-        public static read_memory(pid: number, pc: number): string{
+        public static readMemory(pid: number, pc: number): string{
             // We assume here that the given pid is valid
             const memory = _MemoryManager.PIDMap.get(pid)[0]
 

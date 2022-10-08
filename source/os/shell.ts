@@ -494,7 +494,7 @@ module TSOS {
 
                     // Try and find the input PID in the hashtable
                     if (_MemoryManager.PIDMap.has(inputPid)) {
-                        // TSOS.Control.hostProcesses(inputPid);
+                        TSOS.Control.hostProcesses(inputPid);
                         // Tell the CPU that is is executing
                         _CPU.isExecuting = true;
                     } 

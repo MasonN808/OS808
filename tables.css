@@ -6,6 +6,8 @@ table {
     border-radius: 10px; 
     background-color: aliceblue;
     height: 150px;
+    overflow-y: scroll;
+    display:block;
   }
 
 td, th{
@@ -25,6 +27,48 @@ background-color: #dddddd;
 
 .card{
 width: 395px;
+}
+
+/* For the column widths in taMemory*/
+
+#divMemory{
+    width: 360px;
+}
+
+#taMemory td:nth-child(1){
+    width: 40px;
+}
+
+#taMemory td:nth-child(2){
+    width: 40px;
+}
+
+#taMemory td:nth-child(3){
+    width: 40px;
+}
+
+#taMemory td:nth-child(4){
+    width: 40px;
+}
+
+#taMemory td:nth-child(5){
+    width: 40px;
+}
+
+#taMemory td:nth-child(6){
+    width: 40px;
+}
+
+#taMemory td:nth-child(7){
+    width: 40px;
+}
+
+#taMemory td:nth-child(8){
+    width: 40px;
+}
+
+#taMemory td:nth-child(9){
+    width: 40px;
 }
 
 /* For the column widths in taProcesses*/

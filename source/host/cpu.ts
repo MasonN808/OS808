@@ -20,7 +20,8 @@ module TSOS {
                     public Xreg: number = 0,
                     public Yreg: number = 0,
                     public Zflag: number = 0,
-                    public isExecuting: boolean = false) {
+                    public isExecuting: boolean = false,
+                    public PID: number = null) {
 
         }
 
@@ -31,13 +32,24 @@ module TSOS {
             this.Yreg = 0;
             this.Zflag = 0;
             this.isExecuting = false;
+            this.PID = null;
         }
 
         public cycle(): void {
             _Kernel.krnTrace('CPU cycle');
             // TODO: Accumulate CPU usage and profiling statistics here.
             // Do the real work here. Be sure to set this.isExecuting appropriately.
-            
+
+            // Get the Op code given the pid and pc
+            var opCode = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
+
+            // Have a massive switch statement for all possible Op codes
+            switch (opCode) {
+                // Load the accumulator with a constant
+                case ("A9"):
+                    
+                    break;
+            }
         }
     }
 }

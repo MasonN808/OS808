@@ -5,7 +5,7 @@ module TSOS {
         
         public static readMemory(pid: number, pc: number): string{
             // We assume here that the given pid is valid
-            const memory = _MemoryManager.PIDMap.get(pid)[0]
+            const memory = _MemoryManager.PIDMap.get(pid)[0];
 
             // check number is valid
             if ((pc < _Memory.base) || (pc > _Memory.limit)) {

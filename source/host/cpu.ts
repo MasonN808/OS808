@@ -43,13 +43,38 @@ module TSOS {
             // Get the Op code given the pid and pc
             var opCode = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
 
+            // // Get the constant one op code above current PC (i.e, do one op code lookahead)
+            // const lookAheadConstant1 = TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1);
+            // // Get the constant two op codes above current PC (i.e, do two op code lookahead)
+            // const lookAheadConstant2 = TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 2);
+
+            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+
             // Have a massive switch statement for all possible Op codes
             switch (opCode) {
                 // Load the accumulator with a constant
                 case ("A9"):
-                    
+                    // Get the constant one op code above current PC (i.e, do one op code lookahead)
+                    const lookAheadConstant1 = TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1);
+                    // parse it to an int to store in accumulator
+                    const paresedConstant = parseInt(lookAheadConstant1, 16);
+
+                    // Assign the parsed constant to the CPU and PCB
+                    this.Acc = paresedConstant;
+                    pcb.Acc = paresedConstant;
+
+                    // Increase the PC in CPU and PCB
+                    this.PC += 2;
+                    pcb.programCounter += 2;
                     break;
+
+                // Store the accumulator in memory
+                case ("8D"):
+                
+
             }
+            // Now update the displayed PCB
+            TSOS.Control.hostProcesses(this.PID);
         }
     }
 }

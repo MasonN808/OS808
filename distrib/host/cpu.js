@@ -41,8 +41,17 @@ var TSOS;
             switch (opCode) {
                 // Load the accumulator with a constant
                 case ("A9"):
+                    // Get the constant (i.e, do one op code lookahead)
+                    const constant = TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1);
+                    // parse it to an int to store in accumulator
+                    const paresedConstant = parseInt(constant, 16);
+                    // Assign the parsed constant to the CPU and PCB
+                    this.Acc = paresedConstant;
+                    _MemoryManager.PIDMap.get(this.PID)[1].Acc = paresedConstant;
                     break;
             }
+            // Now update the displayed PCB
+            TSOS.Control.hostProcesses(this.PID);
         }
     }
     TSOS.Cpu = Cpu;

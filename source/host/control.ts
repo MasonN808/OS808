@@ -176,7 +176,7 @@ module TSOS {
             }
         }
 
-        public static hostProcesses(inputPid: number): void {
+        public static hostProcessesInit(inputPid: number): void {
             // To display the pointers in the PCB on load with heading
             const table = <HTMLTableElement> document.getElementById("taProcesses");
 
@@ -188,13 +188,32 @@ module TSOS {
             row.insertCell(0).innerHTML = pcb.processId;
             row.insertCell(1).innerHTML = pcb.programCounter;
             row.insertCell(2).innerHTML = pcb.intermediateRepresentation;
-            row.insertCell(3).innerHTML = pcb.accounting;
+            row.insertCell(3).innerHTML = pcb.Acc;
             row.insertCell(4).innerHTML = pcb.Xreg;
             row.insertCell(5).innerHTML = pcb.Yreg;
             row.insertCell(6).innerHTML = pcb.Zreg;
             row.insertCell(7).innerHTML = pcb.priority;
             row.insertCell(8).innerHTML = pcb.processState;
             row.insertCell(9).innerHTML = pcb.location;
+        }
+
+        public static hostProcesses(inputPid: number): void {
+            // To display the pointers in the PCB on load with heading
+            const table = <HTMLTableElement> document.getElementById("taProcesses");
+
+            // Get the PCB from the input PID in the hashtable
+            var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
+
+            table.rows[pcb.rowIndex].cells[0].innerHTML = pcb.processId;
+            table.rows[pcb.rowIndex].cells[1].innerHTML = pcb.programCounter;
+            table.rows[pcb.rowIndex].cells[2].innerHTML = pcb.intermediateRepresentation;
+            table.rows[pcb.rowIndex].cells[3].innerHTML = pcb.Acc;
+            table.rows[pcb.rowIndex].cells[4].innerHTML = pcb.Xreg;
+            table.rows[pcb.rowIndex].cells[5].innerHTML = pcb.Yreg;
+            table.rows[pcb.rowIndex].cells[6].innerHTML = pcb.Zreg;
+            table.rows[pcb.rowIndex].cells[7].innerHTML = pcb.priority;
+            table.rows[pcb.rowIndex].cells[8].innerHTML = pcb.processState;
+            table.rows[pcb.rowIndex].cells[9].innerHTML = pcb.location;
         }
 
 

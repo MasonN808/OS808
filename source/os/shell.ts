@@ -494,7 +494,7 @@ module TSOS {
 
                     // Try and find the input PID in the hashtable
                     if (_MemoryManager.PIDMap.has(inputPid)) {
-                        _MemoryManager.PIDMap.get
+                        TSOS.Control.hostProcesses()
                     } 
                     else {
                         _StdOut.putText("Undefined Process ID: " + inputPid);

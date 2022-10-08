@@ -42,6 +42,9 @@ var TSOS;
             }
             return retVal;
         }
+        static isInt(str) {
+            return !isNaN(str) && Number.isInteger(parseFloat(str));
+        }
     }
     TSOS.Utils = Utils;
 })(TSOS || (TSOS = {}));

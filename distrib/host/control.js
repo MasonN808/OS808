@@ -75,6 +75,8 @@ var TSOS;
             // Set focus on the start button.
             // Use the TypeScript cast to HTMLInputElement
             document.getElementById("btnStartOS").focus();
+            // Initialize the PCB headings
+            this.hostProcessesInit();
             // Check for our testing and enrichment core, which
             // may be referenced here (from index.html) as function Glados().
             if (typeof Glados === "function") {
@@ -138,7 +140,24 @@ var TSOS;
                 leadingZeros = "";
                 zeroArray = [];
             }
-            // If 
+        }
+        static hostProcessesInit() {
+            // To Display the pointers in the PCB on load
+            const columnSpace = 2;
+            const spaceStr = " ".repeat(columnSpace);
+            // const canvas = <HTMLCanvasElement> document.getElementById("taProcesses");
+            const taProcesses = document.getElementById("taProcesses");
+            const element = document.getElementById("taProcesses");
+            // var ctx = canvas.getContext('2d');
+            // To draw a horizontal line to serperate processes
+            // let totalWidth = canvas.width;
+            // let middle = canvas.width / 2;
+            const str = "PID" + spaceStr + "PC" + spaceStr + " IR" + spaceStr + "ACC" + spaceStr + "X" + spaceStr +
+                "Y" + spaceStr + "Z" + spaceStr + "Priority" + spaceStr + "State" + spaceStr + "Location";
+            taProcesses.value = str;
+        }
+        // TODO: Finish this
+        static hostProcesses() {
         }
         //
         // Host Events

@@ -99,6 +99,9 @@ module TSOS {
             // Use the TypeScript cast to HTMLInputElement
             (<HTMLInputElement> document.getElementById("btnStartOS")).focus();
 
+            // Initialize the PCB headings
+            this.hostProcessesInit();
+
             // Check for our testing and enrichment core, which
             // may be referenced here (from index.html) as function Glados().
             if (typeof Glados === "function") {
@@ -169,8 +172,6 @@ module TSOS {
                     str += " " + zeroArray.join(" ")+ "\n";
                 }
 
-                
-                
                 // Update the Memory console; Do taMemory.value first to keep inserted data at top
                 taMemory.value = taMemory.value + str;
                 rowIndex += 1;
@@ -179,10 +180,34 @@ module TSOS {
                 zeroArray = [];
             }
         }
-        
+
+        public static hostProcessesInit(): void {
+            // To Display the pointers in the PCB on load
+            const columnSpace = 2;
+            const spaceStr = " ".repeat(columnSpace)
+            // const canvas = <HTMLCanvasElement> document.getElementById("taProcesses");
+            const taProcesses = <HTMLInputElement> document.getElementById("taProcesses");
+
+            
+            const element = document.getElementById("taProcesses");
+
+            // var ctx = canvas.getContext('2d');
+
+            // To draw a horizontal line to serperate processes
+            // let totalWidth = canvas.width;
+
+            // let middle = canvas.width / 2;
+
+            const str = "PID" + spaceStr + "PC" + spaceStr + " IR" + spaceStr + "ACC" + spaceStr + "X" + spaceStr +
+            "Y" + spaceStr + "Z" + spaceStr + "Priority" + spaceStr + "State" + spaceStr + "Location";
+
+            taProcesses.value = str;
+
+        }
+
         // TODO: Finish this
         public static hostProcesses(): void {
-
+            
         }
 
 

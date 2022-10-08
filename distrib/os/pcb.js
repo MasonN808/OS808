@@ -1,16 +1,23 @@
 var TSOS;
 (function (TSOS) {
     class Pcb {
-        // TODO: Finish this
-        constructor(processState = "", programCounter = 0, intermediateRepresentation = "", Xreg = 0, Yreg = 0, Zreg = 0, location = "", priority = "") {
-            this.processState = processState;
-            this.programCounter = programCounter;
-            this.intermediateRepresentation = intermediateRepresentation;
-            this.Xreg = Xreg;
-            this.Yreg = Yreg;
-            this.Zreg = Zreg;
-            this.location = location;
-            this.priority = priority;
+        constructor() {
+            this.processState = "";
+            this.programCounter = 0;
+            this.intermediateRepresentation = "";
+            this.Xreg = 0;
+            this.Yreg = 0;
+            this.Zreg = 0;
+            this.location = "";
+            this.priority = "";
+            this.processState = "";
+            this.programCounter = 0;
+            this.intermediateRepresentation = "";
+            this.Xreg = 0;
+            this.Yreg = 0;
+            this.Zreg = 0;
+            this.location = "";
+            this.priority = "";
         }
     }
     TSOS.Pcb = Pcb;

@@ -66,6 +66,9 @@ var TSOS;
             // load
             sc = new TSOS.ShellCommand(this.shellLoad, "load", "- Loads and validates the input code");
             this.commandList[this.commandList.length] = sc;
+            // run <pid>
+            sc = new TSOS.ShellCommand(this.shellRun, "run", "- runs the input code");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             // Display the initial prompt.
@@ -257,6 +260,9 @@ var TSOS;
                     case "load":
                         _StdOut.putText("Loads and validates the input code");
                         break;
+                    case "run":
+                        _StdOut.putText("runs the input code at <pid>");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -362,20 +368,43 @@ var TSOS;
                         // Display warning
                         _StdOut.putText("Program too large");
                     }
-                    // Initialize the array to overwrite the source pointer in _Memory instance
-                    var loadedSource = [];
-                    // Populate an array with the OP codes
-                    for (let index = 0; index < removed_white_space_input_text.length; index += 2) {
-                        loadedSource.push(removed_white_space_input_text.substring(index, index + 2));
+                    else {
+                        // Initialize the array to overwrite the source pointer in _Memory instance
+                        var loadedSource = [];
+                        // Populate an array with the OP codes
+                        for (let index = 0; index < removed_white_space_input_text.length; index += 2) {
+                            loadedSource.push(removed_white_space_input_text.substring(index, index + 2));
+                        }
+                        _Memory.source = loadedSource;
+                        // Display the memory
+                        TSOS.Control.hostMemory();
+                        // Assign a PID
+                        _MemoryManager.assignPID();
+                        // Output the PID
+                        _StdOut.putText("Process ID: " + (_MemoryManager.maxPID - 1));
                     }
-                    _Memory.source = loadedSource;
-                    // Display the memory
-                    TSOS.Control.hostMemory();
-                    // Assign a PID
-                    _MemoryManager.assignPID();
-                    // Output the PID
-                    _StdOut.putText("Process ID: " + (_MemoryManager.maxPID - 1));
                 }
+            }
+        }
+        shellRun(args) {
+            if (args.length > 0) {
+                if (TSOS.Utils.isInt(args[0])) {
+                    const inputPid = parseInt(args[0]);
+                    // Try and find the input PID in the hashtable
+                    if (_MemoryManager.PIDMap.has(inputPid)) {
+                        TSOS.Control.hostProcesses();
+                    }
+                    else {
+                        _StdOut.putText("Undefined Process ID: " + inputPid);
+                    }
+                }
+                else {
+                    _StdOut.putText("Invalid arguement.  Usage: run <pid>.");
+                }
+                const pId = args[0];
+            }
+            else {
+                _StdOut.putText("Usage: run <pid>");
             }
         }
     }

@@ -81,11 +81,11 @@ var TSOS;
                 // Adds contents of an address to the contents of the accumulator and keeps the result in the accumulator
                 case ("6D"):
                     // Get the storage location one op code above current PC (i.e, do one op code lookahead)
-                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1), 16) - 1;
+                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1), 16);
                     // Query constant from memory location
                     var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation);
                     // Update the Accumulator by accumulating the accumulator in CPU and PCB
-                    this.updateAcc(constantInMemory, true);
+                    this.addToAcc(constantInMemory);
                     this.changePC(3);
                     break;
                 // Load the X-register with a constant
@@ -154,10 +154,10 @@ var TSOS;
                         // console.log(_Memory.limit)
                         // -1 since _Memory.limit = 256 not 255
                         if (parseInt(branch, 16) > _Memory.limit - this.PC) {
-                            this.setPC((parseInt(branch, 16) + this.PC) - _Memory.limit + 2);
+                            this.updatePC((parseInt(branch, 16) + this.PC) - _Memory.limit + 2);
                         }
                         else {
-                            this.setPC(parseInt(branch, 16) + this.PC + 2);
+                            this.updatePC(parseInt(branch, 16) + this.PC + 2);
                         }
                     }
                     else {
@@ -222,26 +222,24 @@ var TSOS;
             this.PC += change;
             pcb.programCounter += change;
         }
-        setPC(absolute) {
+        updatePC(absolute) {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
             // Keep track of this to display on PCB without delay
             this.lastPC = this.PC;
             this.PC = absolute;
             pcb.programCounter = absolute;
         }
+        addToAcc(addedNum) {
+            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+            console.log(addedNum);
+            // If we are adding to the accumulator rather than replacing
+            this.Acc += parseInt(addedNum, 16);
+            pcb.Acc += parseInt(addedNum, 16);
+        }
         updateAcc(newAccAsHex, accumulate = false) {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
-            // If we are adding to the accumulator rather than replacing
-            if (accumulate === true) {
-                // parse string to an int to store in accumulator
-                console.log(newAccAsHex);
-                this.Acc = this.Acc + parseInt(newAccAsHex, 16);
-                pcb.Acc = pcb.Acc + parseInt(newAccAsHex, 16);
-            }
-            else {
-                this.Acc = parseInt(newAccAsHex, 16);
-                pcb.Acc = parseInt(newAccAsHex, 16);
-            }
+            this.Acc = parseInt(newAccAsHex, 16);
+            pcb.Acc = parseInt(newAccAsHex, 16);
         }
         updateX(newXAsHex) {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];

@@ -122,15 +122,18 @@ var TSOS;
                     this.putText(chr);
                     // ... and add it to our buffer.
                     this.buffer += chr;
-                    //TODO: Do the command completion here....
-                    for (let index = 0; index < this.possible_commands.length; index++) {
-                        if (this.buffer === this.possible_commands[index].substring(0, this.buffer.length)) {
-                            // Get the suggested text
-                            var light_text = this.possible_commands[index].substring(this.buffer.length, this.possible_commands[index].length);
-                            // Show the suggested light gray text on console
-                            this.lightPutText(light_text);
-                            this.previous_light_text = light_text;
-                            break;
+                    // command completion here....
+                    // Check for empty string
+                    if (this.buffer != "") {
+                        for (let index = 0; index < this.possible_commands.length; index++) {
+                            if (this.buffer === this.possible_commands[index].substring(0, this.buffer.length)) {
+                                // Get the suggested text
+                                var light_text = this.possible_commands[index].substring(this.buffer.length, this.possible_commands[index].length);
+                                // Show the suggested light gray text on console
+                                this.lightPutText(light_text);
+                                this.previous_light_text = light_text;
+                                break;
+                            }
                         }
                     }
                 }

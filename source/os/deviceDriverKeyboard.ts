@@ -43,18 +43,27 @@ module TSOS {
                 else {
                     // Check for ctr-c to break out of executing program
                     if (isCtrl === true && keyCode === 67) {
-                        _CPU.isExecuting = false;
-                        _Console.advanceLine();
-                        _StdOut.putText("SUCCESS: The process with PID " + _CPU.PID + " has been terminated");
-                        _Console.advanceLine();
-                        _OsShell.putPrompt();
+                        // Check if there is an executing program first
+                        if (_CPU.isExecuting === false) {
+                            _Console.advanceLine();
+                            _StdOut.putText("No active process to terminate");
+                            _Console.advanceLine();
+                            _OsShell.putPrompt();
+                        }
+                        else {
+                            _CPU.isExecuting = false;
+                            _Console.advanceLine();
+                            _StdOut.putText("SUCCESS: The process with PID " + _CPU.PID + " has been terminated");
+                            _Console.advanceLine();
+                            _OsShell.putPrompt();
 
-                        // Clear the PCB
-                        TSOS.Control.hostRemoveProcess(_CPU.PID);
-                        // Remove the PID from the hash table in the memory manager to prevent from running again
-                        _MemoryManager.PIDMap.delete(_CPU.PID);
-                        // Reinitilaize CPU for next process
-                        _CPU.init();
+                            // Clear the PCB
+                            TSOS.Control.hostRemoveProcess(_CPU.PID);
+                            // Remove the PID from the hash table in the memory manager to prevent from running again
+                            _MemoryManager.PIDMap.delete(_CPU.PID);
+                            // Reinitilaize CPU for next process
+                            _CPU.init();
+                        }
                     }
                     else {
                         chr = String.fromCharCode(keyCode + 32); // Lowercase a-z

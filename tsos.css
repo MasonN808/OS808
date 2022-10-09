@@ -117,3 +117,12 @@ textarea {
   border: #DFDBC3;
   width: 394px;
 }
+
+#cardCPU {
+  width: 165px;
+  height: 60px;
+}
+
+#taCpu {
+  width: 164px;
+}

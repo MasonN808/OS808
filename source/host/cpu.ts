@@ -267,10 +267,15 @@ module TSOS {
                 
                 // Check for the end of program marker 
                 case ("00"):
-                    // Tell CPU to stop executing
-                    _CPU.isExecuting = false;
                     // Clear the PCB
                     TSOS.Control.hostRemoveProcess(this.PID);
+
+                    // Remove the PID from the hash table in the memory manager
+                    _MemoryManager.PIDMap.delete(this.PID);
+
+                    // Reset all CPU pointers for next executing program
+                    // TODO: May need to work on this later if multiple processes exist
+                    _CPU.init();
             }
             // Now update the displayed PCB
 

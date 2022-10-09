@@ -15,6 +15,11 @@ module TSOS {
         //
         public krnBootstrap() {      // Page 8. {
             Control.hostLog("bootstrap", "host");  // Use hostLog because we ALWAYS want this, even if _Trace is off.
+            
+            // Initialize the memory
+            TSOS.Control.hostMemoryInit();
+            // Initialize the CPU
+            TSOS.Control.hostCpuInit();
 
             _MemoryManager = new MemoryManager();
 

@@ -220,10 +220,6 @@ var TSOS;
             // .. and call the OS Kernel Bootstrap routine.
             _Kernel = new TSOS.Kernel();
             _Kernel.krnBootstrap(); // _GLaDOS.afterStartup() will get called in there, if configured.
-            // Initialize the memory
-            Control.hostMemoryInit();
-            // Initialize the CPU
-            Control.hostCpuInit();
         }
         static hostBtnHaltOS_click(btn) {
             Control.hostLog("Emergency halt", "host");

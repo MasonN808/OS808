@@ -18,6 +18,12 @@ module TSOS {
         }
 
         public static writeMemory(pid: number, pc: number, code: string): void {
+            // Add any leading zeros and uppercase to input code
+            if (code.length == 1) {
+                code = "0" + code;
+            }
+            code = code.toUpperCase();
+            
             // We assume here that the given pid is valid
             _MemoryManager.PIDMap.get(pid)[0][pc] = code;
         }

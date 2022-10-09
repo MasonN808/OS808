@@ -34,6 +34,9 @@ var _DefaultFontFamily = "sans"; // Ignored, I think. The was just a place-holde
 var _DefaultFontSize = 13;
 var _FontHeightMargin = 4; // Additional space added to font size when advancing a line.
 var _Trace = true; // Default the OS trace to be on.
+// For step mode
+var _StartStepMode = false;
+var _StepPressed = false;
 // The OS Kernel and its queues.
 var _Kernel;
 var _KernelInterruptQueue = null;

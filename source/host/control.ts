@@ -172,6 +172,12 @@ module TSOS {
                     cell.innerText = memoryArray[rowIndex*8 + columnIndex - 1];
                 }
 
+                // Fill the rest of the line with 00s if sliced array length < 8
+                // for (let columnIndex=slicedArrayLength; columnIndex < 9; columnIndex++){
+                //     var cell = table.rows[rowIndex].cells[columnIndex];
+                //     cell.innerText = memoryArray[rowIndex*8 + columnIndex - 1];
+                // }
+
                 rowIndex += 1;
             }
         }
@@ -267,5 +273,14 @@ module TSOS {
             // be reloaded from the server. If it is false or not specified the browser may reload the
             // page from its cache, which is not what we want.
         }
+
+        public static hostBtnStartStep_click(btn): void {
+            _StartStepMode = !_StartStepMode;
+        }
+
+        public static hostBtnStep_click(btn): void {
+            _StepPressed = true;
+        }
+            
     }
 }

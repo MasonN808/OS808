@@ -50,7 +50,7 @@
    <div id="divButtonBar" style="margin:4px;">
       <input type="button"
              id = "btnStartOS"
-             name="brnStartOS"
+             name="btnStartOS"
              class="normal_button"
              value="Start"
              tabindex="0"
@@ -58,7 +58,7 @@
 
       <input type="button"
              id = "btnHaltOS"
-             name="brnHaltOS"
+             name="btnHaltOS"
              class="normal_button"
              disabled="disabled"
              value="Halt"
@@ -67,12 +67,28 @@
 
       <input type="button"
              id = "btnReset"
-             name="brnReset"
+             name="btnReset"
              class="normal_button"
              disabled="disabled"
              value="Reset"
              tabindex="2"
              onclick="TSOS.Control.hostBtnReset_click(this);">
+
+      <input type="button"
+             id = "btnStartStepMode"
+             name="btnStartStepMode"
+             class="normal_button"
+             value="StartStep"
+             tabindex="3"
+             onclick="TSOS.Control.hostBtnStartStep_click(this);">
+
+      <input type="button"
+             id = "btnStep"
+             name="btnStep"
+             class="normal_button"
+             value="Step"
+             tabindex="4"
+             onclick="TSOS.Control.hostBtnStep_click(this);">
    </div>
 
    <div id="left">
@@ -147,18 +163,7 @@
                   </div>
                </div>
             </div>
-<!-- 
-            <div class="card h-100">
-               <div class="card-header">Memory</div>
-                  <div class="card-body">
-                     <textarea name="taMemory"
-                     id  ="taMemory"
-                     rows="8"
-                     cols="48"
-                     ></textarea>
-                  </div>
-               </div>
-            </div> -->
+
             <div class="card h-100" id="divMemory">
                <div class="card-header">Memory</div>
                   <div class="card-body">

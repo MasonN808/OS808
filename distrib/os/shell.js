@@ -375,6 +375,10 @@ var TSOS;
                         for (let index = 0; index < removed_white_space_input_text.length; index += 2) {
                             loadedSource.push(removed_white_space_input_text.substring(index, index + 2));
                         }
+                        // Populate the rest of the array with 00s up to the memory limit
+                        for (let index = removed_white_space_input_text.length; index < _Memory.limit * 2; index += 2) {
+                            loadedSource.push("00");
+                        }
                         _Memory.source = loadedSource;
                         // Display the memory
                         TSOS.Control.hostMemory();

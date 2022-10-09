@@ -159,7 +159,6 @@ var TSOS;
             row.insertCell(9).innerHTML = pcb.location;
         }
         static hostProcesses(inputPid) {
-            // To display the pointers in the PCB on load with heading
             const table = document.getElementById("taProcesses");
             // Get the PCB from the input PID in the hashtable
             var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
@@ -173,6 +172,13 @@ var TSOS;
             table.rows[pcb.rowIndex].cells[7].innerHTML = pcb.priority;
             table.rows[pcb.rowIndex].cells[8].innerHTML = pcb.processState;
             table.rows[pcb.rowIndex].cells[9].innerHTML = pcb.location;
+        }
+        static hostRemoveProcess(inputPid) {
+            const table = document.getElementById("taProcesses");
+            // Get the PCB from the input PID in the hashtable
+            var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
+            table.deleteRow(pcb.rowIndex);
+            // TODO: Move around the processes if there exist more than one in PCB
         }
         //
         // Host Events

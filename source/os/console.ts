@@ -294,7 +294,6 @@ module TSOS {
                 // Remove the text at the current X and Y coordinates.
                 // Doing "this.currentYPosition + vertical_offset" because im lazy and to be safe
                 _DrawingContext.clearRect(this.currentXPosition - horizontal_offset, this.currentYPosition - vertical_offset, this.currentXPosition, this.currentYPosition + vertical_offset);
-                console.log(this.currentYPosition);
                 // Move the current X position.
                 this.currentXPosition -= horizontal_offset;
             }

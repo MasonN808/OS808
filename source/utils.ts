@@ -47,5 +47,16 @@ module TSOS {
         public static isInt(str) {
             return !isNaN(str) && Number.isInteger(parseFloat(str));
         }
+
+        // From https://stackoverflow.com/questions/3745666/how-to-convert-from-hex-to-ascii-in-javascript
+        public static hex2a(hexx) {
+            //force conversion
+            var hex = hexx.toString();
+            var str = '';
+            for (var i = 0; i < hex.length; i += 2) {
+                str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
+            }     
+            return str; 
+        }
     }
 }

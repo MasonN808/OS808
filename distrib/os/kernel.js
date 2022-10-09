@@ -71,6 +71,7 @@ var TSOS;
                 this.krnInterruptHandler(interrupt.irq, interrupt.params);
             }
             else if (_CPU.isExecuting) { // If there are no interrupts then run one CPU cycle if there is anything being processed.
+                // Check for step mode activation
                 if (_StartStepMode) {
                     if (_StepPressed) {
                         _CPU.cycle();

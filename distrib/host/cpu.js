@@ -147,9 +147,17 @@ var TSOS;
                     // Get the branch number
                     var branch = TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1);
                     if (this.Zflag === 0) {
-                        console.log(parseInt(branch, 16));
+                        // console.log(parseInt(branch, 16))
+                        // console.log(this.PC)
+                        // console.log(_Memory.limit)
                         // -1 since _Memory.limit = 256 not 255
-                        this.setPC(_Memory.limit - parseInt(branch, 16) - 1);
+                        if (parseInt(branch, 16) > _Memory.limit - this.PC) {
+                            // console.log((parseInt(branch, 16) + this.PC) - _Memory.limit)
+                            this.setPC((parseInt(branch, 16) + this.PC) - _Memory.limit + 2);
+                        }
+                        else {
+                            this.setPC(parseInt(branch, 16) + this.PC);
+                        }
                     }
                     else {
                         this.changePC(2);
@@ -171,19 +179,30 @@ var TSOS;
                 case ("FF"):
                     // Check the X reg
                     if (this.Xreg === 1) {
-                        _StdOut.putText(this.Yreg.toString(16));
+                        // convert decimal to hex, then hex into ASCII
+                        // Add 48 since integers start at 48 rather than 0 in ASCII
+                        // See https://www.rapidtables.com/code/text/ascii-table.html
+                        _StdOut.putText(TSOS.Utils.hex2a((this.Yreg + 48).toString(16)));
                     }
                     else if (this.Xreg === 2) {
                         var memoryIndex = this.Yreg;
                         var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, memoryIndex);
+                        console.log(constantInMemory);
                         while (constantInMemory != "00") {
-                            _StdOut.putText(parseInt(constantInMemory, 16));
+                            // convert the hex into ASCII
+                            _StdOut.putText(TSOS.Utils.hex2a(constantInMemory));
                             memoryIndex += 1;
                             constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, memoryIndex);
                         }
                     }
                     this.changePC(1);
                     break;
+                // Check for the end of program marker 
+                case ("00"):
+                    // Tell CPU to stop executing
+                    _CPU.isExecuting = false;
+                    // Clear the PCB
+                    TSOS.Control.hostRemoveProcess(this.PID);
             }
             // Now update the displayed PCB
             pcb.programCounter = this.lastPC;

@@ -31,7 +31,8 @@ module TSOS {
             // Parse the params.  TODO: Check that the params are valid and osTrapError if not.
             var keyCode = params[0];
             var isShifted = params[1];
-            _Kernel.krnTrace("Key code:" + keyCode + " shifted:" + isShifted);
+            var isCtrl = params[2];
+            _Kernel.krnTrace("Key code:" + keyCode + " shifted:" + isShifted + " ctrl:" + isCtrl);
 
             var chr = "";
             // Check to see if we even want to deal with the key that was pressed.
@@ -40,7 +41,24 @@ module TSOS {
                     chr = String.fromCharCode(keyCode); // Uppercase A-Z
                 } 
                 else {
-                    chr = String.fromCharCode(keyCode + 32); // Lowercase a-z
+                    // Check for ctr-c to break out of executing program
+                    if (isCtrl === true && keyCode === 67) {
+                        _CPU.isExecuting = false;
+                        _Console.advanceLine();
+                        _StdOut.putText("SUCCESS: The process with PID " + _CPU.PID + " has been terminated");
+                        _Console.advanceLine();
+                        _OsShell.putPrompt();
+
+                        // Clear the PCB
+                        TSOS.Control.hostRemoveProcess(_CPU.PID);
+                        // Remove the PID from the hash table in the memory manager to prevent from running again
+                        _MemoryManager.PIDMap.delete(_CPU.PID);
+                        // Reinitilaize CPU for next process
+                        _CPU.init();
+                    }
+                    else {
+                        chr = String.fromCharCode(keyCode + 32); // Lowercase a-z
+                    }
                 }
                 // TODO: Check for caps-lock and handle as shifted if so.
                 _KernelInputQueue.enqueue(chr);

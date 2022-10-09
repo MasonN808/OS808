@@ -12,7 +12,7 @@ module TSOS {
         // For command completion
         public possible_commands = ["ver", "help", "shutdown", "cls", "man",
                                     "trace", "rot13", "prompt", "date", "whereami",
-                                    "howareu", "whoismason", "status", "bsod", "load"];
+                                    "howareu", "whoismason", "status", "bsod", "load", "run"];
 
         constructor(public currentFont = _DefaultFontFamily,
                     public currentFontSize = _DefaultFontSize,
@@ -141,22 +141,24 @@ module TSOS {
                     // ... and add it to our buffer.
                     this.buffer += chr;
 
-                    //TODO: Do the command completion here....
-                    for (let index = 0; index < this.possible_commands.length; index++){
-                        if (this.buffer === this.possible_commands[index].substring(0, this.buffer.length)) {
-                            
-                            // Get the suggested text
-                            var light_text = this.possible_commands[index].substring(this.buffer.length, this.possible_commands[index].length);
-
-                            // Show the suggested light gray text on console
-                            this.lightPutText(light_text);
-
-                            this.previous_light_text = light_text;
-                            break;
+                    // command completion here....
+                    // Check for empty string
+                    if (this.buffer != "") {
+                        for (let index = 0; index < this.possible_commands.length; index++){
+                            if (this.buffer === this.possible_commands[index].substring(0, this.buffer.length)) {
+                                
+                                // Get the suggested text
+                                var light_text = this.possible_commands[index].substring(this.buffer.length, this.possible_commands[index].length);
+    
+                                // Show the suggested light gray text on console
+                                this.lightPutText(light_text);
+    
+                                this.previous_light_text = light_text;
+                                break;
+                            }
                         }
                     }
                 }
-
                 // TODO: Add a case for Ctrl-C that would allow the user to break the current program.
             }
         }
@@ -244,13 +246,6 @@ module TSOS {
          }
 
          public lightPutText(text): void {
-            /*  My first inclination here was to write two functions: putChar() and putString().
-                Then I remembered that JavaScript is (sadly) untyped and it won't differentiate
-                between the two. (Although TypeScript would. But we're compiling to JavaScipt anyway.)
-                So rather than be like PHP and write two (or more) functions that
-                do the same thing, thereby encouraging confusion and decreasing readability, I
-                decided to write one function and use the term "text" to connote string or char.
-            */
             if (text !== "") {
                 // Draw the text at the current X and Y coordinates.
                 _DrawingContext.font = '${this.currentFontSize} , ${this.currentFont}';
@@ -301,7 +296,6 @@ module TSOS {
                 // Remove the text at the current X and Y coordinates.
                 // Doing "this.currentYPosition + vertical_offset" because im lazy and to be safe
                 _DrawingContext.clearRect(this.currentXPosition - horizontal_offset, this.currentYPosition - vertical_offset, this.currentXPosition, this.currentYPosition + vertical_offset);
-                console.log(this.currentYPosition);
                 // Move the current X position.
                 this.currentXPosition -= horizontal_offset;
             }

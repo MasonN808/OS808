@@ -21,6 +21,11 @@ const KEYBOARD_IRQ = 1;
 // TODO: Make a global object and use that instead of the "_" naming convention in the global namespace.
 //
 var _CPU; // Utilize TypeScript's type annotation system to ensure that _CPU is an instance of the Cpu class.
+//	Hardware	(host)
+var _Memory;
+var _MemoryAccessor;
+//	Software	(OS)
+var _MemoryManager = null;
 var _OSclock = 0; // Page 23.
 var _Mode = 0; // (currently unused)  0 = Kernel Mode, 1 = User Mode.  See page 21.
 var _Canvas; // Initialized in Control.hostInit().
@@ -29,6 +34,9 @@ var _DefaultFontFamily = "sans"; // Ignored, I think. The was just a place-holde
 var _DefaultFontSize = 13;
 var _FontHeightMargin = 4; // Additional space added to font size when advancing a line.
 var _Trace = true; // Default the OS trace to be on.
+// For step mode
+var _StartStepMode = false;
+var _StepPressed = false;
 // The OS Kernel and its queues.
 var _Kernel;
 var _KernelInterruptQueue = null;

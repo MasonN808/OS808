@@ -63,8 +63,11 @@ var TSOS;
             // bsod
             sc = new TSOS.ShellCommand(this.shellBsod, "bsod", "- blue screen of death");
             this.commandList[this.commandList.length] = sc;
-            // lload
+            // load
             sc = new TSOS.ShellCommand(this.shellLoad, "load", "- Loads and validates the input code");
+            this.commandList[this.commandList.length] = sc;
+            // run <pid>
+            sc = new TSOS.ShellCommand(this.shellRun, "run", "- runs the input code");
             this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -257,6 +260,9 @@ var TSOS;
                     case "load":
                         _StdOut.putText("Loads and validates the input code");
                         break;
+                    case "run":
+                        _StdOut.putText("runs the input code at <pid>");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -333,7 +339,7 @@ var TSOS;
             // Get the data from the input area
             var taProgramInput = document.getElementById("taProgramInput");
             var input_text = taProgramInput.value;
-            // const uppercased_input_text = input_text.toUpperCase();
+            // Remove all whitespace from text
             const removed_white_space_input_text = input_text.replace(/\s/g, '');
             if (input_text === "") {
                 _StdOut.putText("Empty input: populate program input");
@@ -342,23 +348,71 @@ var TSOS;
                 _StdOut.putText("Hex data in program input is incomplete");
             }
             else {
+                // Check that the Hex is valid
                 const reg_ex = /[0-9a-fA-F]{2}/g;
                 var found_invalid = false;
                 for (let index = 0; index < removed_white_space_input_text.length; index += 2) {
                     // Reset the index for restest
                     reg_ex.lastIndex = 0;
                     const sampled_input = removed_white_space_input_text.substring(index, index + 2);
-                    // const sampled_input_to_int = Number(sampled_input);
                     if (!reg_ex.test(sampled_input)) {
                         found_invalid = true;
                         _StdOut.putText("Invalid hex");
-                        console.log(sampled_input);
                         break;
                     }
                 }
                 if (!found_invalid) {
-                    _StdOut.putText("Hex valid");
+                    console.log("valid");
+                    // Check that the loaded number of OP codes
+                    // Do /2 since its counting single character length
+                    if (removed_white_space_input_text.length / 2 > _Memory.limit) {
+                        // Display warning
+                        _StdOut.putText("Program too large");
+                    }
+                    else {
+                        // Initialize the array to overwrite the source pointer in _Memory instance
+                        var loadedSource = [];
+                        // Populate an array with the OP codes
+                        for (let index = 0; index < removed_white_space_input_text.length; index += 2) {
+                            loadedSource.push(removed_white_space_input_text.substring(index, index + 2));
+                        }
+                        // Populate the rest of the array with 00s up to the memory limit
+                        for (let index = removed_white_space_input_text.length; index < _Memory.limit * 2; index += 2) {
+                            loadedSource.push("00");
+                        }
+                        _Memory.source = loadedSource;
+                        // Display the memory
+                        TSOS.Control.hostMemory();
+                        // Assign a PID
+                        _MemoryManager.assignPID();
+                        // Output the PID
+                        _StdOut.putText("Process ID: " + (_MemoryManager.PIDCounter - 1));
+                    }
                 }
+            }
+        }
+        shellRun(args) {
+            if (args.length > 0) {
+                if (TSOS.Utils.isInt(args[0])) {
+                    const inputPid = parseInt(args[0]);
+                    // Try and find the input PID in the hashtable
+                    if (_MemoryManager.PIDMap.has(inputPid)) {
+                        TSOS.Control.hostProcessesInit(inputPid);
+                        // Change the PID pointer for the CPU
+                        _CPU.PID = inputPid;
+                        // Tell the CPU that is is executing
+                        _CPU.isExecuting = true;
+                    }
+                    else {
+                        _StdOut.putText("Undefined Process ID: " + inputPid);
+                    }
+                }
+                else {
+                    _StdOut.putText("Invalid arguement.  Usage: run <pid>.");
+                }
+            }
+            else {
+                _StdOut.putText("Usage: run <pid>");
             }
         }
     }

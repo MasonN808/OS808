@@ -126,6 +126,131 @@ module TSOS {
             // TODO in the future: Optionally update a log database or some streaming service.
         }
 
+        public static hostMemoryInit(): void {
+            // Display memory of 00s
+            const table = <HTMLTableElement> document.getElementById("taMemory");
+
+            var rowIndex = 0;
+            var leadingZeros = "";
+            var zeroArray = [];
+
+            // Loop through the memory array to display it
+            while (rowIndex < Math.ceil(_Memory.limit/8)){
+                // Check the length to decide whether to add leading zeros
+                if ((rowIndex*8).toString(16).length === 1) {
+                    leadingZeros = "0";
+                }
+
+                var row = table.insertRow(-1);
+                // Use .toString(16) to turn int into hex 
+                row.insertCell(0).innerHTML = leadingZeros + (rowIndex*8).toString(16);
+                for (let columnIndex=1; columnIndex < 9; columnIndex++){
+                    row.insertCell(columnIndex).innerHTML = "00";
+                }
+
+                rowIndex += 1;
+                // Reset pointers for next line
+                leadingZeros = "";
+                zeroArray = [];
+            }
+        }
+
+        public static hostMemory(): void {
+            // Access the memory and display it
+            const table = <HTMLTableElement> document.getElementById("taMemory");
+
+            const memoryArray = _Memory.source;
+            var rowIndex = 0;
+
+            // Loop through the memory array to display it
+            while (rowIndex < Math.ceil(_Memory.limit/8)){
+                const slicedArrayLength = memoryArray.slice(rowIndex*8, rowIndex*8 + 8).length;
+                for (let columnIndex=1; columnIndex < slicedArrayLength + 1; columnIndex++){
+
+                    var cell = table.rows[rowIndex].cells[columnIndex];
+                    cell.innerText = memoryArray[rowIndex*8 + columnIndex - 1];
+                }
+
+                rowIndex += 1;
+            }
+        }
+
+        public static hostProcessesInit(inputPid: number): void {
+            // To display the pointers in the PCB on load with heading
+            const table = <HTMLTableElement> document.getElementById("taProcesses");
+
+            // Get the PCB from the input PID in the hashtable
+            var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
+
+            // insert the row at the ver bottom relative to all other rows
+            var row = table.insertRow(-1);
+            row.insertCell(0).innerHTML = pcb.processId;
+            row.insertCell(1).innerHTML = pcb.programCounter;
+            row.insertCell(2).innerHTML = pcb.intermediateRepresentation;
+            row.insertCell(3).innerHTML = pcb.Acc;
+            row.insertCell(4).innerHTML = pcb.Xreg;
+            row.insertCell(5).innerHTML = pcb.Yreg;
+            row.insertCell(6).innerHTML = pcb.Zflag;
+            row.insertCell(7).innerHTML = pcb.priority;
+            row.insertCell(8).innerHTML = pcb.processState;
+            row.insertCell(9).innerHTML = pcb.location;
+        }
+
+        public static hostProcesses(inputPid: number): void {
+            const table = <HTMLTableElement> document.getElementById("taProcesses");
+
+            // Get the PCB from the input PID in the hashtable
+            var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
+
+            table.rows[pcb.rowIndex].cells[0].innerHTML = pcb.processId;
+            table.rows[pcb.rowIndex].cells[1].innerHTML = pcb.programCounter;
+            table.rows[pcb.rowIndex].cells[2].innerHTML = pcb.intermediateRepresentation;
+            table.rows[pcb.rowIndex].cells[3].innerHTML = pcb.Acc;
+            table.rows[pcb.rowIndex].cells[4].innerHTML = pcb.Xreg;
+            table.rows[pcb.rowIndex].cells[5].innerHTML = pcb.Yreg;
+            table.rows[pcb.rowIndex].cells[6].innerHTML = pcb.Zflag;
+            table.rows[pcb.rowIndex].cells[7].innerHTML = pcb.priority;
+            table.rows[pcb.rowIndex].cells[8].innerHTML = pcb.processState;
+            table.rows[pcb.rowIndex].cells[9].innerHTML = pcb.location;
+        }
+
+        public static hostCpuInit(): void {
+            // To display the pointers in the CPU on load with heading
+            const table = <HTMLTableElement> document.getElementById("taCpu");
+
+            // insert the row at the ver bottom relative to all other rows
+            var row = table.insertRow(1);
+            row.insertCell(0).innerHTML = _CPU.PC.toString();
+            row.insertCell(1).innerHTML = _CPU.IR;
+            row.insertCell(2).innerHTML = _CPU.Acc.toString(16);
+            row.insertCell(3).innerHTML = _CPU.Xreg.toString(16);
+            row.insertCell(4).innerHTML = _CPU.Yreg.toString(16);
+            row.insertCell(5).innerHTML = _CPU.Zflag.toString(16);
+        }
+
+        public static hostCpu(): void {
+            // To display the pointers in the CPU on load with heading
+            const table = <HTMLTableElement> document.getElementById("taCpu");
+
+            table.rows[1].cells[0].innerHTML = _CPU.lastPC.toString();
+            table.rows[1].cells[1].innerHTML = _CPU.IR;
+            table.rows[1].cells[2].innerHTML = _CPU.Acc.toString(16);
+            table.rows[1].cells[3].innerHTML = _CPU.Xreg.toString(16);
+            table.rows[1].cells[4].innerHTML = _CPU.Yreg.toString(16);
+            table.rows[1].cells[5].innerHTML = _CPU.Zflag.toString(16);
+        }
+
+        public static hostRemoveProcess(inputPid: number): void {
+            const table = <HTMLTableElement> document.getElementById("taProcesses");
+
+            // Get the PCB from the input PID in the hashtable
+            var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
+
+            table.deleteRow(pcb.rowIndex);
+
+            // TODO: Move around the processes if there exist more than one in PCB
+        }
+
 
         //
         // Host Events
@@ -144,6 +269,11 @@ module TSOS {
             // ... Create and initialize the CPU (because it's part of the hardware)  ...
             _CPU = new Cpu();  // Note: We could simulate multi-core systems by instantiating more than one instance of the CPU here.
             _CPU.init();       //       There's more to do, like dealing with scheduling and such, but this would be a start. Pretty cool.
+            
+            // Also initialize the memory
+            _Memory	= new Memory();
+            _Memory.init();
+            _MemoryAccessor	= new MemoryAccessor();    
 
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
@@ -169,5 +299,14 @@ module TSOS {
             // be reloaded from the server. If it is false or not specified the browser may reload the
             // page from its cache, which is not what we want.
         }
+
+        public static hostBtnStartStep_click(btn): void {
+            _StartStepMode = !_StartStepMode;
+        }
+
+        public static hostBtnStep_click(btn): void {
+            _StepPressed = true;
+        }
+            
     }
 }

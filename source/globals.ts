@@ -27,6 +27,12 @@ const KEYBOARD_IRQ: number = 1;
 //
 var _CPU: TSOS.Cpu;  // Utilize TypeScript's type annotation system to ensure that _CPU is an instance of the Cpu class.
 
+//	Hardware	(host)
+var	_Memory:	TSOS.Memory;
+var	_MemoryAccessor:	TSOS.MemoryAccessor;
+//	Software	(OS)
+var	_MemoryManager:	any =	null;
+
 var _OSclock: number = 0;  // Page 23.
 
 var _Mode: number = 0;     // (currently unused)  0 = Kernel Mode, 1 = User Mode.  See page 21.
@@ -38,6 +44,10 @@ var _DefaultFontSize: number = 13;
 var _FontHeightMargin: number = 4;       // Additional space added to font size when advancing a line.
 
 var _Trace: boolean = true;              // Default the OS trace to be on.
+
+// For step mode
+var _StartStepMode: boolean = false;
+var _StepPressed: boolean = false;
 
 // The OS Kernel and its queues.
 var _Kernel: TSOS.Kernel;

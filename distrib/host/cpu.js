@@ -128,7 +128,7 @@ var TSOS;
                 case ("EA"):
                     this.changePC(1);
                     break;
-                // Compare a byte in memory to the X-register;  Sets the Z (zero) flag if equal
+                // Compare a byte in memory to the X-register;  Sets the Z (zero) flag to 1 if equal
                 case ("EC"):
                     // Get the storage location one op code above current PC (i.e, do one op code lookahead)
                     var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1), 16);
@@ -154,11 +154,10 @@ var TSOS;
                         // console.log(_Memory.limit)
                         // -1 since _Memory.limit = 256 not 255
                         if (parseInt(branch, 16) > _Memory.limit - this.PC) {
-                            // console.log((parseInt(branch, 16) + this.PC) - _Memory.limit)
                             this.setPC((parseInt(branch, 16) + this.PC) - _Memory.limit + 2);
                         }
                         else {
-                            this.setPC(parseInt(branch, 16) + this.PC);
+                            this.setPC(parseInt(branch, 16) + this.PC + 2);
                         }
                     }
                     else {
@@ -199,7 +198,7 @@ var TSOS;
                     }
                     this.changePC(1);
                     break;
-                // Check for the end of program marker 
+                // Check for the end of program marker
                 case ("00"):
                     // Clear the PCB
                     TSOS.Control.hostRemoveProcess(this.PID);
@@ -233,8 +232,9 @@ var TSOS;
         updateAcc(newAccAsHex, accumulate = false) {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
             // If we are adding to the accumulator rather than replacing
-            if (accumulate) {
+            if (accumulate === true) {
                 // parse string to an int to store in accumulator
+                console.log(newAccAsHex);
                 this.Acc = this.Acc + parseInt(newAccAsHex, 16);
                 pcb.Acc = pcb.Acc + parseInt(newAccAsHex, 16);
             }

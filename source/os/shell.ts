@@ -457,6 +457,7 @@ module TSOS {
                 }
                 
                 if (!found_invalid) {
+                    console.log("valid")
                     // Check that the loaded number of OP codes
                     // Do /2 since its counting single character length
                     if (removed_white_space_input_text.length / 2 > _Memory.limit) {

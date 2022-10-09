@@ -128,15 +128,11 @@ var TSOS;
             // Loop through the memory array to display it
             while (rowIndex < Math.ceil(_Memory.limit / 8)) {
                 const slicedArrayLength = memoryArray.slice(rowIndex * 8, rowIndex * 8 + 8).length;
+                console.log(rowIndex);
                 for (let columnIndex = 1; columnIndex < slicedArrayLength + 1; columnIndex++) {
                     var cell = table.rows[rowIndex].cells[columnIndex];
                     cell.innerText = memoryArray[rowIndex * 8 + columnIndex - 1];
                 }
-                // Fill the rest of the line with 00s if sliced array length < 8
-                // for (let columnIndex=slicedArrayLength; columnIndex < 9; columnIndex++){
-                //     var cell = table.rows[rowIndex].cells[columnIndex];
-                //     cell.innerText = memoryArray[rowIndex*8 + columnIndex - 1];
-                // }
                 rowIndex += 1;
             }
         }

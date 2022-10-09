@@ -18,6 +18,7 @@ module TSOS {
         public lastPC: number;
 
         constructor(public PC: number = 0,
+                    public IR: string = "00",
                     public Acc: number = 0,
                     public Xreg: number = 0,
                     public Yreg: number = 0,
@@ -29,13 +30,14 @@ module TSOS {
 
         public init(): void {
             this.PC = 0;
+            this.IR = "00";
             this.Acc = 0;
             this.Xreg = 0;
             this.Yreg = 0;
             this.Zflag = 0;
             this.isExecuting = false;
             this.PID = null;
-            this.lastPC = null;
+            this.lastPC = 0;
         }
 
         public cycle(): void {
@@ -46,8 +48,8 @@ module TSOS {
 
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
 
-            // Update the IR given the current PC
-            pcb.intermediateRepresentation = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
+            // Update the intermediate representation in PCB and CPU
+            this.updateIR();
 
             // Have a massive switch statement for all possible Op codes
             switch (opCode) {
@@ -260,14 +262,18 @@ module TSOS {
                     _MemoryManager.PIDMap.delete(this.PID);
 
                     // Reset all CPU pointers for next executing program
-                    // TODO: May need to work on this later if multiple processes exist
                     _CPU.init();
+                    TSOS.Control.hostCpu();
+
+                    // TODO: May need to work on this later if multiple processes exist
             }
             // Now update the displayed PCB
 
             pcb.programCounter = this.lastPC;
+            
 
             TSOS.Control.hostProcesses(this.PID);
+            TSOS.Control.hostCpu();
             TSOS.Control.hostMemory();
         }
 
@@ -330,6 +336,14 @@ module TSOS {
             // parse string to an int to store in accumulator
             this.Zflag = newZ;
             pcb.Zflag = newZ;
+        }
+
+        private updateIR(): void {
+            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+
+            // Update the IR given the current PC
+            this.IR = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
+            pcb.intermediateRepresentation = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
         }
     }
 }

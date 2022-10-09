@@ -173,6 +173,28 @@ var TSOS;
             table.rows[pcb.rowIndex].cells[8].innerHTML = pcb.processState;
             table.rows[pcb.rowIndex].cells[9].innerHTML = pcb.location;
         }
+        static hostCpuInit() {
+            // To display the pointers in the CPU on load with heading
+            const table = document.getElementById("taCpu");
+            // insert the row at the ver bottom relative to all other rows
+            var row = table.insertRow(1);
+            row.insertCell(0).innerHTML = _CPU.PC.toString();
+            row.insertCell(1).innerHTML = _CPU.IR;
+            row.insertCell(2).innerHTML = _CPU.Acc.toString(16);
+            row.insertCell(3).innerHTML = _CPU.Xreg.toString(16);
+            row.insertCell(4).innerHTML = _CPU.Yreg.toString(16);
+            row.insertCell(5).innerHTML = _CPU.Zflag.toString(16);
+        }
+        static hostCpu() {
+            // To display the pointers in the CPU on load with heading
+            const table = document.getElementById("taCpu");
+            table.rows[1].cells[0].innerHTML = _CPU.lastPC.toString();
+            table.rows[1].cells[1].innerHTML = _CPU.IR;
+            table.rows[1].cells[2].innerHTML = _CPU.Acc.toString(16);
+            table.rows[1].cells[3].innerHTML = _CPU.Xreg.toString(16);
+            table.rows[1].cells[4].innerHTML = _CPU.Yreg.toString(16);
+            table.rows[1].cells[5].innerHTML = _CPU.Zflag.toString(16);
+        }
         static hostRemoveProcess(inputPid) {
             const table = document.getElementById("taProcesses");
             // Get the PCB from the input PID in the hashtable
@@ -205,6 +227,8 @@ var TSOS;
             _Kernel.krnBootstrap(); // _GLaDOS.afterStartup() will get called in there, if configured.
             // Initialize the memory
             Control.hostMemoryInit();
+            // Initialize the CPU
+            Control.hostCpuInit();
         }
         static hostBtnHaltOS_click(btn) {
             Control.hostLog("Emergency halt", "host");

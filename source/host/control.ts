@@ -221,6 +221,32 @@ module TSOS {
             table.rows[pcb.rowIndex].cells[9].innerHTML = pcb.location;
         }
 
+        public static hostCpuInit(): void {
+            // To display the pointers in the CPU on load with heading
+            const table = <HTMLTableElement> document.getElementById("taCpu");
+
+            // insert the row at the ver bottom relative to all other rows
+            var row = table.insertRow(1);
+            row.insertCell(0).innerHTML = _CPU.PC.toString();
+            row.insertCell(1).innerHTML = _CPU.IR;
+            row.insertCell(2).innerHTML = _CPU.Acc.toString(16);
+            row.insertCell(3).innerHTML = _CPU.Xreg.toString(16);
+            row.insertCell(4).innerHTML = _CPU.Yreg.toString(16);
+            row.insertCell(5).innerHTML = _CPU.Zflag.toString(16);
+        }
+
+        public static hostCpu(): void {
+            // To display the pointers in the CPU on load with heading
+            const table = <HTMLTableElement> document.getElementById("taCpu");
+
+            table.rows[1].cells[0].innerHTML = _CPU.lastPC.toString();
+            table.rows[1].cells[1].innerHTML = _CPU.IR;
+            table.rows[1].cells[2].innerHTML = _CPU.Acc.toString(16);
+            table.rows[1].cells[3].innerHTML = _CPU.Xreg.toString(16);
+            table.rows[1].cells[4].innerHTML = _CPU.Yreg.toString(16);
+            table.rows[1].cells[5].innerHTML = _CPU.Zflag.toString(16);
+        }
+
         public static hostRemoveProcess(inputPid: number): void {
             const table = <HTMLTableElement> document.getElementById("taProcesses");
 
@@ -264,6 +290,8 @@ module TSOS {
 
             // Initialize the memory
             Control.hostMemoryInit();
+            // Initialize the CPU
+            Control.hostCpuInit();
         }
 
         public static hostBtnHaltOS_click(btn): void {

@@ -40,7 +40,7 @@ var TSOS;
                         // Check if there is an executing program first
                         if (_CPU.isExecuting === false) {
                             _Console.advanceLine();
-                            _StdOut.putText("No active process");
+                            _StdOut.putText("No active process to terminate");
                             _Console.advanceLine();
                             _OsShell.putPrompt();
                         }

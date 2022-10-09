@@ -21,18 +21,6 @@ var TSOS;
             this.Zflag = Zflag;
             this.isExecuting = isExecuting;
             this.PID = PID;
-            // I don't know where else to put this
-            // See https://www.typescriptlang.org/play?#code/PTAEFkHsBMFMCcB2oBSBDAbmgygY3gJYAOALqGtHNOaAO5oCeoJkoAFmotADayi5pu3AEZpcAawDOoAsk4BYAFAhQsXgHNOZek2FMK0WepoAFeJAC2BSX1E3qAQRMBJOmwK427NNMlFYuASCSiqSDIgkaAAezBxkvCTSDJAArszwsGhkPuGe5oip0rgwfD6xqepeBCQhYGKJoGGIeZAFKZLcDAB0SrWgADIE4qVCoNyc6ilo6nwAZpkkKRmSADSx1jLSaOkUsAC0kLOzMoh9xRZEvFHVDABcoBZo4kY0synNJASt5E24D5mIJKpeCgDKLJB9LDcFKwLYZOjwNBEfzUWSgMyWaywrqgADqcVA7Vg1BYoNg4LkfUkJEIiHUawKtDJFK26PMVhsAB5qbT1AA+HqKJTFQFkN7NUAAXlAAAoAJRSvmgABEt3oGFgt2VAG5ha1qT9cgAxd5-aU5CXyxUqtWYTU63qKEUGiwMbA0l7S8W4eW6p36siujEc2Du3lSw3NE3NX2O11hoxdXh0khsP19IPsrEJumbUxZmwMyBkVN8HlGW5xhjB7MeulJ2AptOOlQATVS-E4hJssVK9GqoGGDFokHgJNYIo18GyoCIBdgfVkpOq0ihMJxABUYIw1qWe61OnRR+ITpICHByHJfn1vZ9WoK9aKHgxcYjkQho7g78hzb9ZQrJSVABvJRQH4ANnxzYwvVNWNFDA51AwYAAlWFIG4DVoBrGwoIjNB+2yX5Pzg0DQBUAA1IJe3IAjB1gYdR2gIsmVdVDJHQzDsNDOt1FIlQNm2cs6VI+MeIbJs-TA1i0Iw4kuKg8T1FTP0AF902UMAAGESjcDwqmkeB3kQF4MCort8LQAcBGQVNzCZBBzHgVY+k4VESAAcmkAgLlHSIImYCcsk8coewc0dfEsWBaDYBBYAff0n1dDc2DsoxP2-PC-ytQDQBA+DYjs0BECi0AAFF4EcmVlQAEVYAoyAEUZU2sZU5VU9SVFxPhrIRJFOyEF5zL-W8vmQNFthpJgBBIYKWD6DguF4TsbGkaLYuokbvnqaR3lgKJ-C-YlOnixDI1wdLRs0oL3FzX9cn-a08oQiDpIpcjBBhCNlQACTUbhWBHeBuGgB18sm3LSLAiyBySlLIFoNLTW-OCwJUzsZq8GUwvgBUnrA8DAXQuLsaq2HUrpC7vlmSzeBBtZsba0iVNIsElmQV62fe6FYHalswGqz7SVLVR4HUVpMVwaRDnWaQnFcYRYBeRXSxBVmkCMFzGiMJa11gNZRwK+GjDWZI0kkNhUmBgmzzgEFDnmXlF0QWZR0eDK0GEVISxislJBSbgyFkG2+GFtXiuoXXL2gPoiUNpkDyYNbkHYixyRu4waX9pg9twWBSFGwRvEkPpIFwXAlgyaATogva0AuXhsAARymDJkMgYtKZ-M7ZVkIgUhIe5OAYADgNIghjhlawADk0CnyfED7kg5VxyG46Kkrysq5UAHlEEPRAUgsBWnPIeExFz0hiVayTQGZoV8vHnuF-70BOVAAAGFf8rAsPcsaFIy6wkkPcam3BCz-EkJIaYmoVRXUQPVRozc0DwnMMWdemhPgaiKofY+ypb43zRmoHseMf7kjZn-P2gDIH3EznrUAut7jgCyGwLokhG7TnnovBUakmZKB4ffFQyVGwbSRqNa2h8EBFC7J4AIJ40Sh1hEQfUpQuA3gIJMeEXs3BZACqAaAANqheFNqrMhSB6EfTinidwS1mrFw0nmCahBTKF1rvXOhrRc6gFNt4LB1JkEkGJEeeAzxcwI1TH0YqJBAYhOMMUC8e4+By2kArc4fBAapmontGkglwiRCiNXJ8MiJBNxbrANuaC7qWgYdgo+CAR4Q3yqdZYSjAR8HNLRVxlxQxINbu3EgncZS60Zg-CezTlGsIAbnSBX98a+xaTYLousCF8I6mABwvxgAOFoiwSAJ44lpPcMFf6uzAncCGCHdwwC+agBmCQNi8zYAyiWNwNYMoxmtPqXlFQYFbn3OUW8xR4znmvJsCKaAfyPmPT6LMppgLWnVSyNsaUoLWjgrhQs6AiLoX41+eix57ybAIsiF0YFspmpjghTYT52LZldDpTS2+cpsUqSZfYll1yHBcDGOSGQZAUmRTGLITIIIznDErAIsAsK-DKLwrRXF0rWlPKBqylQp0UVcEpW0milkyDyoeQChVCznkqslRBAlsAiVIsaAEVFmquiYsiGcCC5K0WGq1dDXV5JNUGoeZaklyq+h0vip1Q5XgeqPGGNRfZWsGr-RsCCUkvBZhkGJDMNYrk+gKzJBQOghiaDOmsAE-y8A2AMFTBYLoQA
-            // for resources on async and await
-            this.awaitCycle = async () => {
-                var promise = new Promise(() => { _StepPressed == true; });
-                const response = await promise;
-                if (response) {
-                    console.log("MADE IT");
-                    _CPU.cycle();
-                    _StepPressed = false;
-                }
-            };
         }
         init() {
             this.PC = 0;
@@ -42,14 +30,10 @@ var TSOS;
             this.Zflag = 0;
             this.isExecuting = false;
             this.PID = null;
+            this.lastPC = null;
         }
         cycle() {
             _Kernel.krnTrace('CPU cycle');
-            // // Check if step mode has been activated
-            // if (_StartStepMode) {
-            //     var promise = new Promise((resolve) => { _StepPressed = true });
-            //     await promise;
-            // }
             // Get the Op code given the pid and pc
             var opCode = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
@@ -134,7 +118,6 @@ var TSOS;
                     var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1), 16);
                     // Query constant from memory location
                     var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation);
-                    console.log(constantInMemory);
                     // Update the Y-register in CPU and PCB
                     this.updateY(constantInMemory);
                     this.changePC(3);
@@ -164,11 +147,12 @@ var TSOS;
                     // Get the branch number
                     var branch = TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1);
                     if (this.Zflag === 0) {
-                        // -1 since offset is 0 in memory 
-                        this.changePC(parseInt(branch, 16) - _Memory.limit - 1);
+                        console.log(parseInt(branch, 16));
+                        // -1 since _Memory.limit = 256 not 255
+                        this.setPC(_Memory.limit - parseInt(branch, 16) - 1);
                     }
                     else {
-                        this.changePC(1);
+                        this.changePC(2);
                     }
                     break;
                 // Increment the value of a byte
@@ -202,13 +186,23 @@ var TSOS;
                     break;
             }
             // Now update the displayed PCB
+            pcb.programCounter = this.lastPC;
             TSOS.Control.hostProcesses(this.PID);
             TSOS.Control.hostMemory();
         }
         changePC(change) {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+            // Keep track of this to display on PCB without delay
+            this.lastPC = this.PC;
             this.PC += change;
             pcb.programCounter += change;
+        }
+        setPC(absolute) {
+            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+            // Keep track of this to display on PCB without delay
+            this.lastPC = this.PC;
+            this.PC = absolute;
+            pcb.programCounter = absolute;
         }
         updateAcc(newAccAsHex, accumulate = false) {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];

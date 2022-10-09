@@ -97,7 +97,7 @@ module TSOS {
                 this.krnTrace("Idle");
             }
         }
-
+        
 
         //
         // Interrupt Handling

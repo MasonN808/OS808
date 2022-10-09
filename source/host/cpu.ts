@@ -29,6 +29,8 @@ module TSOS {
         //     }
         // }
 
+        public lastPC: number;
+
         constructor(public PC: number = 0,
                     public Acc: number = 0,
                     public Xreg: number = 0,
@@ -47,6 +49,7 @@ module TSOS {
             this.Zflag = 0;
             this.isExecuting = false;
             this.PID = null;
+            this.lastPC = null;
         }
 
         public cycle(): void {
@@ -167,8 +170,6 @@ module TSOS {
                     // Query constant from memory location
                     var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation);
 
-                    console.log(constantInMemory)
-                        
                     // Update the Y-register in CPU and PCB
                     this.updateY(constantInMemory);
 
@@ -207,11 +208,12 @@ module TSOS {
                     var branch = TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1);
 
                     if (this.Zflag === 0) {
-                        // -1 since offset is 0 in memory 
-                        this.changePC(parseInt(branch, 16) - _Memory.limit - 1);
+                        console.log(parseInt(branch, 16))
+                        // -1 since _Memory.limit = 256 not 255
+                        this.setPC(_Memory.limit - parseInt(branch, 16) - 1);
                     }
                     else {
-                        this.changePC(1);
+                        this.changePC(2);
                     }
                     break;
 
@@ -251,15 +253,33 @@ module TSOS {
                     break;
             }
             // Now update the displayed PCB
+
+            pcb.programCounter = this.lastPC;
+
             TSOS.Control.hostProcesses(this.PID);
             TSOS.Control.hostMemory();
         }
 
         private changePC(change: number): void {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+
+            // Keep track of this to display on PCB without delay
+            this.lastPC = this.PC;
             
             this.PC += change;
             pcb.programCounter += change;
+
+        }
+
+        private setPC(absolute: number): void {
+            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+
+            // Keep track of this to display on PCB without delay
+            this.lastPC = this.PC;
+            
+            this.PC = absolute;
+            pcb.programCounter = absolute;
+
         }
 
         private updateAcc(newAccAsHex: string, accumulate = false): void {

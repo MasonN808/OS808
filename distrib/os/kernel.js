@@ -76,7 +76,6 @@ var TSOS;
                         _CPU.cycle();
                         _StepPressed = false;
                     }
-                    // _CPU.awaitCycle;
                 }
                 else {
                     _CPU.cycle();

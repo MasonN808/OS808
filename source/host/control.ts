@@ -262,6 +262,7 @@ module TSOS {
             // .. enable the Halt and Reset buttons ...
             (<HTMLButtonElement>document.getElementById("btnHaltOS")).disabled = false;
             (<HTMLButtonElement>document.getElementById("btnReset")).disabled = false;
+            (<HTMLButtonElement>document.getElementById("btnToggleStepMode")).disabled = false;
 
             // .. set focus on the OS console display ...
             document.getElementById("display").focus();
@@ -300,8 +301,25 @@ module TSOS {
             // page from its cache, which is not what we want.
         }
 
-        public static hostBtnStartStep_click(btn): void {
-            _StartStepMode = !_StartStepMode;
+        public static hostBtnToggleStep_click(btn): void {
+            console.log("BAD")
+            // To change the button color on click
+            var style = document.getElementById('btnToggleStepMode').style;
+            console.log(style.backgroundColor)
+            if (style.backgroundColor == "green" || style.backgroundColor == "") {
+                style.backgroundColor = "red";
+
+                // Enable the step buttion
+                (<HTMLButtonElement>document.getElementById("btnStep")).disabled = false;
+            } else {
+                style.backgroundColor = "green";
+
+                // Disable the step buttion
+                (<HTMLButtonElement>document.getElementById("btnStep")).disabled = true;
+            }
+          
+
+            _ToggleStepMode = !_ToggleStepMode;
         }
 
         public static hostBtnStep_click(btn): void {

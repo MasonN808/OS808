@@ -206,6 +206,7 @@ var TSOS;
             // .. enable the Halt and Reset buttons ...
             document.getElementById("btnHaltOS").disabled = false;
             document.getElementById("btnReset").disabled = false;
+            document.getElementById("btnToggleStepMode").disabled = false;
             // .. set focus on the OS console display ...
             document.getElementById("display").focus();
             // ... Create and initialize the CPU (because it's part of the hardware)  ...
@@ -237,8 +238,22 @@ var TSOS;
             // be reloaded from the server. If it is false or not specified the browser may reload the
             // page from its cache, which is not what we want.
         }
-        static hostBtnStartStep_click(btn) {
-            _StartStepMode = !_StartStepMode;
+        static hostBtnToggleStep_click(btn) {
+            console.log("BAD");
+            // To change the button color on click
+            var style = document.getElementById('btnToggleStepMode').style;
+            console.log(style.backgroundColor);
+            if (style.backgroundColor == "green" || style.backgroundColor == "") {
+                style.backgroundColor = "red";
+                // Enable the step buttion
+                document.getElementById("btnStep").disabled = false;
+            }
+            else {
+                style.backgroundColor = "green";
+                // Disable the step buttion
+                document.getElementById("btnStep").disabled = true;
+            }
+            _ToggleStepMode = !_ToggleStepMode;
         }
         static hostBtnStep_click(btn) {
             _StepPressed = true;

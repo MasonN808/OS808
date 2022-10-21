@@ -4,10 +4,11 @@
    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
    <meta name="author"             content="Alan G. Labouseur" />
    <!-- Bootstrap 5 -->
-   <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous"> -->
-   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous">
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+   <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous"> -->
    <link rel="stylesheet" href="tsos.css" type="text/css" media="screen" />
    <link rel="stylesheet" href="tables.css" type="text/css" media="screen" />
+   <link rel="stylesheet" href="buttons.css" type="text/css" media="screen" />
    <title>
       TSOS - a browser-based virtual Operating System in TypeScript
    </title>
@@ -40,181 +41,195 @@
 
    <!-- Other Routines -->
    <script type="text/javascript" src="distrib/utils.js"></script>
+
+   <!-- Initialization -->
+   <script type="text/javascript" src="test/initialization.js"></script>
    
    <!-- Uncomment the line below to enable GLaDOS testing. -->
-   <script type="text/javascript" src="http://alanclasses.github.io/TSOS/test/glados-ip2.js"></script>
+   <!-- <script type="text/javascript" src="http://alanclasses.github.io/TSOS/test/glados-ip2.js"></script> -->
+
    
 </head>
 
 <body id="bootstrap-overrides" onload="onDocumentLoad()">
 
-<div id="divMain">
-   <div id="divButtonBar" style="margin:4px;">
-      <input type="button"
-            id = "btnStartOS"
-            name="btnStartOS"
-            class="normal_button"
-            value="Start"
-            tabindex="0"
-            onclick="TSOS.Control.hostBtnStartOS_click(this);">
-   <input type="button"
-         id = "btnHaltOS"
-         name="btnHaltOS"
-         class="normal_button"
-         disabled="disabled"
-         value="Halt"
-         tabindex="1"
-         onclick="TSOS.Control.hostBtnHaltOS_click(this);">
+   <!-- For Navigation bar -->
+   <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+      <div class="container">
+         <a href=" "class="navbar-brand"><span class="text-warning">OS808</span></a>
+      </div>
+   </nav>
 
-   <input type="button"
-         id = "btnReset"
-         name="btnReset"
-         class="normal_button"
-         disabled="disabled"
-         value="Reset"
-         tabindex="2"
-         onclick="TSOS.Control.hostBtnReset_click(this);">
 
-   <input type="button"
-         id = "btnStartStepMode"
-         name="btnStartStepMode"
-         class="normal_button"
-         value="StartStep"
-         tabindex="3"
-         onclick="TSOS.Control.hostBtnStartStep_click(this);">
+   <div id="divMain">
+      <div id="divButtonBar" style="margin:4px;">
+         <input type="button"
+               id = "btnStartOS"
+               name="btnStartOS"
+               class="btn btn-primary"
+               value="Start"
+               tabindex="0"
+               onclick="TSOS.Control.hostBtnStartOS_click(this);">
+         <input type="button"
+               id = "btnHaltOS"
+               name="btnHaltOS"
+               class="btn btn-warning"
+               disabled="disabled"
+               value="Halt"
+               tabindex="1"
+               onclick="TSOS.Control.hostBtnHaltOS_click(this);">
 
-   <input type="button"
-         id = "btnStep"
-         name="btnStep"
-         class="normal_button"
-         value="Step"
-         tabindex="4"
-         onclick="TSOS.Control.hostBtnStep_click(this);">
+         <input type="button"
+               id = "btnReset"
+               name="btnReset"
+               class="btn btn-danger"
+               disabled="disabled"
+               value="Reset"
+               tabindex="2"
+               onclick="TSOS.Control.hostBtnReset_click(this);">
+
+         <input type="button"
+               id = "btnToggleStepMode"
+               name="btnToggleStepMode"
+               class="btn btn-primary active"
+               disabled="disabled"
+               value="ToggleStep"
+               tabindex="3"
+               onclick="TSOS.Control.hostBtnToggleStep_click(this);">
+
+         <input type="button"
+               id = "btnStep"
+               name="btnStep"
+               class="btn btn-secondary"
+               disabled="disabled"
+               value="Step"
+               tabindex="4"
+               onclick="TSOS.Control.hostBtnStep_click(this);">
+      </div>
+
+         <div class="row">
+            <div class="col-md-6">
+               <div id="divConsole">
+                  <canvas id="display"
+                  width="500px"
+                  height="500px"
+                  tabindex="3">
+                  </canvas>
+               </div>
+
+               <div id="date">
+                  <span class="label">Date/Time:</span>
+                  <div id="taDate"></div>
+               </div>
+
+               <div id="status">
+                  <label class="label">
+                     <span class="label">Status:</span>
+                     <div id="taStatus"></div>
+                  </label>
+               </div>
+            </div>
+
+            <div class="col-md-5">
+               <div class="card">
+                  <div class="card-header">Host Log</div>
+                     <div class="card-body">
+                        <textarea name="taHostLog"
+                              id  ="taHostLog"
+                              rows="8"
+                              cols="48"
+                        ></textarea>
+                     </div>
+               </div>
+      
+               <div class="card">
+                  <div class="card-header">User Program Input</div>
+                     <div class="card-body">
+                        <textarea name="taProgramInput"
+                              id  ="taProgramInput"
+                              rows="8"
+                              cols="48"
+                        ></textarea>
+                     </div>
+               </div>
+            </div>
+         </div>
+
+         <div class="row">
+            <div class="col-md-5">
+               <!-- <div class="p-3 border bg-light"> -->
+                  <div class="card h-100">
+                     <div class="card-header">Processes</div>
+                        <div class="card-body">
+                           <span>
+                              <table name="taProcesses"
+                              id  ="taProcesses">
+                                 <tr class="tableHeader">
+                                    <th>PID</th>
+                                    <th>PC</th>
+                                    <th>IR</th>
+                                    <th>ACC</th>
+                                    <th>X</th>
+                                    <th>Y</th>
+                                    <th>Z</th>
+                                    <th>Priority</th>
+                                    <th>State</th>
+                                    <th>Location</th>
+                                 </tr>
+                              </table>
+                           </span>
+                        </div>
+                  </div>
+               <!-- </div> -->
+            </div>
+            <div class="col-md-3">
+               <!-- <div class="p-3 border bg-light"> -->
+                  <div class="card h-100" id="cardCPU">
+                     <div class="card-header">CPU</div>
+                        <div class="card-body">
+                           <span>
+                              <table name="taCpu"
+                              id  ="taCpu">
+                                 <tr class="tableHeader">
+                                    <th>PC</th>
+                                    <th>IR</th>
+                                    <th>ACC</th>
+                                    <th>X</th>
+                                    <th>Y</th>
+                                    <th>Z</th>
+                                 </tr>
+                              </table>
+                           </span>
+                        </div>
+                  </div>
+               <!-- </div> -->
+            </div>
+            <div class="col-md-3">
+               <!-- <div class="p-3 border bg-light"></div> -->
+                  <div class="card h-100" id="divMemory">
+                     <div class="card-header">Memory</div>
+                        <div class="card-body">
+                           <span>
+                              <table name="taMemory"
+                              id  ="taMemory">
+                              </table>
+                           </span>
+                        </div>
+                  </div>
+               <!-- </div> -->
+            </div>
+         </div>
    </div>
 
-      <div class="row">
-         <div class="col-md-6">
-            <div id="divConsole">
-               <canvas id="display"
-               width="500px"
-               height="500px"
-               tabindex="3">
-               </canvas>
-            </div>
+   <!-- <p class="footerText" style="clear:both;">
+      <br>
+      Copyright &copy; 2008 - 2019 No Rights Reserved.
+      <br>
+      Reproduction is inhibited without the express written consent of
+      Ted Codd, Stevie Ray Vaughan, and Ian Fleming.
+   </p> -->
 
-            <div id="date">
-               <span class="label">Date/Time:</span>
-               <div id="taDate"></div>
-            </div>
-
-            <div id="status">
-               <label class="label">
-                  <span class="label">Status:</span>
-                  <div id="taStatus"></div>
-               </label>
-            </div>
-         </div>
-
-         <div class="col-md-5">
-            <div class="card h-100">
-               <div class="card-header">Host Log</div>
-                  <div class="card-body">
-                     <textarea name="taHostLog"
-                           id  ="taHostLog"
-                           rows="8"
-                           cols="48"
-                     ></textarea>
-                  </div>
-            </div>
-   
-            <div class="card h-100">
-               <div class="card-header">User Program Input</div>
-                  <div class="card-body">
-                     <textarea name="taProgramInput"
-                           id  ="taProgramInput"
-                           rows="8"
-                           cols="48"
-                     ></textarea>
-                  </div>
-            </div>
-          </div>
-      </div>
-
-      <div class="row">
-         <div class="col-md-5">
-            <!-- <div class="p-3 border bg-light"> -->
-               <div class="card h-100">
-                  <div class="card-header">Processes</div>
-                     <div class="card-body">
-                        <span>
-                           <table name="taProcesses"
-                           id  ="taProcesses">
-                              <tr class="tableHeader">
-                                 <th>PID</th>
-                                 <th>PC</th>
-                                 <th>IR</th>
-                                 <th>ACC</th>
-                                 <th>X</th>
-                                 <th>Y</th>
-                                 <th>Z</th>
-                                 <th>Priority</th>
-                                 <th>State</th>
-                                 <th>Location</th>
-                              </tr>
-                           </table>
-                        </span>
-                     </div>
-               </div>
-            <!-- </div> -->
-         </div>
-         <div class="col-md-3">
-            <!-- <div class="p-3 border bg-light"> -->
-               <div class="card h-100" id="cardCPU">
-                  <div class="card-header">CPU</div>
-                     <div class="card-body">
-                        <span>
-                           <table name="taCpu"
-                           id  ="taCpu">
-                              <tr class="tableHeader">
-                                 <th>PC</th>
-                                 <th>IR</th>
-                                 <th>ACC</th>
-                                 <th>X</th>
-                                 <th>Y</th>
-                                 <th>Z</th>
-                              </tr>
-                           </table>
-                        </span>
-                     </div>
-               </div>
-            <!-- </div> -->
-         </div>
-         <div class="col-md-3">
-            <!-- <div class="p-3 border bg-light"></div> -->
-               <div class="card h-100" id="divMemory">
-                  <div class="card-header">Memory</div>
-                     <div class="card-body">
-                        <span>
-                           <table name="taMemory"
-                           id  ="taMemory">
-                           </table>
-                        </span>
-                     </div>
-               </div>
-            <!-- </div> -->
-         </div>
-      </div>
-</div>
-
-<!-- <p class="footerText" style="clear:both;">
-   <br>
-   Copyright &copy; 2008 - 2019 No Rights Reserved.
-   <br>
-   Reproduction is inhibited without the express written consent of
-   Ted Codd, Stevie Ray Vaughan, and Ian Fleming.
-</p> -->
-
-<!-- <img src="https://i.imgur.com/MjeqeUP.gif" class="center" height="60" alt="A cat with a body made of a poptart flying through space while pooping rainbows."> -->
+   <!-- <img src="https://i.imgur.com/MjeqeUP.gif" class="center" height="60" alt="A cat with a body made of a poptart flying through space while pooping rainbows."> -->
 
 </body>
 </html>

@@ -46,7 +46,7 @@ var _FontHeightMargin: number = 4;       // Additional space added to font size 
 var _Trace: boolean = true;              // Default the OS trace to be on.
 
 // For step mode
-var _StartStepMode: boolean = false;
+var _ToggleStepMode: boolean = false;
 var _StepPressed: boolean = false;
 
 // The OS Kernel and its queues.

@@ -302,10 +302,10 @@ module TSOS {
         }
 
         public static hostBtnToggleStep_click(btn): void {
-            console.log("BAD")
             // To change the button color on click
             var style = document.getElementById('btnToggleStepMode').style;
             console.log(style.backgroundColor)
+            // On initialization, the buttion background color is "", ... strangely
             if (style.backgroundColor == "green" || style.backgroundColor == "") {
                 style.backgroundColor = "red";
 
@@ -317,7 +317,6 @@ module TSOS {
                 // Disable the step buttion
                 (<HTMLButtonElement>document.getElementById("btnStep")).disabled = true;
             }
-          
 
             _ToggleStepMode = !_ToggleStepMode;
         }

@@ -17,7 +17,7 @@ td, th{
 tr {
     /* For row height */
     display: block;
-    vertical-align:top;
+    vertical-align: top;
     line-height: 22.5px;
 }
 
@@ -26,7 +26,7 @@ background-color: #dddddd;
 }
 
 .card{
-width: 395px;
+    width: 395px;
 }
 
 /* For the column widths in taMemory*/

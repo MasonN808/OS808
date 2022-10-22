@@ -3,11 +3,17 @@
 body {
   /* background: #909193 url(https://cutewallpaper.org/21/nyan-cat-background-gif/Background-from-Nyan-Cat-Imgur.png) repeat; */
   background: #22272e;
+  /* background: whitesmoke; */
   background-size: 100vw, 100%;
-  font-family: Helvetica, Verdana, Arial, sans-serif;
-  font-size: 12pt;
+  /* font-family: Helvetica, Verdana, Arial, sans-serif; */
+  font-family: terrariaFont;
+  font-size: 14pt;
   font-weight: normal;
   font-style: normal;
+  /* -webkit-text-fill-color: white;
+  -webkit-text-stroke-color: black;
+  -webkit-text-stroke-width: .50px;  */
+  /* text-shadow: 0 0 2px #000; horizontal-offset vertical-offset 'blur' colour */
 }
 
 h1 {
@@ -26,7 +32,8 @@ h2 {
 }
 
 h3 {
-  font-family: Helvetica, Verdana, Arial, sans-serif;
+  /* font-family: Helvetica, Verdana, Arial, sans-serif; */
+  font-family: terrariaFont;
   font-size: 16pt;
   font-weight: normal;
   font-style: normal;
@@ -61,13 +68,15 @@ h3 {
 
 #btnHaltOS, #btnReset, #btnStartOS {
   color: black;
-  font-family: 'Courier New', Courier, monospace;
+  /* font-family: 'Courier New', Courier, monospace; */
+  font-family: terrariaFont;
 }
 
 .label, #taDate {
   color: white;
   padding: 0px;
-  font-family: 'Courier New', Courier, monospace;
+  /* font-family: 'Courier New', Courier, monospace; */
+  font-family: terrariaFont;
 }
 
 .columns {
@@ -100,11 +109,22 @@ h3 {
 }
 
 #divConsole {
-  margin:4px;
-  width:500px;
+  /* margin:4px; */
+  width:520px;
   height:500px;
-  float: none;
+  /* float: none; */
 }
+
+#display {
+  background: #fff;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+  width: 520px;
+  height: 500px;
+  /* margin: 20px 20px; */
+  overflow: hidden;
+}
+
 
 .center {
   display: block;
@@ -125,4 +145,19 @@ textarea {
 
 #taCpu {
   width: 164px;
+}
+
+.card-body {
+  padding: 0;
+}
+
+.col-md-8{
+  width: /*as you wish*/;
+}
+
+/* Terraria Font */
+
+@font-face {
+  font-family: terrariaFont;
+  src: url(andyBold.ttf);
 }

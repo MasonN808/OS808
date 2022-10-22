@@ -239,7 +239,6 @@ var TSOS;
             // page from its cache, which is not what we want.
         }
         static hostBtnToggleStep_click(btn) {
-            console.log("BAD");
             // To change the button color on click
             var style = document.getElementById('btnToggleStepMode').style;
             console.log(style.backgroundColor);

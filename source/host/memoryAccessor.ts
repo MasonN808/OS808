@@ -1,9 +1,9 @@
 module TSOS {
 
     export class MemoryAccessor {
-        public source: Array<string>;
+        public source: Array<OpCode>;
         
-        public static readMemory(pid: number, pc: number): string{
+        public static readMemory(pid: number, pc: number): OpCode{
             // We assume here that the given pid is valid
             const memory = _MemoryManager.PIDMap.get(pid)[0];
 
@@ -14,7 +14,9 @@ module TSOS {
                 // Call Kernel shutdown routine.
                 _Kernel.krnShutdown();
             }
-            return memory[pc]
+
+            // Returns a OpCode object
+            return memory[pc];
         }
 
         public static writeMemory(pid: number, pc: number, code: string): void {
@@ -25,7 +27,7 @@ module TSOS {
             code = code.toUpperCase();
             
             // We assume here that the given pid is valid
-            _MemoryManager.PIDMap.get(pid)[0][pc] = code;
+            _MemoryManager.PIDMap.get(pid)[0][pc] = new OpCode(code);
         }
     }
 }

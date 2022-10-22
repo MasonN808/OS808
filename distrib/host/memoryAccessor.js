@@ -11,6 +11,7 @@ var TSOS;
                 // Call Kernel shutdown routine.
                 _Kernel.krnShutdown();
             }
+            // Returns a OpCode object
             return memory[pc];
         }
         static writeMemory(pid, pc, code) {
@@ -20,7 +21,7 @@ var TSOS;
             }
             code = code.toUpperCase();
             // We assume here that the given pid is valid
-            _MemoryManager.PIDMap.get(pid)[0][pc] = code;
+            _MemoryManager.PIDMap.get(pid)[0][pc] = new TSOS.OpCode(code);
         }
     }
     TSOS.MemoryAccessor = MemoryAccessor;

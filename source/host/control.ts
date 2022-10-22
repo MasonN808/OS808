@@ -32,10 +32,7 @@ module TSOS {
             //Enable the added-in canvas text functions (see canvastext.ts for provenance and details).
             CanvasTextFunctions.enable(_DrawingContext);   // Text functionality is now built in to the HTML5 canvas. But this is old-school, and fun, so we'll keep it.
 
-            var date_time = new Date().toLocaleString();
-
-            // Use the TypeScript cast to HTMLInputElement
-            (<HTMLInputElement> document.getElementById("taDate")).innerHTML=date_time;
+            this.dateLog();
 
             // Set focus on the start button.
             // Use the TypeScript cast to HTMLInputElement
@@ -166,9 +163,18 @@ module TSOS {
             while (rowIndex < Math.ceil(_Memory.limit/8)){
                 const slicedArrayLength = memoryArray.slice(rowIndex*8, rowIndex*8 + 8).length;
                 for (let columnIndex=1; columnIndex < slicedArrayLength + 1; columnIndex++){
-
                     var cell = table.rows[rowIndex].cells[columnIndex];
-                    cell.innerText = memoryArray[rowIndex*8 + columnIndex - 1];
+                    cell.innerText = memoryArray[rowIndex*8 + columnIndex - 1].codeString;
+
+                    if (memoryArray[rowIndex*8 + columnIndex - 1].currentOperator){
+                        cell.style.color = "#e10544"; // Terraria Red
+                    }
+                    else if (memoryArray[rowIndex*8 + columnIndex - 1].currentOperand){
+                        cell.style.color = "#f29091"; // Terraria Light Red
+                    }
+                    else {
+                        cell.style.color = "black";
+                    }
                 }
 
                 rowIndex += 1;
@@ -234,6 +240,7 @@ module TSOS {
 
             table.rows[1].cells[0].innerHTML = _CPU.lastPC.toString();
             table.rows[1].cells[1].innerHTML = _CPU.IR;
+            table.rows[1].cells[1].style.color = "red";
             table.rows[1].cells[2].innerHTML = _CPU.Acc.toString(16);
             table.rows[1].cells[3].innerHTML = _CPU.Xreg.toString(16);
             table.rows[1].cells[4].innerHTML = _CPU.Yreg.toString(16);

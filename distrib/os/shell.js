@@ -363,7 +363,7 @@ var TSOS;
                 }
                 if (!found_invalid) {
                     console.log("valid");
-                    // Check that the loaded number of OP codes
+                    // Check that the loaded number of OP codes is within memory limit
                     // Do /2 since its counting single character length
                     if (removed_white_space_input_text.length / 2 > _Memory.limit) {
                         // Display warning
@@ -374,11 +374,11 @@ var TSOS;
                         var loadedSource = [];
                         // Populate an array with the OP codes
                         for (let index = 0; index < removed_white_space_input_text.length; index += 2) {
-                            loadedSource.push(removed_white_space_input_text.substring(index, index + 2));
+                            loadedSource.push(new TSOS.OpCode(removed_white_space_input_text.substring(index, index + 2)));
                         }
                         // Populate the rest of the array with 00s up to the memory limit
                         for (let index = removed_white_space_input_text.length; index < _Memory.limit * 2; index += 2) {
-                            loadedSource.push("00");
+                            loadedSource.push(new TSOS.OpCode("00"));
                         }
                         _Memory.source = loadedSource;
                         // Display the memory

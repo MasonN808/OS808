@@ -190,7 +190,6 @@ var TSOS;
                             break;
                         case 55:
                             chr = String.fromCharCode(38); // &
-                            // console.log(chr)
                             break;
                         case 56:
                             chr = String.fromCharCode(42); // *

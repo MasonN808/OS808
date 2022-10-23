@@ -18,7 +18,6 @@ module TSOS {
 
             _MemoryManager = new MemoryManager();
             _MemoryManager.init();
-            console.log(_MemoryManager.mainMemory + " test 2 " + _MemoryManager.test)
 
             // Initialize the memory
             TSOS.Control.hostMemoryInit();

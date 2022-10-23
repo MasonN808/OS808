@@ -44,6 +44,7 @@ var TSOS;
             this.updateIR();
             // Use this for to identify D0 operator is reached
             var entered_D0 = false;
+            var exitProgram = false;
             // Have a massive switch statement for all possible Op codes
             switch (opCode.codeString) {
                 // Load the accumulator with a constant
@@ -179,12 +180,9 @@ var TSOS;
                     // Change the pointer(s) for coloring
                     TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).currentOperand = true;
                     if (this.Zflag === 0) {
-                        // console.log(parseInt(branch, 16))
-                        // console.log(this.PC)
-                        // console.log(_Memory.limit)
                         // -1 since _Memory.limit = 256 not 255
                         if (parseInt(branch, 16) > _MemoryManager.limit - this.PC) {
-                            this.updatePC((parseInt(branch, 16) + this.PC) - _MemoryManager.limit + 2);
+                            this.updatePC((parseInt(branch, 16) + this.PC) - _MemoryManager.limit + 1);
                         }
                         else {
                             this.updatePC(parseInt(branch, 16) + this.PC + 2);
@@ -221,7 +219,6 @@ var TSOS;
                     else if (this.Xreg === 2) {
                         var memoryIndex = this.Yreg;
                         var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, memoryIndex).codeString;
-                        console.log(constantInMemory);
                         while (constantInMemory != "00") {
                             // convert the hex into ASCII
                             _StdOut.putText(TSOS.Utils.hex2a(constantInMemory));
@@ -233,18 +230,24 @@ var TSOS;
                     break;
                 // Check for the end of program marker
                 case ("00"):
+                    // Remove the memory partition from main memory
+                    _MemoryManager.removeProgramInMemory(_MemoryManager.PIDMap.get(this.PID)[0]);
                     // Clear the PCB
                     TSOS.Control.hostRemoveProcess(this.PID);
                     // Remove the PID from the hash table in the memory manager
                     _MemoryManager.PIDMap.delete(this.PID);
                     // Reset all CPU pointers for next executing program
                     _CPU.init();
-                    TSOS.Control.hostCpu();
-                // TODO: May need to work on this later if multiple processes exist
+                    exitProgram = true;
+                    // TSOS.Control.hostCpu();
+                    // TSOS.Control.hostMemory();
+                    break;
             }
             pcb.programCounter = this.lastPC;
             // Now update the displayed PCB
-            TSOS.Control.hostProcesses(this.PID);
+            if (!exitProgram) {
+                TSOS.Control.hostProcesses(this.PID);
+            }
             TSOS.Control.hostCpu();
             TSOS.Control.hostMemory();
             // Reset the operator and operand pointers for coloring text
@@ -273,7 +276,6 @@ var TSOS;
         }
         addToAcc(addedNum) {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
-            console.log(addedNum);
             // If we are adding to the accumulator rather than replacing
             this.Acc += parseInt(addedNum, 16);
             pcb.Acc += parseInt(addedNum, 16);

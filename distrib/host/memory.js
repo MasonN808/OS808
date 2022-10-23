@@ -13,10 +13,10 @@ var TSOS;
         // }
         constructor() {
             this.base = 0;
-            this.limit = 256;
+            this.limit = 255;
             // Properties for our memory storage
             this.base = 0;
-            this.limit = 256;
+            this.limit = 255;
             // State that the memory is empty
             this.empty = true;
             // Initialize an array of length limit; this will be the 

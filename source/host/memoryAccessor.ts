@@ -5,7 +5,7 @@ module TSOS {
         
         public static readMemory(pid: number, pc: number): OpCode{
             // We assume here that the given pid is valid
-            const memory = _MemoryManager.PIDMap.get(pid)[0];
+            const memory = _MemoryManager.PIDMap.get(pid)[0].source;
 
             // check number is valid
             if ((pc < _MemoryManager.base) || (pc > _MemoryManager.limit)) {
@@ -27,7 +27,7 @@ module TSOS {
             code = code.toUpperCase();
             
             // We assume here that the given pid is valid
-            _MemoryManager.PIDMap.get(pid)[0][pc] = new OpCode(code);
+            _MemoryManager.PIDMap.get(pid)[0].source[pc] = new OpCode(code);
         }
 
         public static rewriteAllMemory(memory: Memory, source: string[]): any {

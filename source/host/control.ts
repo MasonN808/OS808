@@ -160,7 +160,7 @@ module TSOS {
             const table = <HTMLTableElement> document.getElementById("taMemory");
             // Loop through all programs in sequence
             for (let loadedProgramIndex = 0; loadedProgramIndex < _MemoryManager.maxLoadedPrograms; loadedProgramIndex++) {
-                console.log(_MemoryManager.mainMemory + " test 3 " + _MemoryManager.test)
+                // Get the source memory from the parition in main memory
                 const memoryArray = _MemoryManager.mainMemory[loadedProgramIndex].source;
 
                 // adjust rowIndex WRT loaded program index
@@ -168,16 +168,19 @@ module TSOS {
     
                 // Loop through the memory array to display it
                 while (rowIndex < Math.ceil(_MemoryManager.limit/8)*(loadedProgramIndex + 1)){
-                    const slicedArrayLength = memoryArray.slice((rowIndex-(32 *loadedProgramIndex))*8, (rowIndex-(32 *loadedProgramIndex))*8 + 8).length;
+                    const slicedArrayLength = memoryArray.slice((rowIndex-(32*loadedProgramIndex))*8, (rowIndex-(32*loadedProgramIndex))*8 + 8).length;
+                    // Add one for the row label element
                     for (let columnIndex=1; columnIndex < slicedArrayLength + 1; columnIndex++){
                         var cell = table.rows[rowIndex].cells[columnIndex];
-                        cell.innerText = memoryArray[rowIndex*8 + columnIndex - 1].codeString;
+                        
+                        var elementIndex = (rowIndex-(32 *loadedProgramIndex))*8 + columnIndex - 1;
+                        cell.innerText = memoryArray[elementIndex].codeString;
                         
                         // Color the table element text
-                        if (memoryArray[rowIndex*8 + columnIndex - 1].currentOperator){
+                        if (memoryArray[elementIndex].currentOperator){
                             cell.style.color = "#e10544"; // Terraria Red
                         }
-                        else if (memoryArray[rowIndex*8 + columnIndex - 1].currentOperand){
+                        else if (memoryArray[elementIndex].currentOperand){
                             cell.style.color = "#f29091"; // Terraria Light Red
                         }
                         else {
@@ -321,7 +324,6 @@ module TSOS {
         public static hostBtnToggleStep_click(btn): void {
             // To change the button color on click
             var style = document.getElementById('btnToggleStepMode').style;
-            console.log(style.backgroundColor)
             // On initialization, the buttion background color is "", ... strangely
             if (style.backgroundColor == "green" || style.backgroundColor == "") {
                 style.backgroundColor = "red";

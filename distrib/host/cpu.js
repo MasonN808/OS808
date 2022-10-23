@@ -183,8 +183,8 @@ var TSOS;
                         // console.log(this.PC)
                         // console.log(_Memory.limit)
                         // -1 since _Memory.limit = 256 not 255
-                        if (parseInt(branch, 16) > _Memory.limit - this.PC) {
-                            this.updatePC((parseInt(branch, 16) + this.PC) - _Memory.limit + 2);
+                        if (parseInt(branch, 16) > _MemoryManager.limit - this.PC) {
+                            this.updatePC((parseInt(branch, 16) + this.PC) - _MemoryManager.limit + 2);
                         }
                         else {
                             this.updatePC(parseInt(branch, 16) + this.PC + 2);
@@ -305,7 +305,7 @@ var TSOS;
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
             // Update the IR given the current PC
             this.IR = TSOS.MemoryAccessor.readMemory(this.PID, this.PC).codeString;
-            pcb.intermediateRepresentation = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
+            pcb.intermediateRepresentation = TSOS.MemoryAccessor.readMemory(this.PID, this.PC).codeString;
         }
     }
     TSOS.Cpu = Cpu;

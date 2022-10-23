@@ -14,11 +14,13 @@ var TSOS;
         //
         krnBootstrap() {
             TSOS.Control.hostLog("bootstrap", "host"); // Use hostLog because we ALWAYS want this, even if _Trace is off.
+            _MemoryManager = new TSOS.MemoryManager();
+            _MemoryManager.init();
+            console.log(_MemoryManager.mainMemory + " test 2 " + _MemoryManager.test);
             // Initialize the memory
             TSOS.Control.hostMemoryInit();
             // Initialize the CPU
             TSOS.Control.hostCpuInit();
-            _MemoryManager = new TSOS.MemoryManager();
             // Initialize our global queues.
             _KernelInterruptQueue = new TSOS.Queue(); // A (currently) non-priority queue for interrupt requests (IRQs).
             _KernelBuffers = new Array(); // Buffers... for the kernel.

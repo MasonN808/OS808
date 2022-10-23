@@ -362,10 +362,9 @@ var TSOS;
                     }
                 }
                 if (!found_invalid) {
-                    console.log("valid");
                     // Check that the loaded number of OP codes is within memory limit
                     // Do /2 since its counting single character length
-                    if (removed_white_space_input_text.length / 2 > _Memory.limit) {
+                    if (removed_white_space_input_text.length / 2 > _MemoryManager.limit) {
                         // Display warning
                         _StdOut.putText("Program too large");
                     }
@@ -377,14 +376,20 @@ var TSOS;
                             loadedSource.push(new TSOS.OpCode(removed_white_space_input_text.substring(index, index + 2)));
                         }
                         // Populate the rest of the array with 00s up to the memory limit
-                        for (let index = removed_white_space_input_text.length; index < _Memory.limit * 2; index += 2) {
+                        for (let index = removed_white_space_input_text.length; index < _MemoryManager.limit * 2; index += 2) {
                             loadedSource.push(new TSOS.OpCode("00"));
                         }
-                        _Memory.source = loadedSource;
+                        // Create a new instance of memory to load the source into
+                        var toBeLoadedMemory = new TSOS.Memory();
+                        // write the new source into memory
+                        toBeLoadedMemory = TSOS.MemoryAccessor.rewriteAllMemory(toBeLoadedMemory, loadedSource);
+                        // Check that the the program can fit in a memory partition and load it, if can
+                        _MemoryManager.loadProgramInMemory(toBeLoadedMemory);
+                        // _Memory.source = loadedSource;
+                        // Assign a PID
+                        _MemoryManager.assignPID(loadedSource);
                         // Display the memory
                         TSOS.Control.hostMemory();
-                        // Assign a PID
-                        _MemoryManager.assignPID();
                         // Output the PID
                         _StdOut.putText("Process ID: " + (_MemoryManager.PIDCounter - 1));
                     }

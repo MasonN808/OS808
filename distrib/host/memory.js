@@ -1,14 +1,24 @@
 var TSOS;
 (function (TSOS) {
     class Memory {
+        // public init(): void {
+        //     // Properties for our memory storage
+        //     this.base = 0;
+        //     this.limit = 256;
+        //     // State that the memory is empty
+        //     this.empty = true;
+        //     // Initialize an array of length limit; this will be the 
+        //     // max size of the sum of the loaded programs
+        //     this.source = new Array<OpCode>(this.limit).fill(new OpCode("00"));
+        // }
         constructor() {
             this.base = 0;
             this.limit = 256;
-        }
-        init() {
             // Properties for our memory storage
             this.base = 0;
             this.limit = 256;
+            // State that the memory is empty
+            this.empty = true;
             // Initialize an array of length limit; this will be the 
             // max size of the sum of the loaded programs
             this.source = new Array(this.limit).fill(new OpCode("00"));

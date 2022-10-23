@@ -1,11 +1,12 @@
 var TSOS;
 (function (TSOS) {
     class MemoryAccessor {
+        // public source: Array<OpCode>;
         static readMemory(pid, pc) {
             // We assume here that the given pid is valid
             const memory = _MemoryManager.PIDMap.get(pid)[0];
             // check number is valid
-            if ((pc < _Memory.base) || (pc > _Memory.limit)) {
+            if ((pc < _MemoryManager.base) || (pc > _MemoryManager.limit)) {
                 // Do BSOD
                 _StdOut.putTextCenter("Shutting down OS...");
                 // Call Kernel shutdown routine.
@@ -22,6 +23,12 @@ var TSOS;
             code = code.toUpperCase();
             // We assume here that the given pid is valid
             _MemoryManager.PIDMap.get(pid)[0][pc] = new TSOS.OpCode(code);
+        }
+        static rewriteAllMemory(memory, source) {
+            for (let index = 0; index < memory.limit; index++) {
+                memory.source[index] = new TSOS.OpCode(source[index]);
+            }
+            return memory;
         }
     }
     TSOS.MemoryAccessor = MemoryAccessor;

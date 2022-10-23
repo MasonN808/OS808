@@ -97,49 +97,59 @@ var TSOS;
         static hostMemoryInit() {
             // Display memory of 00s
             const table = document.getElementById("taMemory");
-            var rowIndex = 0;
-            var leadingZeros = "";
-            var zeroArray = [];
-            // Loop through the memory array to display it
-            while (rowIndex < Math.ceil(_Memory.limit / 8)) {
-                // Check the length to decide whether to add leading zeros
-                if ((rowIndex * 8).toString(16).length === 1) {
-                    leadingZeros = "0";
+            // Loop through all programs
+            for (let loadedProgramIndex = 0; loadedProgramIndex < _MemoryManager.maxLoadedPrograms; loadedProgramIndex++) {
+                var rowIndex = 0 + (32 * loadedProgramIndex);
+                var leadingZeros = "";
+                var zeroArray = [];
+                // Loop through the memory array to display it
+                while (rowIndex < Math.ceil(_MemoryManager.limit / 8) * (loadedProgramIndex + 1)) {
+                    // Check the length to decide whether to add leading zeros
+                    if ((rowIndex * 8).toString(16).length === 1) {
+                        leadingZeros = "0";
+                    }
+                    var row = table.insertRow(-1);
+                    // Use .toString(16) to turn int into hex
+                    // Insert the row label
+                    row.insertCell(0).innerHTML = leadingZeros + (rowIndex * 8).toString(16);
+                    for (let columnIndex = 1; columnIndex < 9; columnIndex++) {
+                        row.insertCell(columnIndex).innerHTML = "00";
+                    }
+                    rowIndex += 1;
+                    // Reset pointers for next line
+                    leadingZeros = "";
+                    zeroArray = [];
                 }
-                var row = table.insertRow(-1);
-                // Use .toString(16) to turn int into hex 
-                row.insertCell(0).innerHTML = leadingZeros + (rowIndex * 8).toString(16);
-                for (let columnIndex = 1; columnIndex < 9; columnIndex++) {
-                    row.insertCell(columnIndex).innerHTML = "00";
-                }
-                rowIndex += 1;
-                // Reset pointers for next line
-                leadingZeros = "";
-                zeroArray = [];
             }
         }
         static hostMemory() {
             // Access the memory and display it
             const table = document.getElementById("taMemory");
-            const memoryArray = _Memory.source;
-            var rowIndex = 0;
-            // Loop through the memory array to display it
-            while (rowIndex < Math.ceil(_Memory.limit / 8)) {
-                const slicedArrayLength = memoryArray.slice(rowIndex * 8, rowIndex * 8 + 8).length;
-                for (let columnIndex = 1; columnIndex < slicedArrayLength + 1; columnIndex++) {
-                    var cell = table.rows[rowIndex].cells[columnIndex];
-                    cell.innerText = memoryArray[rowIndex * 8 + columnIndex - 1].codeString;
-                    if (memoryArray[rowIndex * 8 + columnIndex - 1].currentOperator) {
-                        cell.style.color = "#e10544"; // Terraria Red
+            // Loop through all programs in sequence
+            for (let loadedProgramIndex = 0; loadedProgramIndex < _MemoryManager.maxLoadedPrograms; loadedProgramIndex++) {
+                console.log(_MemoryManager.mainMemory + " test 3 " + _MemoryManager.test);
+                const memoryArray = _MemoryManager.mainMemory[loadedProgramIndex].source;
+                // adjust rowIndex WRT loaded program index
+                var rowIndex = 0 + (32 * loadedProgramIndex);
+                // Loop through the memory array to display it
+                while (rowIndex < Math.ceil(_MemoryManager.limit / 8) * (loadedProgramIndex + 1)) {
+                    const slicedArrayLength = memoryArray.slice((rowIndex - (32 * loadedProgramIndex)) * 8, (rowIndex - (32 * loadedProgramIndex)) * 8 + 8).length;
+                    for (let columnIndex = 1; columnIndex < slicedArrayLength + 1; columnIndex++) {
+                        var cell = table.rows[rowIndex].cells[columnIndex];
+                        cell.innerText = memoryArray[rowIndex * 8 + columnIndex - 1].codeString;
+                        // Color the table element text
+                        if (memoryArray[rowIndex * 8 + columnIndex - 1].currentOperator) {
+                            cell.style.color = "#e10544"; // Terraria Red
+                        }
+                        else if (memoryArray[rowIndex * 8 + columnIndex - 1].currentOperand) {
+                            cell.style.color = "#f29091"; // Terraria Light Red
+                        }
+                        else {
+                            cell.style.color = "black";
+                        }
                     }
-                    else if (memoryArray[rowIndex * 8 + columnIndex - 1].currentOperand) {
-                        cell.style.color = "#f29091"; // Terraria Light Red
-                    }
-                    else {
-                        cell.style.color = "black";
-                    }
+                    rowIndex += 1;
                 }
-                rowIndex += 1;
             }
         }
         static hostProcessesInit(inputPid) {
@@ -221,8 +231,8 @@ var TSOS;
             _CPU = new TSOS.Cpu(); // Note: We could simulate multi-core systems by instantiating more than one instance of the CPU here.
             _CPU.init(); //       There's more to do, like dealing with scheduling and such, but this would be a start. Pretty cool.
             // Also initialize the memory
-            _Memory = new TSOS.Memory();
-            _Memory.init();
+            // _Memory	= new Memory();
+            // _Memory.init();
             _MemoryAccessor = new TSOS.MemoryAccessor();
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(TSOS.Devices.hostClockPulse, CPU_CLOCK_INTERVAL);

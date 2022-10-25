@@ -151,6 +151,14 @@ textarea {
   padding: 0;
 }
 
+.svgText {
+  fill: white;
+  stroke: black;
+  stroke-width: 5px;
+  stroke-linejoin: round;
+  paint-order: stroke;
+}
+
 /* Terraria Font */
 
 @font-face {

@@ -41,7 +41,6 @@ module TSOS {
             var foundValidSlot = false;
             // Check if we can load the source into memory and load, if possible, greedily
             for (let index = 0; index < _MemoryManager.maxLoadedPrograms; index++) {
-                // if (this.mainMemory[index] == null || typeof this.mainMemory[index] === 'undefined' || this.mainMemory[index].empty) {
                 if (this.mainMemory[index].empty) {
                     this.mainMemory[index] = loadedProgram;
                     this.mainMemory[index].empty = false;
@@ -50,6 +49,9 @@ module TSOS {
                 }
             }
             if (foundValidSlot) {
+                // Apply the PID to memory
+                loadedProgram.PID = this.PIDCounter;
+                // and apply PID to PCB
                 this.assignPID(loadedProgram);
             }
             else {
@@ -63,6 +65,17 @@ module TSOS {
                 // Create a new memory instance at every partition of main memory
                 this.mainMemory[memoryPartitionIndex] = new Memory();
             }
+        }
+        
+        // Clears all memory partitions in main memory
+        public clearMainMemory(): void {
+            for (let memoryPartitionIndex = 0; memoryPartitionIndex < this.maxLoadedPrograms; memoryPartitionIndex++) {
+                if (this.PIDMap.has(this.mainMemory[memoryPartitionIndex].PID)) {
+                    // Remove the memory and PCB from hash table
+                    this.PIDMap.delete(this.mainMemory[memoryPartitionIndex].PID)
+                }
+            }
+            this.initializeMainMemory();
         }
 
         public removeProgramInMemory(targetProgram: Memory): void {

@@ -29,7 +29,6 @@ var TSOS;
             var foundValidSlot = false;
             // Check if we can load the source into memory and load, if possible, greedily
             for (let index = 0; index < _MemoryManager.maxLoadedPrograms; index++) {
-                // if (this.mainMemory[index] == null || typeof this.mainMemory[index] === 'undefined' || this.mainMemory[index].empty) {
                 if (this.mainMemory[index].empty) {
                     this.mainMemory[index] = loadedProgram;
                     this.mainMemory[index].empty = false;
@@ -38,6 +37,9 @@ var TSOS;
                 }
             }
             if (foundValidSlot) {
+                // Apply the PID to memory
+                loadedProgram.PID = this.PIDCounter;
+                // and apply PID to PCB
                 this.assignPID(loadedProgram);
             }
             else {
@@ -51,12 +53,20 @@ var TSOS;
                 this.mainMemory[memoryPartitionIndex] = new TSOS.Memory();
             }
         }
+        // Clears all memory partitions in main memory
+        clearMainMemory() {
+            for (let memoryPartitionIndex = 0; memoryPartitionIndex < this.maxLoadedPrograms; memoryPartitionIndex++) {
+                if (this.PIDMap.has(this.mainMemory[memoryPartitionIndex].PID)) {
+                    // Remove the memory and PCB from hash table
+                    this.PIDMap.delete(this.mainMemory[memoryPartitionIndex].PID);
+                }
+            }
+            this.initializeMainMemory();
+        }
         removeProgramInMemory(targetProgram) {
             for (let memoryPartitionIndex = 0; memoryPartitionIndex < _MemoryManager.maxLoadedPrograms; memoryPartitionIndex++) {
-                console.log("LSKDJFLJ");
-                // TODO: remove the memory and clear
+                // Check if the target Program is the same Memory object as any Memory partition in main memory
                 if (Object.is(targetProgram, this.mainMemory[memoryPartitionIndex])) {
-                    console.log("IN");
                     this.mainMemory[memoryPartitionIndex] = new TSOS.Memory();
                     break;
                 }

@@ -12,8 +12,6 @@
      ------------ */
 
 module TSOS {
-
-    
     export class Cpu {
         public lastPC: number;
 
@@ -24,7 +22,8 @@ module TSOS {
                     public Yreg: number = 0,
                     public Zflag: number = 0,
                     public isExecuting: boolean = false,
-                    public PID: number = null) {
+                    public PID: number = null,
+                    public currentQuantum: number = 1) {
 
         }
 
@@ -38,10 +37,30 @@ module TSOS {
             this.isExecuting = false;
             this.PID = null;
             this.lastPC = 0;
+            this.currentQuantum = 0;
         }
 
         public cycle(): void {
             _Kernel.krnTrace('CPU cycle');
+            console.log(_ReadyQueue)
+
+            if (this.PID === null) {
+                this.PID = _ReadyQueue.dequeue();
+                console.log(this.PID)
+                this.calibrateCPUandPCB(this.PID);
+            }
+
+            // Issue a context switch if process hits quantum level
+            if (this.currentQuantum === _Scheduler.quantum) {
+                // Check that ready queue is not empty
+                if (!_ReadyQueue.isEmpty()) {
+                    // Reset the currentquantum to 0
+                    this.resetQuantum();
+                    // Pull the PID from the enqueued process from the ready queue
+                    this.PID = _Scheduler.contextSwitch(this.PID);
+                    this.calibrateCPUandPCB(this.PID);
+                }
+            }
 
             // Get the Op code given the pid and pc
             var opCode = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
@@ -298,27 +317,29 @@ module TSOS {
                 
                 // Check for the end of program marker
                 case ("00"):
-                    // Remove the memory partition from main memory
-                    _MemoryManager.removeProgramInMemory(_MemoryManager.PIDMap.get(this.PID)[0])
+                    // NOTE: Dont need to remove from the ready queue, since it has already been done due to queue structure
 
-                    // Clear the PCB
-                    TSOS.Control.hostRemoveProcess(this.PID);
-
-                    // Remove the PID from the hash table in the memory manager
-                    _MemoryManager.PIDMap.delete(this.PID);
+                    // // Remove the memory partition from main memory
+                    // _MemoryManager.removeProgramInMemory(_MemoryManager.PIDMap.get(this.PID)[0])
+                    // // Clear the PCB
+                    // TSOS.Control.hostRemoveProcess(this.PID);
+                    // // Remove the PID from the hash table in the memory manager
+                    // _MemoryManager.PIDMap.delete(this.PID);
+                    _MemoryManager.removePIDFromEverywhere(this.PID);
 
                     // Reset all CPU pointers for next executing program
-                    _CPU.init();
-
-                    exitProgram = true;
+                    this.PID = null;
+                    console.log(this.PID);
                     
-                    // TSOS.Control.hostCpu();
-
-                    // TSOS.Control.hostMemory();
+                    // Check if the ready queue is empty to determine whether to completly stop CPU execution
+                    if (_ReadyQueue.isEmpty()){
+                        exitProgram = true;
+                        _CPU.init(); // turns .isExecuting to false
+                    }
                     break;
             }
             
-            pcb.programCounter = this.lastPC;
+            // pcb.programCounter = this.lastPC;
             
             // Now update the displayed PCB
             if (!exitProgram) {
@@ -328,16 +349,35 @@ module TSOS {
             TSOS.Control.hostCpu();
             TSOS.Control.hostMemory();
 
-            // Reset the operator and operand pointers for coloring text
-            if (entered_D0) {
-                TSOS.MemoryAccessor.readMemory(this.PID, this.lastPC + 1).currentOperand = false;
+            if (this.PID !== null) {
+                // Reset the operator and operand pointers for coloring text
+                if (entered_D0) {
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.lastPC + 1).currentOperand = false;
+                }
+                else {
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC - 1).currentOperand = false;
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC - 2).currentOperand = false;
+                }
+                
+                opCode.currentOperator = false;
+    
+                // update the quantum
+                this.updateQuantum();
             }
-            else {
-                TSOS.MemoryAccessor.readMemory(this.PID, this.PC - 1).currentOperand = false;
-                TSOS.MemoryAccessor.readMemory(this.PID, this.PC - 2).currentOperand = false;
-            }
-            
-            opCode.currentOperator = false;
+
+        }
+
+        private calibrateCPUandPCB(targetPID: number): void {
+            const pcb = _MemoryManager.PIDMap.get(targetPID)[1];
+
+            this.PC = pcb.programCounter;
+            this.lastPC = pcb.lastProgramCounter;
+            this.IR = pcb.intermediateRepresentation;
+            this.Acc = pcb.Acc;
+            this.Xreg = pcb.Xreg;
+            this.Yreg = pcb.Yreg;
+            this.Zflag = pcb.Zflag;
+            this.currentQuantum = pcb.currentQuantum;
         }
 
         private changePC(change: number): void {
@@ -345,9 +385,9 @@ module TSOS {
 
             // Keep track of this to display on PCB without delay
             this.lastPC = this.PC;
+            pcb.lastProgramCounter = this.PC;
             
             this.PC += change;
-
             pcb.programCounter += change;
         }
 
@@ -356,7 +396,8 @@ module TSOS {
 
             // Keep track of this to display on PCB without delay
             this.lastPC = this.PC;
-            
+            pcb.lastProgramCounter = this.PC;
+
             this.PC = absolute;
             pcb.programCounter = absolute;
         }
@@ -369,8 +410,10 @@ module TSOS {
             pcb.Acc += parseInt(addedNum, 16);
         }
 
-        private updateAcc(newAccAsHex: string, accumulate = false): void {
+        private updateAcc(newAccAsHex: string): void {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+
+            // parse string to an int to store in Accumulator
             this.Acc = parseInt(newAccAsHex, 16);
             pcb.Acc = parseInt(newAccAsHex, 16);
         }
@@ -379,7 +422,7 @@ module TSOS {
         private updateX(newXAsHex: string): void {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
 
-            // parse string to an int to store in accumulator
+            // parse string to an int to store in X register
             this.Xreg = parseInt(newXAsHex, 16);
             pcb.Xreg = parseInt(newXAsHex, 16);
         }
@@ -387,7 +430,7 @@ module TSOS {
         private updateY(newYAsHex: string): void {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
 
-            // parse string to an int to store in accumulator
+            // parse string to an int to store in Y register
             this.Yreg = parseInt(newYAsHex, 16);
             pcb.Yreg = parseInt(newYAsHex, 16);
         }
@@ -395,7 +438,7 @@ module TSOS {
         private updateZ(newZ: number): void {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
 
-            // parse string to an int to store in accumulator
+            // parse string to an int to store in Z flag
             this.Zflag = newZ;
             pcb.Zflag = newZ;
         }
@@ -406,6 +449,23 @@ module TSOS {
             // Update the IR given the current PC
             this.IR = TSOS.MemoryAccessor.readMemory(this.PID, this.PC).codeString;
             pcb.intermediateRepresentation = TSOS.MemoryAccessor.readMemory(this.PID, this.PC).codeString;
+        }
+
+        private updateQuantum(): void {
+            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+
+            // Update the quantum pointers
+            this.currentQuantum += 1;
+            pcb.currentQuantum += 1;
+        }
+
+
+        private resetQuantum(): void {
+            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+
+            // Reset the quantum pointers
+            this.currentQuantum = 0;
+            pcb.currentQuantum = 0;
         }
     }
 }

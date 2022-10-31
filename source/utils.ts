@@ -58,5 +58,10 @@ module TSOS {
             }     
             return str; 
         }
+        
+        public static removeListElement(list: number[], target: number) {
+            list = list.filter(item => item !== target);
+            return list;
+        }
     }
 }

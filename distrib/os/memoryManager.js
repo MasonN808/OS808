@@ -1,6 +1,5 @@
 var TSOS;
 (function (TSOS) {
-    // TODO: Finish this
     class MemoryManager {
         constructor() {
             this.PIDCounter = 1;
@@ -27,7 +26,7 @@ var TSOS;
         }
         loadProgramInMemory(loadedProgram) {
             var foundValidSlot = false;
-            // Check if we can load the source into memory and load, if possible, greedily
+            // Check if we can load the source into memory, if possible, greedily
             for (let index = 0; index < _MemoryManager.maxLoadedPrograms; index++) {
                 if (this.mainMemory[index].empty) {
                     this.mainMemory[index] = loadedProgram;
@@ -37,8 +36,10 @@ var TSOS;
                 }
             }
             if (foundValidSlot) {
-                // Apply the PID to memory
+                // Apply the PID to memory object
                 loadedProgram.PID = this.PIDCounter;
+                // Add it to the end of resident list
+                _ResidentList.push(loadedProgram.PID);
                 // and apply PID to PCB
                 this.assignPID(loadedProgram);
             }
@@ -71,6 +72,15 @@ var TSOS;
                     break;
                 }
             }
+        }
+        removePIDFromEverywhere(targetPID) {
+            // Clear the PCB
+            TSOS.Control.hostRemoveProcess(targetPID);
+            // Remove the memory partition from main memory
+            _MemoryManager.removeProgramInMemory(_MemoryManager.PIDMap.get(targetPID)[0]);
+            // Remove the PID from the hash table in the memory manager to prevent from running again
+            _MemoryManager.PIDMap.delete(targetPID);
+            // Note: the CPU.init() will remove the process from ready queue
         }
     }
     TSOS.MemoryManager = MemoryManager;

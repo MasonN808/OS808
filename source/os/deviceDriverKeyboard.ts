@@ -57,10 +57,8 @@ module TSOS {
                             _Console.advanceLine();
                             _OsShell.putPrompt();
 
-                            // Clear the PCB
-                            TSOS.Control.hostRemoveProcess(_CPU.PID);
-                            // Remove the PID from the hash table in the memory manager to prevent from running again
-                            _MemoryManager.PIDMap.delete(_CPU.PID);
+                            _MemoryManager.removePIDFromEverywhere(_CPU.PID);
+                            // Note: the CPU.init() will remove the process from ready queue
                             // Reinitilaize CPU for next process
                             _CPU.init();
                         }

@@ -72,6 +72,12 @@ var TSOS;
             // clearmem
             sc = new TSOS.ShellCommand(this.shellClearMem, "clearmem", "- clears all memory partitions");
             this.commandList[this.commandList.length] = sc;
+            // ps
+            sc = new TSOS.ShellCommand(this.shellPs, "ps", "- displays all processes and their states");
+            this.commandList[this.commandList.length] = sc;
+            // quantum <int>
+            sc = new TSOS.ShellCommand(this.shellQuantum, "quantum", "- sets the quantum for CPU scheduling");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             // Display the initial prompt.
@@ -268,6 +274,13 @@ var TSOS;
                         break;
                     case "clearmem":
                         _StdOut.putText("clears all memory partitions");
+                        break;
+                    case "ps":
+                        _StdOut.putText("displays all processes and their states");
+                        break;
+                    case "quantum":
+                        _StdOut.putText("sets the Round Robin quantum for CPU scheduling");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -400,14 +413,20 @@ var TSOS;
             }
         }
         shellRun(args) {
-            if (args.length > 0) {
+            if (args.length === 1) {
                 if (TSOS.Utils.isInt(args[0])) {
                     const inputPid = parseInt(args[0]);
                     // Try and find the input PID in the hashtable
-                    if (_MemoryManager.PIDMap.has(inputPid)) {
+                    // if (_MemoryManager.PIDMap.has(inputPid)) {
+                    // See if process is in resident list
+                    if (_ResidentList.indexOf(inputPid) > -1) {
                         TSOS.Control.hostProcessesInit(inputPid);
+                        // Enqueue the processID to ready queue
+                        _ReadyQueue.enqueue(inputPid);
+                        // Remove the processID from the resident list
+                        _ResidentList = TSOS.Utils.removeListElement(_ResidentList, inputPid);
                         // Change the PID pointer for the CPU
-                        _CPU.PID = inputPid;
+                        // _CPU.PID = inputPid;
                         // Tell the CPU that is is executing
                         _CPU.isExecuting = true;
                     }
@@ -426,6 +445,23 @@ var TSOS;
         shellClearMem() {
             _MemoryManager.clearMainMemory();
             TSOS.Control.hostMemory();
+        }
+        shellPs() {
+        }
+        shellQuantum(args) {
+            // Check that input is an int convertable string
+            if (args.length === 1) {
+                if (TSOS.Utils.isInt(args[0])) {
+                    // Change the quantum in global scheduler
+                    _Scheduler.changeQuantum(parseInt(args[0]));
+                }
+                else {
+                    _StdOut.putText("Invalid arguement.  Usage: quantum <int>.");
+                }
+            }
+            else {
+                _StdOut.putText("Usage: quantum <int>");
+            }
         }
     }
     TSOS.Shell = Shell;

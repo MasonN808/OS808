@@ -127,6 +127,18 @@ module TSOS {
                 "- clears all memory partitions");
             this.commandList[this.commandList.length] = sc;
 
+            // ps
+            sc = new ShellCommand(this.shellPs,
+                "ps",
+                "- displays all processes and their states");
+            this.commandList[this.commandList.length] = sc;
+
+            // quantum <int>
+            sc = new ShellCommand(this.shellQuantum,
+                "quantum",
+                "- sets the quantum for CPU scheduling");
+            this.commandList[this.commandList.length] = sc;
+
 
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -300,59 +312,68 @@ module TSOS {
                         break;
 
                     case "shutdown":
-                        _StdOut.putText("Shuts down the Kernel")
+                        _StdOut.putText("Shuts down the Kernel");
                         break;
 
                     case "cls":
-                        _StdOut.putText("clears the screen")
+                        _StdOut.putText("clears the screen");
                         break;
 
                     case "trace":
-                        _StdOut.putText("Switches the host log on and off")
+                        _StdOut.putText("Switches the host log on and off");
                         break;
 
                     case "rot13":
-                        _StdOut.putText("Encrypts a string into another string")
+                        _StdOut.putText("Encrypts a string into another string");
                         break;
 
                     case "prompt":
-                        _StdOut.putText("Changes the prompt of the console")
+                        _StdOut.putText("Changes the prompt of the console");
                         break;
 
                     case "date":
-                        _StdOut.putText("Outputs the current date and time")
+                        _StdOut.putText("Outputs the current date and time");
                         break;
 
                     case "whereami":
-                        _StdOut.putText("Gives an insightful message about the user's location")
+                        _StdOut.putText("Gives an insightful message about the user's location");
                         break;
                     
                     case "howareu":
-                        _StdOut.putText("Gives insightful information about the OS")
+                        _StdOut.putText("Gives insightful information about the OS");
                         break;
 
                     case "whoismason":
-                        _StdOut.putText("Gives website url of Mason")
+                        _StdOut.putText("Gives website url of Mason");
                         break;
 
                     case "status":
-                        _StdOut.putText("Pastes a status message provided by the user to the display")
+                        _StdOut.putText("Pastes a status message provided by the user to the display");
                         break;
                     
                     case "bsod":
-                        _StdOut.putText("Does blue screen of death")
+                        _StdOut.putText("Does blue screen of death");
                         break;
 
                     case "load":
-                        _StdOut.putText("Loads and validates the input code")
+                        _StdOut.putText("Loads and validates the input code");
                         break;
 
                     case "run":
-                        _StdOut.putText("runs the input code at <pid>")
+                        _StdOut.putText("runs the input code at <pid>");
                         break;
 
                     case "clearmem":
-                        _StdOut.putText("clears all memory partitions")
+                        _StdOut.putText("clears all memory partitions");
+                        break;
+                    
+                    case "ps":
+                        _StdOut.putText("displays all processes and their states");
+                        break;
+                    
+                    case "quantum":
+                        _StdOut.putText("sets the Round Robin quantum for CPU scheduling");
+                        break;
 
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -507,15 +528,21 @@ module TSOS {
         }
 
         public shellRun(args: string[]) {
-            if (args.length > 0) {
+            if (args.length === 1) {
                 if (TSOS.Utils.isInt(args[0])) {
                     const inputPid = parseInt(args[0])
-
                     // Try and find the input PID in the hashtable
-                    if (_MemoryManager.PIDMap.has(inputPid)) {
+                    // if (_MemoryManager.PIDMap.has(inputPid)) {
+
+                    // See if process is in resident list
+                    if (_ResidentList.indexOf(inputPid) > -1) {
                         TSOS.Control.hostProcessesInit(inputPid);
+                        // Enqueue the processID to ready queue
+                        _ReadyQueue.enqueue(inputPid);
+                        // Remove the processID from the resident list
+                        _ResidentList = TSOS.Utils.removeListElement(_ResidentList, inputPid);
                         // Change the PID pointer for the CPU
-                        _CPU.PID = inputPid;
+                        // _CPU.PID = inputPid;
                         // Tell the CPU that is is executing
                         _CPU.isExecuting = true;
                     } 
@@ -536,6 +563,26 @@ module TSOS {
         public shellClearMem() {
             _MemoryManager.clearMainMemory();
             TSOS.Control.hostMemory();
+        }
+        
+        public shellPs() {
+            
+        }
+
+        public shellQuantum(args: string[]) {
+            // Check that input is an int convertable string
+            if (args.length === 1) {
+                if (TSOS.Utils.isInt(args[0])) {
+                    // Change the quantum in global scheduler
+                    _Scheduler.changeQuantum(parseInt(args[0]));
+                } 
+                else {
+                    _StdOut.putText("Invalid arguement.  Usage: quantum <int>.");
+                }
+            } 
+            else {
+                _StdOut.putText("Usage: quantum <int>");
+            }
         }
     }
 }

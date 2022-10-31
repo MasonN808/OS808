@@ -176,6 +176,13 @@ var TSOS;
             const table = document.getElementById("taProcesses");
             // Get the PCB from the input PID in the hashtable
             var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
+            // give the appropriate rowIndex
+            var addedRowIndex = 1;
+            for (const value of _MemoryManager.PIDMap.values()) {
+                const pcb = value[1];
+                pcb.rowIndex = addedRowIndex;
+                addedRowIndex += 1;
+            }
             table.rows[pcb.rowIndex].cells[0].innerHTML = pcb.processId;
             table.rows[pcb.rowIndex].cells[1].innerHTML = pcb.programCounter;
             table.rows[pcb.rowIndex].cells[2].innerHTML = pcb.intermediateRepresentation;

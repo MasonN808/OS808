@@ -55,6 +55,10 @@ var TSOS;
             }
             return str;
         }
+        static removeListElement(list, target) {
+            list = list.filter(item => item !== target);
+            return list;
+        }
     }
     TSOS.Utils = Utils;
 })(TSOS || (TSOS = {}));

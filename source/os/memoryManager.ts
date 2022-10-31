@@ -1,5 +1,5 @@
 module TSOS {
-    // TODO: Finish this
+
     export class MemoryManager {
         public PIDCounter: number;
         // Create a hash map for the PIDs and PCBs
@@ -39,7 +39,7 @@ module TSOS {
 
         public loadProgramInMemory(loadedProgram: Memory): void {
             var foundValidSlot = false;
-            // Check if we can load the source into memory and load, if possible, greedily
+            // Check if we can load the source into memory, if possible, greedily
             for (let index = 0; index < _MemoryManager.maxLoadedPrograms; index++) {
                 if (this.mainMemory[index].empty) {
                     this.mainMemory[index] = loadedProgram;
@@ -49,8 +49,10 @@ module TSOS {
                 }
             }
             if (foundValidSlot) {
-                // Apply the PID to memory
+                // Apply the PID to memory object
                 loadedProgram.PID = this.PIDCounter;
+                // Add it to the end of resident list
+                _ResidentList.push(loadedProgram.PID)
                 // and apply PID to PCB
                 this.assignPID(loadedProgram);
             }
@@ -86,6 +88,16 @@ module TSOS {
                     break;
                 }
             }
+        }
+
+        public removePIDFromEverywhere(targetPID: number): void {
+            // Clear the PCB
+            TSOS.Control.hostRemoveProcess(targetPID);
+            // Remove the memory partition from main memory
+            _MemoryManager.removeProgramInMemory(_MemoryManager.PIDMap.get(targetPID)[0]);
+            // Remove the PID from the hash table in the memory manager to prevent from running again
+            _MemoryManager.PIDMap.delete(targetPID);
+            // Note: the CPU.init() will remove the process from ready queue
         }
     }
 }

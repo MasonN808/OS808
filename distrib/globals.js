@@ -55,6 +55,10 @@ var _SarcasticMode = false;
 // Global Device Driver Objects - page 12
 var _krnKeyboardDriver = null;
 var _hardwareClockID = null;
+// For scheduling
+var _ReadyQueue = null; // for the running processes
+var _ResidentList = []; // for loaded processes
+var _Scheduler;
 // For testing (and enrichment)...
 var Glados = null; // This is the function Glados() in glados-ip*.js http://alanclasses.github.io/TSOS/test/ .
 var _GLaDOS = null; // If the above is linked in, this is the instantiated instance of Glados.

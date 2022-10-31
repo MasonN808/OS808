@@ -20,9 +20,6 @@ module TSOS {
             _MemoryManager = new MemoryManager();
             _MemoryManager.init();
 
-            // Initialize the scheduler
-            _Scheduler = new Scheduler();
-
             // Initialize the memory
             TSOS.Control.hostMemoryInit();
             // Initialize the CPU
@@ -60,6 +57,9 @@ module TSOS {
             this.krnTrace("Creating and Launching the shell.");
             _OsShell = new Shell();
             _OsShell.init();
+
+            // Initialize the scheduler
+            _Scheduler = new Scheduler();
 
             // Finally, initiate student testing protocol.
             if (_GLaDOS) {

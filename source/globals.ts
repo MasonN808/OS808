@@ -29,10 +29,10 @@ var _CPU: TSOS.Cpu;  // Utilize TypeScript's type annotation system to ensure th
 
 //	Hardware	(host)
 // var	_Memory:	TSOS.Memory;
-var	_MemoryAccessor:	TSOS.MemoryAccessor;
+var	_MemoryAccessor: TSOS.MemoryAccessor;
 
 //	Software	(OS)
-var	_MemoryManager:	any =	null;
+var	_MemoryManager: any =	null;
 
 var _OSclock: number = 0;  // Page 23.
 
@@ -76,8 +76,10 @@ var _krnKeyboardDriver: TSOS.DeviceDriverKeyboard  = null;
 var _hardwareClockID: number = null;
 
 // For scheduling
-var _ReadyQueue: TSOS.Queue = null;
+var _ReadyQueue: TSOS.Queue = null; // for the running processes
+var _ResidentList: number[] = []; // for loaded processes
 var _Scheduler: TSOS.Scheduler;
+
 
 // For testing (and enrichment)...
 var Glados: any = null;  // This is the function Glados() in glados-ip*.js http://alanclasses.github.io/TSOS/test/ .

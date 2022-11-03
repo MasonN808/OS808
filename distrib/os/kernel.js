@@ -8,6 +8,7 @@
      ------------ */
 var TSOS;
 (function (TSOS) {
+    // import { Dispatcher } from './dispatcher'
     class Kernel {
         //
         // OS Startup and Shutdown Routines
@@ -47,8 +48,6 @@ var TSOS;
             this.krnTrace("Creating and Launching the shell.");
             _OsShell = new TSOS.Shell();
             _OsShell.init();
-            // Initialize the scheduler
-            _Scheduler = new TSOS.Scheduler();
             // Finally, initiate student testing protocol.
             if (_GLaDOS) {
                 _GLaDOS.afterStartup();
@@ -123,6 +122,10 @@ var TSOS;
                 case KEYBOARD_IRQ:
                     _krnKeyboardDriver.isr(params); // Kernel mode device driver
                     _StdIn.handleInput();
+                    break;
+                case CONTEXT_SWITCH: // Let the ISR issue a context switch via the dispatchers
+                    // Pull the current PID from the CPU from the enqueued process in the ready queue
+                    TSOS.Dispatcher.contextSwitch(_CPU.PID);
                     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");

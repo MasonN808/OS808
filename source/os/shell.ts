@@ -539,10 +539,9 @@ module TSOS {
                         TSOS.Control.hostProcessesInit(inputPid);
                         // Enqueue the processID to ready queue
                         _ReadyQueue.enqueue(inputPid);
+                        console.log(_ReadyQueue) 
                         // Remove the processID from the resident list
                         _ResidentList = TSOS.Utils.removeListElement(_ResidentList, inputPid);
-                        // Change the PID pointer for the CPU
-                        // _CPU.PID = inputPid;
                         // Tell the CPU that is is executing
                         _CPU.isExecuting = true;
                     } 
@@ -574,7 +573,7 @@ module TSOS {
             if (args.length === 1) {
                 if (TSOS.Utils.isInt(args[0])) {
                     // Change the quantum in global scheduler
-                    _Scheduler.changeQuantum(parseInt(args[0]));
+                    _Scheduler.changeMaxQuantum(parseInt(args[0]));
                 } 
                 else {
                     _StdOut.putText("Invalid arguement.  Usage: quantum <int>.");

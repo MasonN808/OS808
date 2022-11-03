@@ -20,6 +20,7 @@ const TIMER_IRQ: number = 0;  // Pages 23 (timer), 9 (interrupts), and 561 (inte
                               // NOTE: The timer is different from hardware/host clock pulses. Don't confuse these.
 const KEYBOARD_IRQ: number = 1;
 
+const CONTEXT_SWITCH: number = 2;
 
 //
 // Global Variables
@@ -79,6 +80,7 @@ var _hardwareClockID: number = null;
 var _ReadyQueue: TSOS.Queue = null; // for the running processes
 var _ResidentList: number[] = []; // for loaded processes
 var _Scheduler: TSOS.Scheduler;
+// var _Dispatcher: TSOS.Dispatcher;
 
 
 // For testing (and enrichment)...

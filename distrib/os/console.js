@@ -23,7 +23,7 @@ var TSOS;
             this.possible_commands = ["ver", "help", "shutdown", "cls", "man",
                 "trace", "rot13", "prompt", "date", "whereami",
                 "howareu", "whoismason", "status", "bsod", "load", "run",
-                "clearmem"];
+                "clearmem", "runall", "quantum"];
         }
         init() {
             this.clearScreen();

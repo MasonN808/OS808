@@ -127,6 +127,13 @@ module TSOS {
                 "- clears all memory partitions");
             this.commandList[this.commandList.length] = sc;
 
+            // runall
+            sc = new ShellCommand(this.shellRunAll,
+                "runall",
+                "- runs all processes in the resdient queue");
+            this.commandList[this.commandList.length] = sc;
+
+
             // ps
             sc = new ShellCommand(this.shellPs,
                 "ps",
@@ -366,6 +373,10 @@ module TSOS {
                     case "clearmem":
                         _StdOut.putText("clears all memory partitions");
                         break;
+
+                    case "runall":
+                        _StdOut.putText("runs all processes in resident queue");
+                        break;
                     
                     case "ps":
                         _StdOut.putText("displays all processes and their states");
@@ -539,7 +550,6 @@ module TSOS {
                         TSOS.Control.hostProcessesInit(inputPid);
                         // Enqueue the processID to ready queue
                         _ReadyQueue.enqueue(inputPid);
-                        console.log(_ReadyQueue) 
                         // Remove the processID from the resident list
                         _ResidentList = TSOS.Utils.removeListElement(_ResidentList, inputPid);
                         // Tell the CPU that is is executing
@@ -556,12 +566,29 @@ module TSOS {
             else {
                 _StdOut.putText("Usage: run <pid>");
             }
-
         }
 
         public shellClearMem() {
             _MemoryManager.clearMainMemory();
             TSOS.Control.hostMemory();
+        }
+
+        public shellRunAll() {
+            // Check if _ResidentList is empty
+            if (_ResidentList) {
+                for (let index=0; index < _ResidentList.length; index++) {
+                    var resident = _ResidentList[index];
+                    TSOS.Control.hostProcessesInit(resident);
+                    _ReadyQueue.enqueue(resident);
+                    // Tell the CPU that is is executing
+                    _CPU.isExecuting = true;
+                }
+                // Clear the resident list
+                _ResidentList = [];
+            }
+            else {
+                _StdOut.putText("Resident queue is empty: load some program(s)");
+            }
         }
         
         public shellPs() {

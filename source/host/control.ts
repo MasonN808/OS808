@@ -274,6 +274,15 @@ module TSOS {
             // Get the PCB from the input PID in the hashtable
             var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
 
+            // give the appropriate rowIndex
+            var addedRowIndex = 1;
+            // loop through hash map to get just values
+            for (const value of _MemoryManager.PIDMap.values()) {
+                const pcb = value[1];
+                pcb.rowIndex = addedRowIndex;
+                addedRowIndex += 1;
+            }
+
             table.deleteRow(pcb.rowIndex);
 
             // TODO: Move around the processes if there exist more than one in PCB

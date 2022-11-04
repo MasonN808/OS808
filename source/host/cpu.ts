@@ -309,7 +309,6 @@ module TSOS {
 
                     // Reset all CPU pointers for next executing program
                     this.PID = null;
-                    console.log(this.PID);
                     
                     // Check if the ready queue is empty to determine whether to completly stop CPU execution
                     if (_ReadyQueue.isEmpty()){

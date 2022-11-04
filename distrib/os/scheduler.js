@@ -20,10 +20,14 @@ var TSOS;
                 // Check that ready queue is not empty to prevent context switching with itself (ask Alan)
                 // Reset the currentquantum to 0
                 this.resetQuantum();
-                if (!_ReadyQueue.isEmpty()) {
-                    // Enqueue this interrupt on the kernel interrupt queue so that it gets to the Interrupt handler.
-                    _KernelInterruptQueue.enqueue(new TSOS.Interrupt(CONTEXT_SWITCH, []));
-                }
+                // "type-1" indicates that we store the current processes PCB
+                this.issueContextSwitchInterrupt("type-1");
+            }
+        }
+        issueContextSwitchInterrupt(type) {
+            if (!_ReadyQueue.isEmpty()) {
+                // Enqueue this interrupt on the kernel interrupt queue so that it gets to the Interrupt handler.
+                _KernelInterruptQueue.enqueue(new TSOS.Interrupt(CONTEXT_SWITCH, [type]));
             }
         }
     }

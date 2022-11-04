@@ -40,5 +40,23 @@ module TSOS {
             }
             return retVal;
         }
+
+        public has(element: any) {
+            const index = this.q.indexOf(element);
+            if (index > -1){ // the element is in the array
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        
+        public remove(element: any) {
+            const index = this.q.indexOf(element);
+            if (index > -1){ // only splice array when item is found
+                // 2nd parameter means remove one item only
+                this.q.splice(index, 1);
+            }
+        }
     }
 }

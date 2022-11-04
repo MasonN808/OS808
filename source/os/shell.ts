@@ -133,11 +133,22 @@ module TSOS {
                 "- runs all processes in the resdient queue");
             this.commandList[this.commandList.length] = sc;
 
-
             // ps
             sc = new ShellCommand(this.shellPs,
                 "ps",
                 "- displays all processes and their states");
+            this.commandList[this.commandList.length] = sc;
+
+            // kill <pid>
+            sc = new ShellCommand(this.shellKill,
+                "kill",
+                "- kills the current process and wipes its memory");
+            this.commandList[this.commandList.length] = sc;
+
+            // killall
+            sc = new ShellCommand(this.shellKillAll,
+                "killall",
+                "- kills all processes and wipes all memory");
             this.commandList[this.commandList.length] = sc;
 
             // quantum <int>
@@ -381,6 +392,14 @@ module TSOS {
                     case "ps":
                         _StdOut.putText("displays all processes and their states");
                         break;
+
+                    case "kill":
+                        _StdOut.putText("kills the specified process");
+                        break;
+
+                    case "killall":
+                        _StdOut.putText("kills all the running processes");
+                        break;
                     
                     case "quantum":
                         _StdOut.putText("sets the Round Robin quantum for CPU scheduling");
@@ -500,7 +519,8 @@ module TSOS {
                 if (!found_invalid) {
                     // Check that the loaded number of OP codes is within memory limit
                     // Do /2 since its counting single character length
-                    if (removed_white_space_input_text.length / 2 > _MemoryManager.limit) {
+                    // Do +1 since length has offset 1 while limit has offset 0
+                    if (removed_white_space_input_text.length / 2 > _MemoryManager.limit + 1) {
                         // Display warning
                         _StdOut.putText("Program too large");
                     }
@@ -593,6 +613,53 @@ module TSOS {
         
         public shellPs() {
             
+        }
+
+        public shellKill(args: string[]) {
+            if (args.length === 1) {
+                if (TSOS.Utils.isInt(args[0])) {
+                    const pid = parseInt(args[0]);
+                    // See if the pid exists
+                    if (_MemoryManager.PIDMap.has(pid)) {
+                        // See if it the target pid is in the resident list
+                        if (_ResidentList.indexOf(pid) === -1 ) {
+                            // See if its in the CPU; otherwise, it's in the ready queue
+                            if (_CPU.PID === pid) {
+                                // _CPU.PID = null;
+                                _Scheduler.resetQuantum();
+                                // Issue a context switch interrupt
+                                // "type-2" indicates that we DO NOT store the current processes PCB
+                                _Scheduler.issueContextSwitchInterrupt("type-2");
+                                TSOS.Control.hostCpu();
+                            }
+                            // Remove it from the ready queue, otherwise
+                            else {
+                                _ReadyQueue.remove(pid);
+                            }
+                            _StdOut.putText("Process with PID " + pid + " has been terminated wtih memory wiped");
+
+                            _MemoryManager.removePIDFromEverywhere(pid);
+                            // Note: the CPU.init() will remove the process from ready queue
+                            // Reinitilaize CPU for next process
+                            TSOS.Control.hostMemory();
+                            // TSOS.Control.hostProcesses(pid);
+                        }
+                        else {
+                            _StdOut.putText("Can't kill process in resident list");
+                        }
+                    }
+                    else {
+                        // PID does not exist in ready queue or resident list or cpu
+                        _StdOut.putText("Undefined Process ID: " + pid);
+                    }
+                }
+                else {
+                    _StdOut.putText("Invalid arguement.  Usage: kill <pid>.");
+                }
+            } 
+            else {
+                _StdOut.putText("Usage: kill <pid>");
+            }
         }
 
         public shellQuantum(args: string[]) {

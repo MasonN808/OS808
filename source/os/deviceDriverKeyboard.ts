@@ -51,16 +51,11 @@ module TSOS {
                             _OsShell.putPrompt();
                         }
                         else {
-                            _CPU.isExecuting = false;
+                            // Kill the current process using the shell command kill <pid>
                             _Console.advanceLine();
-                            _StdOut.putText("SUCCESS: The process with PID " + _CPU.PID + " has been terminated");
+                            _OsShell.shellKill([_CPU.PID.toString()]);
                             _Console.advanceLine();
                             _OsShell.putPrompt();
-
-                            _MemoryManager.removePIDFromEverywhere(_CPU.PID);
-                            // Note: the CPU.init() will remove the process from ready queue
-                            // Reinitilaize CPU for next process
-                            _CPU.init();
                         }
                     }
                     else {

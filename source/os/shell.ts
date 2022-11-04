@@ -625,11 +625,15 @@ module TSOS {
                         if (_ResidentList.indexOf(pid) === -1 ) {
                             // See if its in the CPU; otherwise, it's in the ready queue
                             if (_CPU.PID === pid) {
-                                // _CPU.PID = null;
+                                // Check if the ready queue is empty to stop the CPU from executing
+                                if (_ReadyQueue.isEmpty()) {
+                                    _CPU.isExecuting = false;
+                                }
                                 _Scheduler.resetQuantum();
                                 // Issue a context switch interrupt
                                 // "type-2" indicates that we DO NOT store the current processes PCB
                                 _Scheduler.issueContextSwitchInterrupt("type-2");
+                                // Update the cpu display
                                 TSOS.Control.hostCpu();
                             }
                             // Remove it from the ready queue, otherwise
@@ -639,10 +643,7 @@ module TSOS {
                             _StdOut.putText("Process with PID " + pid + " has been terminated wtih memory wiped");
 
                             _MemoryManager.removePIDFromEverywhere(pid);
-                            // Note: the CPU.init() will remove the process from ready queue
-                            // Reinitilaize CPU for next process
                             TSOS.Control.hostMemory();
-                            // TSOS.Control.hostProcesses(pid);
                         }
                         else {
                             _StdOut.putText("Can't kill process in resident list");

@@ -53,7 +53,7 @@ module TSOS {
             var opCode = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
             opCode.currentOperator = true;
 
-            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+            // const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
 
             // Update the intermediate representation in PCB and CPU
             this.updateIR();
@@ -356,6 +356,7 @@ module TSOS {
             this.Xreg = pcb.Xreg;
             this.Yreg = pcb.Yreg;
             this.Zflag = pcb.Zflag;
+            // pcb.processState = "Running";
             _Scheduler.quantum = pcb.currentQuantum;
         }
 

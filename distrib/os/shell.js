@@ -457,11 +457,10 @@ var TSOS;
                     var resident = _ResidentList[index];
                     TSOS.Control.hostProcessesInit(resident);
                     _ReadyQueue.enqueue(resident);
-                    // Remove the processID from the resident list
-                    // _ResidentList = TSOS.Utils.removeListElement(_ResidentList, resident);
                     // Tell the CPU that is is executing
                     _CPU.isExecuting = true;
                 }
+                // Clear the resident list
                 _ResidentList = [];
             }
             else {

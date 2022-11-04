@@ -10,8 +10,18 @@ module TSOS {
             // Log the context switch
             _Kernel.krnTrace("Context Switch: process " + currentPID + " switched with process " + dequeuedPID);
 
-            _CPU.PID = dequeuedPID;
+            // Switch from running to ready state for respective pcbs
+            const pcb1 = _MemoryManager.PIDMap.get(currentPID)[1];
+            pcb1.processState = "Ready";
+            // Update the displayed PCB
+            TSOS.Control.hostProcesses(currentPID);
 
+            const pcb2 = _MemoryManager.PIDMap.get(dequeuedPID)[1];
+            pcb2.processState = "Running";
+            // Update the displayed PCB
+            TSOS.Control.hostProcesses(dequeuedPID);
+
+            _CPU.PID = dequeuedPID;
             _CPU.calibratePCBtoCPU(_CPU.PID);
         }
     }

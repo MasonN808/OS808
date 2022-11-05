@@ -481,6 +481,20 @@ var TSOS;
             }
         }
         shellPs() {
+            _StdOut.putText("PID PC   IR  ACC  X  Y  Z");
+            _StdOut.advanceLine();
+            // Make a copy of the ready array
+            const copyReadyArray = Object.assign([], _ReadyQueue.q);
+            // Push the current CPU process pid to the copy of the ready queue before linear traversal
+            copyReadyArray.push(_CPU.PID);
+            // Loop through all PCBs in the ready queue
+            for (const pid of copyReadyArray) {
+                const pcb = _MemoryManager.PIDMap.get(pid)[1];
+                _StdOut.putText(pid + " ".repeat(5 - pcb.programCounter.toString().length) + pcb.programCounter
+                    + " ".repeat(5 - pcb.intermediateRepresentation.toString().length) + pcb.intermediateRepresentation
+                    + " ".repeat(5 - pcb.Acc.toString().length) + pcb.Acc + "  " + pcb.Xreg + "  " + pcb.Yreg + "  " + pcb.Zflag);
+                _StdOut.advanceLine();
+            }
         }
         shellKill(args) {
             if (args.length === 1) {

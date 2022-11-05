@@ -486,39 +486,7 @@ var TSOS;
             if (args.length === 1) {
                 if (TSOS.Utils.isInt(args[0])) {
                     const pid = parseInt(args[0]);
-                    // See if the pid exists
-                    if (_MemoryManager.PIDMap.has(pid)) {
-                        // See if it the target pid is in the resident list
-                        if (_ResidentList.indexOf(pid) === -1) {
-                            // See if its in the CPU; otherwise, it's in the ready queue
-                            if (_CPU.PID === pid) {
-                                // Check if the ready queue is empty to stop the CPU from executing
-                                if (_ReadyQueue.isEmpty()) {
-                                    _CPU.isExecuting = false;
-                                }
-                                _Scheduler.resetQuantum();
-                                // Issue a context switch interrupt
-                                // "type-2" indicates that we DO NOT store the current processes PCB
-                                _Scheduler.issueContextSwitchInterrupt("type-2");
-                                // Update the cpu display
-                                TSOS.Control.hostCpu();
-                            }
-                            // Remove it from the ready queue, otherwise
-                            else {
-                                _ReadyQueue.remove(pid);
-                            }
-                            _StdOut.putText("Process with PID " + pid + " has been terminated wtih memory wiped");
-                            _MemoryManager.removePIDFromEverywhere(pid);
-                            TSOS.Control.hostMemory();
-                        }
-                        else {
-                            _StdOut.putText("Can't kill process in resident list");
-                        }
-                    }
-                    else {
-                        // PID does not exist in ready queue or resident list or cpu
-                        _StdOut.putText("Undefined Process ID: " + pid);
-                    }
+                    _OsShell.killLogic(pid);
                 }
                 else {
                     _StdOut.putText("Invalid arguement.  Usage: kill <pid>.");
@@ -526,6 +494,47 @@ var TSOS;
             }
             else {
                 _StdOut.putText("Usage: kill <pid>");
+            }
+        }
+        shellKillAll() {
+            // Make a copy of the ready array
+            const copyReadyArray = Object.assign([], _ReadyQueue.q);
+            // Push the current CPU process pid to the copy of the ready queue before linear traversal
+            copyReadyArray.push(_CPU.PID);
+            for (const pid of copyReadyArray) {
+                _OsShell.killLogic(pid);
+            }
+        }
+        // Where most of the kill logic for processes is
+        killLogic(pid) {
+            // See if the pid exists
+            if (_MemoryManager.PIDMap.has(pid)) {
+                // See if it the target pid is in the resident list
+                if (_ResidentList.indexOf(pid) === -1) {
+                    // See if its in the CPU; otherwise, it's in the ready queue
+                    if (_CPU.PID === pid) {
+                        // Check if the ready queue is empty to stop the CPU from executing
+                        if (_ReadyQueue.isEmpty()) {
+                            // Reinitialize the CPU and stop from executing
+                            _CPU.init();
+                        }
+                        else {
+                            _Scheduler.resetQuantum();
+                            // Issue a context switch interrupt
+                            // "type-2" indicates that we DO NOT store the current processes PCB
+                            _Scheduler.issueContextSwitchInterrupt("type-2");
+                        }
+                        // Update the cpu display
+                        TSOS.Control.hostCpu();
+                    }
+                    // Remove it from the ready queue, otherwise
+                    else {
+                        _ReadyQueue.remove(pid);
+                    }
+                    _StdOut.putText("Process with PID " + pid + " has been terminated wtih memory wiped");
+                    _MemoryManager.removePIDFromEverywhere(pid);
+                    TSOS.Control.hostMemory();
+                }
             }
         }
         shellQuantum(args) {

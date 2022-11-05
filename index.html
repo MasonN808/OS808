@@ -6,9 +6,10 @@
    <!-- Bootstrap 5 -->
    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" integrity="sha384-y3tfxAZXuh4HwSYylfB+J125MxIs6mR5FOHamPBG064zB+AFeWH94NdvaCBm8qnd" crossorigin="anonymous"> -->
-   <link rel="stylesheet" href="css/tsos.css" type="text/css" media="screen" />
+   <link rel="stylesheet" href="css/tsos2.css" type="text/css" media="screen" />
    <link rel="stylesheet" href="css/tables.css" type="text/css" media="screen" />
    <link rel="stylesheet" href="css/buttons.css" type="text/css" media="screen" />
+   <link rel="stylesheet" href="css/grid.css" type="text/css" media="screen" />
    <title>
       TSOS - a browser-based virtual Operating System in TypeScript
    </title>
@@ -55,43 +56,31 @@
 </head>
 
 <body id="bootstrap-overrides" onload="onDocumentLoad()">
-
-   <!-- For Navigation bar -->
-   <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
-      <div class="container">
-         <a href=" "class="navbar-brand">
-            <!-- <span><img src="css/pylon.gif" height="30px"></span> -->
-            <img src="css/gold_coin.gif" class="pixelated" height="50px">
-            <span style="font-size: 45px; vertical-align: -12px;"class="text-warning">OS808</span>
-         </a>
-         <span class="navbar-text">
-            <div style="display: inline-block;" id="date">
-               <span class="label">Date/Time:</span>
-               <div style="display: inline-block;" id="taDate"></div>
-            </div>
-            <div id="status">
-               <label class="label">
-                  <span class="label">Status:</span>
-                  <div id="taStatus"></div>
-               </label>
-            </div>
-         </span>
-      </div>
-   </nav>
-
+   
    <div class="contatiner">
-      <!-- <div class="divMain">
-         <div id="date">
-            <span class="label">Date/Time:</span>
-            <div id="taDate"></div>
+      <!-- For Navigation bar -->
+      <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+         <div class="container">
+            <a href=" "class="navbar-brand">
+               <!-- <span><img src="css/pylon.gif" height="30px"></span> -->
+               <img src="css/gold_coin.gif" class="pixelated" height="50px">
+               <span style="font-size: 45px; vertical-align: -12px;"class="text-warning">OS808</span>
+            </a>
+            <span class="navbar-text">
+               <div style="display: inline-block;" id="date">
+                  <span class="label">Date/Time:</span>
+                  <div style="display: inline-block;" id="taDate"></div>
+               </div>
+               <div id="status">
+                  <label class="label">
+                     <span class="label">Status:</span>
+                     <div id="taStatus"></div>
+                  </label>
+               </div>
+            </span>
          </div>
-         <div id="status">
-            <label class="label">
-               <span class="label">Status:</span>
-               <div id="taStatus"></div>
-            </label>
-         </div>
-      </div> -->
+      </nav>
+
 
       <div id="divMain">
          <div id="divButtonBar" style="margin:4px; padding: 12px;">
@@ -140,7 +129,7 @@
                   onclick="TSOS.Control.hostBtnStep_click(this);">
          </div>
          
-         <div class="container">
+         <!-- <div class="container">
             <div class="row gx-4 gy-5">
                <div class="col-6">
                   <div id="divConsole">
@@ -263,7 +252,130 @@
                   </div>
                </div>
             </div>
+         </div> -->
+
+         <div class="wrapper">
+               <div class="console">
+                  <div id="divConsole">
+                     <canvas id="display"
+                        width="600px"
+                        height="500px"
+                        tabindex="3">
+                     </canvas>
+                  </div>
+               </div>
+
+               <div class="hostLog">
+                  <div class="card" style="padding: 0; width: 590px;">
+                     <div class="card-header">
+                        <svg width="100px"height="auto"viewbox="0 0 100 22">
+                           <text class="svgText" x="2" y="15">Host Log</text>
+                           </svg>
+                     </div>
+                        <div class="card-body overflow-auto">
+                           <textarea name="taHostLog"
+                                 id  ="taHostLog"
+                                 rows="8"
+                                 cols="80"
+                                 style="resize: none"
+                           ></textarea>
+                        </div>
+                  </div>
+               </div>
+                  
+               <div class="programInput">
+                  <div class="card" style="padding: 0; height: auto;">
+                     <div class="card-header">
+                        <svg width="150px"height="auto"viewbox="0 0 150 22">
+                           <text class="svgText" x="2" y="15">User Program Input</text>
+                           </svg></div>
+                        <div class="card-body overflow-auto">
+                           <textarea name="taProgramInput"
+                                 id  ="taProgramInput"
+                                 rows="5"
+                                 cols="40"
+                                 style="resize: none"
+                           ></textarea>
+                        </div>
+                  </div>
+               </div>
+               
+               <div class="processes">
+                     <div class="card" style="width: 590px; height: 207px;">
+                        <div class="card-header">
+                           <svg width="100px"height="auto"viewbox="0 0 100 22">
+                              <text class="svgText" x="2" y="15">Processes</text>
+                           </svg>
+                           </div>
+                           <div class="card-body overflow-auto" style="height: 212px;">
+                              <span>
+                                 <table name="taProcesses"
+                                 id  ="taProcesses">
+                                    <tr class="tableHeader">
+                                       <th>PID</th>
+                                       <th>PC</th>
+                                       <th>IR</th>
+                                       <th>ACC</th>
+                                       <th>X</th>
+                                       <th>Y</th>
+                                       <th>Z</th>
+                                       <th>Priority</th>
+                                       <th>State</th>
+                                       <th>Location</th>
+                                       <th>Base</th>
+                                       <th>Limit</th>
+                                       <th>Segment</th>
+                                       <th>Quantum</th>
+                                    </tr>
+                                 </table>
+                              </span>
+                           </div>
+                     </div>
+               </div>
+
+               <div class="cpu">
+                  <div class="card h-100" id="cardCPU">
+                     <div class="card-header">
+                        <svg width="100px"height="auto"viewbox="0 0 100 22">
+                           <text class="svgText" x="2" y="15">CPU</text>
+                         </svg>
+                        </div>
+                        <div class="card-body overflow-auto">
+                           <span>
+                              <table name="taCpu"
+                              id  ="taCpu">
+                                 <tr class="tableHeader">
+                                    <th>PC</th>
+                                    <th>IR</th>
+                                    <th>ACC</th>
+                                    <th>X</th>
+                                    <th>Y</th>
+                                    <th>Z</th>
+                                 </tr>
+                              </table>
+                           </span>
+                        </div>
+                  </div>
+               </div>
+
+               <div class="memory">
+                  <div class="card h-100" id="divMemory">
+                     <div class="card-header">
+                        <svg width="100px"height="auto"viewbox="0 0 100 22">
+                           <text class="svgText" x="2" y="15">Memory</text>
+                         </svg></div>
+                        <div class="card-body overflow-auto">
+                           <span>
+                              <table name="taMemory"
+                              id  ="taMemory">
+                              </table>
+                           </span>
+                        </div>
+                  </div>
+               </div>
+            </div>
          </div>
+
       </div>
    </div>
 

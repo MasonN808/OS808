@@ -13,7 +13,7 @@
 var TSOS;
 (function (TSOS) {
     class Cpu {
-        constructor(PC = 0, IR = "00", Acc = 0, Xreg = 0, Yreg = 0, Zflag = 0, isExecuting = false, PID = null) {
+        constructor(PC = 0, IR = "00", Acc = 0, Xreg = 0, Yreg = 0, Zflag = 0, isExecuting = false, PID = null, Quantum) {
             this.PC = PC;
             this.IR = IR;
             this.Acc = Acc;
@@ -22,6 +22,7 @@ var TSOS;
             this.Zflag = Zflag;
             this.isExecuting = isExecuting;
             this.PID = PID;
+            this.Quantum = Quantum;
         }
         init() {
             this.PC = 0;
@@ -33,7 +34,8 @@ var TSOS;
             this.isExecuting = false;
             this.PID = null;
             this.lastPC = 0;
-            _Scheduler.resetQuantum();
+            this.Quantum = 0;
+            // _Scheduler.resetQuantum();
         }
         cycle() {
             _Kernel.krnTrace('CPU cycle');
@@ -43,10 +45,11 @@ var TSOS;
             }
             // Validate the current quantum and issue an interrupt if we hit the max quantum
             _Scheduler.validateQuantum();
+            // Now update the displayed PCB
+            TSOS.Control.hostProcesses(this.PID);
             // Get the Op code given the pid and pc
             var opCode = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
             opCode.currentOperator = true;
-            // const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
             // Update the intermediate representation in PCB and CPU
             this.updateIR();
             // Use this for to identify D0 operator is reached
@@ -248,11 +251,6 @@ var TSOS;
                     }
                     break;
             }
-            // pcb.programCounter = this.lastPC;
-            // Now update the displayed PCB
-            if (!exitProgram && this.PID !== null) {
-                TSOS.Control.hostProcesses(this.PID);
-            }
             TSOS.Control.hostCpu();
             TSOS.Control.hostMemory();
             // If we have not exited quite yet
@@ -267,7 +265,11 @@ var TSOS;
                 }
                 opCode.currentOperator = false;
             }
-            _Scheduler.incrementQuantum();
+            this.incrementQuantum();
+            // Now update the displayed PCB
+            if (!exitProgram && this.PID !== null) {
+                TSOS.Control.hostProcesses(this.PID);
+            }
         }
         calibratePCBtoCPU(targetPID) {
             const pcb = _MemoryManager.PIDMap.get(targetPID)[1];
@@ -279,7 +281,7 @@ var TSOS;
             this.Xreg = pcb.Xreg;
             this.Yreg = pcb.Yreg;
             this.Zflag = pcb.Zflag;
-            _Scheduler.quantum = pcb.currentQuantum;
+            this.Quantum = pcb.currentQuantum;
         }
         changePC(change) {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
@@ -332,6 +334,16 @@ var TSOS;
             // Update the IR given the current PC
             this.IR = TSOS.MemoryAccessor.readMemory(this.PID, this.PC).codeString;
             pcb.intermediateRepresentation = TSOS.MemoryAccessor.readMemory(this.PID, this.PC).codeString;
+        }
+        incrementQuantum() {
+            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+            this.Quantum += 1;
+            pcb.currentQuantum = this.Quantum;
+        }
+        resetQuantum() {
+            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+            this.Quantum = 0;
+            pcb.currentQuantum = this.Quantum;
         }
     }
     TSOS.Cpu = Cpu;

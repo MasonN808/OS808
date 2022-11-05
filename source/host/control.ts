@@ -212,6 +212,10 @@ module TSOS {
             row.insertCell(7).innerHTML = pcb.priority;
             row.insertCell(8).innerHTML = pcb.processState;
             row.insertCell(9).innerHTML = pcb.location;
+            row.insertCell(10).innerHTML = pcb.base;
+            row.insertCell(11).innerHTML = pcb.limit;
+            row.insertCell(12).innerHTML = pcb.segment;
+            row.insertCell(13).innerHTML = pcb.currentQuantum;
         }
 
         public static hostProcesses(inputPid: number): void {
@@ -235,6 +239,8 @@ module TSOS {
                 }
             }
 
+            // Update the base, limit, and segment
+
             table.rows[pcb.rowIndex].cells[0].innerHTML = pcb.processId;
             table.rows[pcb.rowIndex].cells[1].innerHTML = pcb.programCounter;
             table.rows[pcb.rowIndex].cells[2].innerHTML = pcb.intermediateRepresentation;
@@ -245,6 +251,10 @@ module TSOS {
             table.rows[pcb.rowIndex].cells[7].innerHTML = pcb.priority;
             table.rows[pcb.rowIndex].cells[8].innerHTML = pcb.processState;
             table.rows[pcb.rowIndex].cells[9].innerHTML = pcb.location;
+            table.rows[pcb.rowIndex].cells[10].innerHTML = pcb.base;
+            table.rows[pcb.rowIndex].cells[11].innerHTML = pcb.limit;
+            table.rows[pcb.rowIndex].cells[12].innerHTML = pcb.segment;
+            table.rows[pcb.rowIndex].cells[13].innerHTML = pcb.currentQuantum;
         }
 
         public static hostCpuInit(): void {

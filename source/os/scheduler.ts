@@ -23,10 +23,10 @@ module TSOS {
         
         public validateQuantum(): void {
             // Issue an interrupt for the interrupt service routine to call a context switch from the dispatcher if process hits max quantum level
-            if (this.quantum === this.max_quantum) {
+            if (_CPU.Quantum === this.max_quantum) {
                 // Check that ready queue is not empty to prevent context switching with itself (ask Alan)
                 // Reset the currentquantum to 0
-                this.resetQuantum();
+                _CPU.resetQuantum();
                 // "type-1" indicates that we store the current processes PCB
                 this.issueContextSwitchInterrupt("type-1");
             }

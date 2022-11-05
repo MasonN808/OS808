@@ -22,5 +22,13 @@ function Glados() {
       _KernelInputQueue.enqueue('a');
       _KernelInputQueue.enqueue('d');
       TSOS.Kernel.prototype.krnInterruptHandler(KEYBOARD_IRQ, [13, false]);
+
+      _KernelInputQueue.enqueue('r');
+      _KernelInputQueue.enqueue('u');
+      _KernelInputQueue.enqueue('n');
+      _KernelInputQueue.enqueue('a');
+      _KernelInputQueue.enqueue('l');
+      _KernelInputQueue.enqueue('l');
+      TSOS.Kernel.prototype.krnInterruptHandler(KEYBOARD_IRQ, [13, false]);
     };
 }

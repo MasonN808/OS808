@@ -24,8 +24,11 @@ var TSOS;
             this.priority = "0";
             this.processState = "Ready";
             this.location = "Memory";
+            this.base = -1;
+            this.limit = 0;
+            this.segment = 0;
             this.rowIndex = 1;
-            this.currentQuantum = 1;
+            this.currentQuantum = 0;
         }
     }
     TSOS.Pcb = Pcb;

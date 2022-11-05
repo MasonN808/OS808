@@ -60,8 +60,10 @@ module TSOS {
         }
         
         public static removeListElement(list: number[], target: number) {
-            list = list.filter(item => item !== target);
-            return list;
+            const index = list.indexOf(target, 0);
+            if (index > -1) {
+                list.splice(index, 1);
+            }
         }
     }
 }

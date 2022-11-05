@@ -559,55 +559,66 @@ module TSOS {
         }
 
         public shellRun(args: string[]) {
-            if (args.length === 1) {
-                if (TSOS.Utils.isInt(args[0])) {
-                    const inputPid = parseInt(args[0])
-                    // Try and find the input PID in the hashtable
-                    // if (_MemoryManager.PIDMap.has(inputPid)) {
-
-                    // See if process is in resident list
-                    if (_ResidentList.indexOf(inputPid) > -1) {
-                        TSOS.Control.hostProcessesInit(inputPid);
-                        // Enqueue the processID to ready queue
-                        _ReadyQueue.enqueue(inputPid);
-                        // Remove the processID from the resident list
-                        _ResidentList = TSOS.Utils.removeListElement(_ResidentList, inputPid);
-                        // Tell the CPU that is is executing
-                        _CPU.isExecuting = true;
+            // Check if _ResidentList is empty
+            if (_ResidentList.length !== 0) {
+                if (args.length === 1) {
+                    if (TSOS.Utils.isInt(args[0])) {
+                        const inputPid = parseInt(args[0])
+                        // See if process is in resident list
+                        if (_ResidentList.indexOf(inputPid) > -1) {
+                            TSOS.Control.hostProcessesInit(inputPid);
+                            // Enqueue the processID to ready queue
+                            _ReadyQueue.enqueue(inputPid);
+                            // Remove the processID from the resident list
+                            TSOS.Utils.removeListElement(_ResidentList, inputPid);
+                            // Tell the CPU that is is executing
+                            _CPU.isExecuting = true;
+                        } 
+                        else {
+                            _StdOut.putText("Undefined Process ID: " + inputPid);
+                        }
                     } 
                     else {
-                        _StdOut.putText("Undefined Process ID: " + inputPid);
+                        _StdOut.putText("Invalid arguement.  Usage: run <pid>.");
                     }
                 } 
                 else {
-                    _StdOut.putText("Invalid arguement.  Usage: run <pid>.");
+                    _StdOut.putText("Usage: run <pid>");
                 }
-            } 
+            }
             else {
-                _StdOut.putText("Usage: run <pid>");
+                _StdOut.putText("Resident queue is empty: load some program(s) to run");
             }
         }
 
         public shellClearMem() {
-            _MemoryManager.clearMainMemory();
-            TSOS.Control.hostMemory();
+            // Check if we can clear the memory
+            if (!_CPU.isExecuting) {
+                _MemoryManager.clearMainMemory();
+                TSOS.Control.hostMemory();
+            }
+            else {
+                _StdOut.putText("CPU is still executing: can not clear memory paritions")
+            }
         }
 
         public shellRunAll() {
             // Check if _ResidentList is empty
-            if (_ResidentList) {
-                for (let index=0; index < _ResidentList.length; index++) {
-                    var resident = _ResidentList[index];
+            if (_ResidentList.length !== 0) {
+                 // Make a copy of the resident list
+                const copyResidentList = Object.assign([], _ResidentList);
+                for (const resident of copyResidentList) {
                     TSOS.Control.hostProcessesInit(resident);
+                    // Enqueue the processID to ready queue
                     _ReadyQueue.enqueue(resident);
-                    // Tell the CPU that is is executing
-                    _CPU.isExecuting = true;
+                    // Remove the resident from the resident list
+                    TSOS.Utils.removeListElement(_ResidentList, resident);
                 }
-                // Clear the resident list
-                _ResidentList = [];
+                // Tell the CPU that is is executing
+                _CPU.isExecuting = true;
             }
             else {
-                _StdOut.putText("Resident queue is empty: load some program(s)");
+                _StdOut.putText("Resident queue is empty: load some program(s) to run all");
             }
         }
         
@@ -691,11 +702,18 @@ module TSOS {
             // Check that input is an int convertable string
             if (args.length === 1) {
                 if (TSOS.Utils.isInt(args[0])) {
-                    // Change the quantum in global scheduler
-                    _Scheduler.changeMaxQuantum(parseInt(args[0]));
+                    const newQuantum = parseInt(args[0]);
+                    // Make some checks on the input
+                    if (newQuantum > 0) {
+                        // Change the quantum in global scheduler
+                        _Scheduler.changeMaxQuantum(newQuantum);
+                    }
+                    else {
+                        _StdOut.putText("Invalid input: quantuam must be a positive integer")
+                    }
                 } 
                 else {
-                    _StdOut.putText("Invalid arguement.  Usage: quantum <int>.");
+                    _StdOut.putText("Invalid arguement.  Usage: quantum <int>");
                 }
             } 
             else {

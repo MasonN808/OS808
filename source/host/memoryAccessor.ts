@@ -1,18 +1,18 @@
 module TSOS {
 
     export class MemoryAccessor {
-        // public source: Array<OpCode>;
         
         public static readMemory(pid: number, pc: number): OpCode{
             // We assume here that the given pid is valid
             const memory = _MemoryManager.PIDMap.get(pid)[0].source;
 
-            // check number is valid
+            // check pc is within memory bounds
             if ((pc < _MemoryManager.base) || (pc > _MemoryManager.limit)) {
                 // Do BSOD
                 _StdOut.putTextCenter("Shutting down OS...");
                 // Call Kernel shutdown routine.
                 _Kernel.krnShutdown();
+                // _StdOut("Out of bounds memory access occured");
             }
 
             // Returns a OpCode object
@@ -25,6 +25,15 @@ module TSOS {
                 code = "0" + code;
             }
             code = code.toUpperCase();
+
+            // check pc is within memory bounds
+            if ((pc < _MemoryManager.base) || (pc > _MemoryManager.limit)) {
+                // Do BSOD
+                _StdOut.putTextCenter("Shutting down OS...");
+                // Call Kernel shutdown routine.
+                _Kernel.krnShutdown();
+                // _StdOut("Out of bounds memory access occured");
+            }
             
             // We assume here that the given pid is valid
             _MemoryManager.PIDMap.get(pid)[0].source[pc] = new OpCode(code);

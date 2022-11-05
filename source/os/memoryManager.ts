@@ -43,6 +43,9 @@ module TSOS {
             for (let index = 0; index < _MemoryManager.maxLoadedPrograms; index++) {
                 if (this.mainMemory[index].empty) {
                     this.mainMemory[index] = loadedProgram;
+                    // Update the base and limit pointers in memory object
+                    loadedProgram.limit = (this.limit + index) * (index + 1);
+                    loadedProgram.base = (this.limit + index) * (index) - 1;
                     this.mainMemory[index].empty = false;
                     foundValidSlot = true;
                     break;
@@ -72,9 +75,13 @@ module TSOS {
         // Clears all memory partitions in main memory
         public clearMainMemory(): void {
             for (let memoryPartitionIndex = 0; memoryPartitionIndex < this.maxLoadedPrograms; memoryPartitionIndex++) {
-                if (this.PIDMap.has(this.mainMemory[memoryPartitionIndex].PID)) {
+                const targetPID = this.mainMemory[memoryPartitionIndex].PID;
+                if (this.PIDMap.has(targetPID)) {
                     // Remove the memory and PCB from hash table
-                    this.PIDMap.delete(this.mainMemory[memoryPartitionIndex].PID)
+                    this.PIDMap.delete(targetPID);
+                    // Remove it from both the ready queue and the resident list if they exist
+                    TSOS.Utils.removeListElement(_ReadyQueue.q, targetPID);
+                    TSOS.Utils.removeListElement(_ResidentList, targetPID);
                 }
             }
             this.initializeMainMemory();
@@ -97,7 +104,6 @@ module TSOS {
             _MemoryManager.removeProgramInMemory(_MemoryManager.PIDMap.get(targetPID)[0]);
             // Remove the PID from the hash table in the memory manager to prevent from running again
             _MemoryManager.PIDMap.delete(targetPID);
-            // Note: the CPU.init() will remove the process from ready queue
         }
     }
 }

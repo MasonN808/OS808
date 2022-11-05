@@ -175,14 +175,20 @@ var TSOS;
         static hostProcesses(inputPid) {
             const table = document.getElementById("taProcesses");
             // Get the PCB from the input PID in the hashtable
-            var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
+            const pcb = _MemoryManager.PIDMap.get(inputPid)[1];
             // give the appropriate rowIndex
             var addedRowIndex = 1;
-            // loop through hash map to get just values
-            for (const value of _MemoryManager.PIDMap.values()) {
-                const pcb = value[1];
-                pcb.rowIndex = addedRowIndex;
-                addedRowIndex += 1;
+            // loop through hash map to get key-value pairs
+            for (const entry of _MemoryManager.PIDMap.entries()) {
+                // entry[1] is the value
+                // entry[1][1] is the pcb
+                const traversedPCB = entry[1][1];
+                // Check if the key of the entry is in the ready queue or the CPU
+                if (_ReadyQueue.q.indexOf(entry[0]) > -1 || _CPU.PID === entry[0]) {
+                    // Adjust the rowIndex pointers
+                    traversedPCB.rowIndex = addedRowIndex;
+                    addedRowIndex += 1;
+                }
             }
             table.rows[pcb.rowIndex].cells[0].innerHTML = pcb.processId;
             table.rows[pcb.rowIndex].cells[1].innerHTML = pcb.programCounter;
@@ -224,14 +230,19 @@ var TSOS;
             var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
             // give the appropriate rowIndex
             var addedRowIndex = 1;
-            // loop through hash map to get just values
-            for (const value of _MemoryManager.PIDMap.values()) {
-                const pcb = value[1];
-                pcb.rowIndex = addedRowIndex;
-                addedRowIndex += 1;
+            // loop through hash map to get key-value pairs
+            for (const entry of _MemoryManager.PIDMap.entries()) {
+                // entry[1] is the value
+                // entry[1][1] is the pcb
+                const traversedPCB = entry[1][1];
+                // Check if the key of the entry is in the ready queue or the CPU
+                if (_ReadyQueue.q.indexOf(entry[0]) > -1 || _CPU.PID === entry[0]) {
+                    // Adjust the rowIndex pointers
+                    traversedPCB.rowIndex = addedRowIndex;
+                    addedRowIndex += 1;
+                }
             }
             table.deleteRow(pcb.rowIndex);
-            // TODO: Move around the processes if there exist more than one in PCB
         }
         //
         // Host Events

@@ -321,13 +321,14 @@ module TSOS {
             // pcb.programCounter = this.lastPC;
             
             // Now update the displayed PCB
-            if (!exitProgram) {
+            if (!exitProgram && this.PID !== null) {
                 TSOS.Control.hostProcesses(this.PID);
             }
 
             TSOS.Control.hostCpu();
             TSOS.Control.hostMemory();
-            // If we have not exited t
+
+            // If we have not exited quite yet
             if (this.PID !== null) {
                 // Reset the operator and operand pointers for coloring text
                 if (entered_D0) {
@@ -337,9 +338,7 @@ module TSOS {
                     TSOS.MemoryAccessor.readMemory(this.PID, this.PC - 1).currentOperand = false;
                     TSOS.MemoryAccessor.readMemory(this.PID, this.PC - 2).currentOperand = false;
                 }
-                
                 opCode.currentOperator = false;
-                
             }
             _Scheduler.incrementQuantum();
         }
@@ -355,7 +354,6 @@ module TSOS {
             this.Xreg = pcb.Xreg;
             this.Yreg = pcb.Yreg;
             this.Zflag = pcb.Zflag;
-            // pcb.processState = "Running";
             _Scheduler.quantum = pcb.currentQuantum;
         }
 

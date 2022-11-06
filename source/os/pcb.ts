@@ -34,7 +34,7 @@ module TSOS {
             this.limit = 0;
             this.segment = 0;
             this.rowIndex = 1;
-            this.currentQuantum = 0;
+            this.currentQuantum = 1;
         }
     }
 }

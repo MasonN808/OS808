@@ -20,11 +20,12 @@ module TSOS {
 
             const pcb2 = _MemoryManager.PIDMap.get(dequeuedPID)[1];
             pcb2.processState = "Running";
-            // Update the displayed PCB
-            TSOS.Control.hostProcesses(dequeuedPID);
-
+            
             _CPU.PID = dequeuedPID;
             _CPU.calibratePCBtoCPU(_CPU.PID);
+            
+            // Update the displayed PCB
+            TSOS.Control.hostProcesses(dequeuedPID);
         }
     }
 }

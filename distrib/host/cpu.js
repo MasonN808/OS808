@@ -13,7 +13,7 @@
 var TSOS;
 (function (TSOS) {
     class Cpu {
-        constructor(PC = 0, IR = "00", Acc = 0, Xreg = 0, Yreg = 0, Zflag = 0, isExecuting = false, PID = null, Quantum) {
+        constructor(PC = 0, IR = "00", Acc = 0, Xreg = 0, Yreg = 0, Zflag = 0, isExecuting = false, PID = null, Quantum = 0) {
             this.PC = PC;
             this.IR = IR;
             this.Acc = Acc;
@@ -43,6 +43,13 @@ var TSOS;
                 this.PID = _ReadyQueue.dequeue();
                 this.calibratePCBtoCPU(this.PID);
             }
+            else if (this.PID === null && _ReadyQueue.isEmpty()) {
+                this.init();
+                return;
+            }
+            // For the very first running program
+            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+            pcb.processState = "Running";
             // Validate the current quantum and issue an interrupt if we hit the max quantum
             _Scheduler.validateQuantum();
             // Now update the displayed PCB

@@ -2,20 +2,20 @@ module TSOS {
     export class Scheduler {
         // The scheduler selects a process from a list of processes by applying some process scheduling algorithm.
         public max_quantum: number; 
-        public quantum: number;
+        // public quantum: number;
 
         constructor () {
             this.max_quantum = 6; // This is the default quantum
-            this.quantum = 0;
+            // this.quantum = 0;
         }
 
-        public resetQuantum(): void {
-            this.quantum = 0;
-        }
+        // public resetQuantum(): void {
+        //     this.quantum = 0;
+        // }
 
-        public incrementQuantum(): void {
-            this.quantum += 1;
-        }
+        // public incrementQuantum(): void {
+        //     this.quantum += 1;
+        // }
 
         public changeMaxQuantum(newMaxQuantum: number): void {
             this.max_quantum = newMaxQuantum;

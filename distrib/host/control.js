@@ -188,7 +188,8 @@ var TSOS;
                 // entry[1][1] is the pcb
                 const traversedPCB = entry[1][1];
                 // Check if the key of the entry is in the ready queue or the CPU
-                if (_ReadyQueue.q.indexOf(entry[0]) > -1 || _CPU.PID === entry[0]) {
+                // entry[0] is the key
+                if (_ReadyQueue.q.indexOf(entry[0]) > -1 || _CPU.PID == entry[0]) {
                     // Adjust the rowIndex pointers
                     traversedPCB.rowIndex = addedRowIndex;
                     addedRowIndex += 1;
@@ -245,7 +246,7 @@ var TSOS;
                 // entry[1][1] is the pcb
                 const traversedPCB = entry[1][1];
                 // Check if the key of the entry is in the ready queue or the CPU
-                if (_ReadyQueue.q.indexOf(entry[0]) > -1 || _CPU.PID === entry[0]) {
+                if (_ReadyQueue.q.indexOf(entry[0]) > -1 || _CPU.PID == entry[0]) {
                     // Adjust the rowIndex pointers
                     traversedPCB.rowIndex = addedRowIndex;
                     addedRowIndex += 1;

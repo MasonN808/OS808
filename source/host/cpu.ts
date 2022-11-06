@@ -23,7 +23,7 @@ module TSOS {
                     public Zflag: number = 0,
                     public isExecuting: boolean = false,
                     public PID: number = null,
-                    public Quantum: number) {
+                    public Quantum: number = 0) {
         }
 
         public init(): void {
@@ -47,6 +47,14 @@ module TSOS {
                 this.PID = _ReadyQueue.dequeue();
                 this.calibratePCBtoCPU(this.PID);
             }
+            else if (this.PID === null && _ReadyQueue.isEmpty()) {
+                this.init();
+                return;
+            }
+
+            // For the very first running program
+            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+            pcb.processState = "Running";
             
             // Validate the current quantum and issue an interrupt if we hit the max quantum
             _Scheduler.validateQuantum();
@@ -337,7 +345,7 @@ module TSOS {
             }
 
             this.incrementQuantum();
-
+            
             // Now update the displayed PCB
             if (!exitProgram && this.PID !== null) {
                 TSOS.Control.hostProcesses(this.PID);

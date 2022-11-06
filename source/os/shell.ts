@@ -674,11 +674,12 @@ module TSOS {
                     if (_CPU.PID === pid) {
                         // Check if the ready queue is empty to stop the CPU from executing
                         if (_ReadyQueue.isEmpty()) {
-                            // Reinitialize the CPU and stop from executing
+                            // Reinitialize the CPU and stop from executing  
                             _CPU.init();
                         }
                         else {
-                            _Scheduler.resetQuantum();
+                            // _Scheduler.resetQuantum();
+                            // _CPU.resetQuantum();
                             // Issue a context switch interrupt
                             // "type-2" indicates that we DO NOT store the current processes PCB
                             _Scheduler.issueContextSwitchInterrupt("type-2");

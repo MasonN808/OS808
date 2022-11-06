@@ -1,16 +1,17 @@
 var TSOS;
 (function (TSOS) {
     class Scheduler {
+        // public quantum: number;
         constructor() {
             this.max_quantum = 6; // This is the default quantum
-            this.quantum = 0;
+            // this.quantum = 0;
         }
-        resetQuantum() {
-            this.quantum = 0;
-        }
-        incrementQuantum() {
-            this.quantum += 1;
-        }
+        // public resetQuantum(): void {
+        //     this.quantum = 0;
+        // }
+        // public incrementQuantum(): void {
+        //     this.quantum += 1;
+        // }
         changeMaxQuantum(newMaxQuantum) {
             this.max_quantum = newMaxQuantum;
         }

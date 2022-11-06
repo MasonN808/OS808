@@ -27,6 +27,16 @@ module TSOS {
         }
         
         public assignPID(memory: Memory, memorySegment: number): void {
+            // Check that the pid counter is never over FF (255)
+            if (this.PIDCounter >= 255) {
+                Control.hostLog("PID has reached 255", "host");
+                Control.hostLog("Emergency halt", "host");
+                Control.hostLog("Attempting Kernel shutdown", "host");
+                // Call the OS shutdown routine.
+                _Kernel.krnShutdown();
+                // Stop the interval that's simulating our clock pulse.
+                clearInterval(_hardwareClockID);
+            }
             // Create a new PCB for our loaded program that has not executed yet (i.e., a process)
             const pcb = new TSOS.Pcb(this.PIDCounter);
             // Create a list of the memory and PCB to be added to Hash table

@@ -269,6 +269,15 @@ var TSOS;
                         contextSwitch = true;
                     }
                     break;
+                // We reached an invalid operator
+                default:
+                    _StdOut.putText("Invalid Operator " + this.IR + " in PID " + this.PID + ", clearing CPU and memory partition");
+                    _MemoryManager.removePIDFromEverywhere(this.PID);
+                    // Restart the CPU
+                    _CPU.init();
+                    // Update displays
+                    TSOS.Control.hostMemory();
+                    TSOS.Control.hostCpu();
             }
             TSOS.Control.hostCpu();
             TSOS.Control.hostMemory();

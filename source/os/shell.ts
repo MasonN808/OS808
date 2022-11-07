@@ -682,7 +682,7 @@ module TSOS {
                             // _CPU.resetQuantum();
                             // Issue a context switch interrupt
                             // "type-2" indicates that we DO NOT store the current processes PCB
-                            _Scheduler.issueContextSwitchInterrupt("type-2");
+                            _Scheduler.issueContextSwitchInterrupt("type-2", _CPU.PID);
                         }
                         // Update the cpu display
                         TSOS.Control.hostCpu();

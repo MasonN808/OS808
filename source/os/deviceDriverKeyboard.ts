@@ -51,18 +51,11 @@ module TSOS {
                             _OsShell.putPrompt();
                         }
                         else {
-                            _CPU.isExecuting = false;
+                            // Kill the current process using the shell command kill <pid>
                             _Console.advanceLine();
-                            _StdOut.putText("SUCCESS: The process with PID " + _CPU.PID + " has been terminated");
+                            _OsShell.shellKill([_CPU.PID.toString()]);
                             _Console.advanceLine();
                             _OsShell.putPrompt();
-
-                            // Clear the PCB
-                            TSOS.Control.hostRemoveProcess(_CPU.PID);
-                            // Remove the PID from the hash table in the memory manager to prevent from running again
-                            _MemoryManager.PIDMap.delete(_CPU.PID);
-                            // Reinitilaize CPU for next process
-                            _CPU.init();
                         }
                     }
                     else {
@@ -233,7 +226,6 @@ module TSOS {
                         
                         case 55:
                             chr = String.fromCharCode(38); // &
-                            // console.log(chr)
                             break;
 
                         case 56:

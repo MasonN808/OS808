@@ -69,6 +69,24 @@ var TSOS;
             // run <pid>
             sc = new TSOS.ShellCommand(this.shellRun, "run", "- runs the input code");
             this.commandList[this.commandList.length] = sc;
+            // clearmem
+            sc = new TSOS.ShellCommand(this.shellClearMem, "clearmem", "- clears all memory partitions");
+            this.commandList[this.commandList.length] = sc;
+            // runall
+            sc = new TSOS.ShellCommand(this.shellRunAll, "runall", "- runs all processes in the resdient queue");
+            this.commandList[this.commandList.length] = sc;
+            // ps
+            sc = new TSOS.ShellCommand(this.shellPs, "ps", "- displays all processes and their states");
+            this.commandList[this.commandList.length] = sc;
+            // kill <pid>
+            sc = new TSOS.ShellCommand(this.shellKill, "kill", "- kills the current process and wipes its memory");
+            this.commandList[this.commandList.length] = sc;
+            // killall
+            sc = new TSOS.ShellCommand(this.shellKillAll, "killall", "- kills all processes and wipes all memory");
+            this.commandList[this.commandList.length] = sc;
+            // quantum <int>
+            sc = new TSOS.ShellCommand(this.shellQuantum, "quantum", "- sets the quantum for CPU scheduling");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             // Display the initial prompt.
@@ -263,6 +281,24 @@ var TSOS;
                     case "run":
                         _StdOut.putText("runs the input code at <pid>");
                         break;
+                    case "clearmem":
+                        _StdOut.putText("clears all memory partitions");
+                        break;
+                    case "runall":
+                        _StdOut.putText("runs all processes in resident queue");
+                        break;
+                    case "ps":
+                        _StdOut.putText("displays all processes and their states");
+                        break;
+                    case "kill":
+                        _StdOut.putText("kills the specified process");
+                        break;
+                    case "killall":
+                        _StdOut.putText("kills all the running processes");
+                        break;
+                    case "quantum":
+                        _StdOut.putText("sets the Round Robin quantum for CPU scheduling");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -362,10 +398,10 @@ var TSOS;
                     }
                 }
                 if (!found_invalid) {
-                    console.log("valid");
-                    // Check that the loaded number of OP codes
+                    // Check that the loaded number of OP codes is within memory limit
                     // Do /2 since its counting single character length
-                    if (removed_white_space_input_text.length / 2 > _Memory.limit) {
+                    // Do +1 since length has offset 1 while limit has offset 0
+                    if (removed_white_space_input_text.length / 2 > _MemoryManager.limit + 1) {
                         // Display warning
                         _StdOut.putText("Program too large");
                     }
@@ -377,14 +413,18 @@ var TSOS;
                             loadedSource.push(removed_white_space_input_text.substring(index, index + 2));
                         }
                         // Populate the rest of the array with 00s up to the memory limit
-                        for (let index = removed_white_space_input_text.length; index < _Memory.limit * 2; index += 2) {
+                        for (let index = removed_white_space_input_text.length; index < _MemoryManager.limit * 2; index += 2) {
                             loadedSource.push("00");
                         }
-                        _Memory.source = loadedSource;
+                        // Create a new instance of memory to load the source into
+                        var toBeLoadedMemory = new TSOS.Memory();
+                        // write the new source into memory
+                        toBeLoadedMemory = TSOS.MemoryAccessor.rewriteAllMemory(toBeLoadedMemory, loadedSource);
+                        // Check that the the program can fit in a memory partition and load it, if can
+                        // ... and Assign a PID
+                        _MemoryManager.loadProgramInMemory(toBeLoadedMemory);
                         // Display the memory
                         TSOS.Control.hostMemory();
-                        // Assign a PID
-                        _MemoryManager.assignPID();
                         // Output the PID
                         _StdOut.putText("Process ID: " + (_MemoryManager.PIDCounter - 1));
                     }
@@ -392,27 +432,158 @@ var TSOS;
             }
         }
         shellRun(args) {
-            if (args.length > 0) {
-                if (TSOS.Utils.isInt(args[0])) {
-                    const inputPid = parseInt(args[0]);
-                    // Try and find the input PID in the hashtable
-                    if (_MemoryManager.PIDMap.has(inputPid)) {
-                        TSOS.Control.hostProcessesInit(inputPid);
-                        // Change the PID pointer for the CPU
-                        _CPU.PID = inputPid;
-                        // Tell the CPU that is is executing
-                        _CPU.isExecuting = true;
+            // Check if _ResidentList is empty
+            if (_ResidentList.length !== 0) {
+                if (args.length === 1) {
+                    if (TSOS.Utils.isInt(args[0])) {
+                        const inputPid = parseInt(args[0]);
+                        // See if process is in resident list
+                        if (_ResidentList.indexOf(inputPid) > -1) {
+                            TSOS.Control.hostProcessesInit(inputPid);
+                            // Enqueue the processID to ready queue
+                            _ReadyQueue.enqueue(inputPid);
+                            // Remove the processID from the resident list
+                            TSOS.Utils.removeListElement(_ResidentList, inputPid);
+                            // Tell the CPU that is is executing
+                            _CPU.isExecuting = true;
+                        }
+                        else {
+                            _StdOut.putText("Undefined Process ID: " + inputPid);
+                        }
                     }
                     else {
-                        _StdOut.putText("Undefined Process ID: " + inputPid);
+                        _StdOut.putText("Invalid arguement.  Usage: run <pid>.");
                     }
                 }
                 else {
-                    _StdOut.putText("Invalid arguement.  Usage: run <pid>.");
+                    _StdOut.putText("Usage: run <pid>");
                 }
             }
             else {
-                _StdOut.putText("Usage: run <pid>");
+                _StdOut.putText("Resident queue is empty: load some program(s) to run");
+            }
+        }
+        shellClearMem() {
+            // Check if we can clear the memory
+            if (!_CPU.isExecuting) {
+                _MemoryManager.clearMainMemory();
+                TSOS.Control.hostMemory();
+            }
+            else {
+                _StdOut.putText("CPU is still executing: can not clear memory paritions");
+            }
+        }
+        shellRunAll() {
+            // Check if _ResidentList is empty
+            if (_ResidentList.length !== 0) {
+                // Make a copy of the resident list
+                const copyResidentList = Object.assign([], _ResidentList);
+                for (const resident of copyResidentList) {
+                    TSOS.Control.hostProcessesInit(resident);
+                    // Enqueue the processID to ready queue
+                    _ReadyQueue.enqueue(resident);
+                    // Remove the resident from the resident list
+                    TSOS.Utils.removeListElement(_ResidentList, resident);
+                }
+                // Tell the CPU that is is executing
+                _CPU.isExecuting = true;
+            }
+            else {
+                _StdOut.putText("Resident queue is empty: load some program(s) to run all");
+            }
+        }
+        shellPs() {
+            _StdOut.putText("PID PC   IR  ACC  X  Y  Z");
+            _StdOut.advanceLine();
+            // Make a copy of the ready array
+            const copyReadyArray = Object.assign([], _ReadyQueue.q);
+            // Push the current CPU process pid to the copy of the ready queue before linear traversal
+            copyReadyArray.push(_CPU.PID);
+            // Loop through all PCBs in the ready queue
+            for (const pid of copyReadyArray) {
+                const pcb = _MemoryManager.PIDMap.get(pid)[1];
+                _StdOut.putText(pid + " ".repeat(5 - pcb.programCounter.toString().length) + pcb.programCounter
+                    + " ".repeat(5 - pcb.intermediateRepresentation.toString().length) + pcb.intermediateRepresentation
+                    + " ".repeat(5 - pcb.Acc.toString().length) + pcb.Acc + "  " + pcb.Xreg + "  " + pcb.Yreg + "  " + pcb.Zflag);
+                _StdOut.advanceLine();
+            }
+        }
+        shellKill(args) {
+            if (args.length === 1) {
+                if (TSOS.Utils.isInt(args[0])) {
+                    const pid = parseInt(args[0]);
+                    _OsShell.killLogic(pid);
+                }
+                else {
+                    _StdOut.putText("Invalid arguement.  Usage: kill <pid>.");
+                }
+            }
+            else {
+                _StdOut.putText("Usage: kill <pid>");
+            }
+        }
+        shellKillAll() {
+            // Make a copy of the ready array
+            const copyReadyArray = Object.assign([], _ReadyQueue.q);
+            // Push the current CPU process pid to the copy of the ready queue before linear traversal
+            copyReadyArray.push(_CPU.PID);
+            for (const pid of copyReadyArray) {
+                _OsShell.killLogic(pid);
+            }
+        }
+        // Where most of the kill logic for processes is
+        killLogic(pid) {
+            // See if the pid exists
+            if (_MemoryManager.PIDMap.has(pid)) {
+                // See if it the target pid is in the resident list
+                if (_ResidentList.indexOf(pid) === -1) {
+                    // See if its in the CPU; otherwise, it's in the ready queue
+                    if (_CPU.PID === pid) {
+                        // Check if the ready queue is empty to stop the CPU from executing
+                        if (_ReadyQueue.isEmpty()) {
+                            // Reinitialize the CPU and stop from executing  
+                            _CPU.init();
+                        }
+                        else {
+                            // _Scheduler.resetQuantum();
+                            // _CPU.resetQuantum();
+                            // Issue a context switch interrupt
+                            // "type-2" indicates that we DO NOT store the current processes PCB
+                            _Scheduler.issueContextSwitchInterrupt("type-2");
+                        }
+                        // Update the cpu display
+                        TSOS.Control.hostCpu();
+                    }
+                    // Remove it from the ready queue, otherwise
+                    else {
+                        _ReadyQueue.remove(pid);
+                    }
+                    _StdOut.putText("Process with PID " + pid + " has been terminated wtih memory wiped");
+                    _MemoryManager.removePIDFromEverywhere(pid);
+                    TSOS.Control.hostMemory();
+                }
+            }
+        }
+        shellQuantum(args) {
+            // Check that input is an int convertable string
+            if (args.length === 1) {
+                if (TSOS.Utils.isInt(args[0])) {
+                    const newQuantum = parseInt(args[0]);
+                    // Make some checks on the input
+                    if (newQuantum > 0) {
+                        // Change the quantum in global scheduler
+                        _Scheduler.changeMaxQuantum(newQuantum);
+                    }
+                    else {
+                        _StdOut.putText("Invalid input: quantuam must be a positive integer");
+                    }
+                }
+                else {
+                    _StdOut.putText("Invalid arguement.  Usage: quantum <int>");
+                }
+            }
+            else {
+                _StdOut.putText("Usage: quantum <int>");
             }
         }
     }

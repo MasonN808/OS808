@@ -1,0 +1,158 @@
+table {
+    font-size: small;
+    color: #000000;
+    border-color: #000000;
+    border-collapse: separate;
+    border-radius: 10px; 
+    background-color: aliceblue;
+    height: 150px;
+    overflow-y: scroll;
+    display:block;
+  }
+
+td, th{
+    text-align: center;
+}
+  
+tr {
+    /* For row height */
+    display: block;
+    vertical-align: top;
+    line-height: 22.5px;
+}
+
+tr:nth-child(even) {
+background-color: #dddddd;
+}
+
+.card{
+    width: 395px;
+}
+
+/* For the column widths in taMemory*/
+
+#divMemory{
+    width: 360px;
+}
+
+#taMemory td:nth-child(1){
+    width: 40px;
+}
+
+#taMemory td:nth-child(2){
+    width: 40px;
+}
+
+#taMemory td:nth-child(3){
+    width: 40px;
+}
+
+#taMemory td:nth-child(4){
+    width: 40px;
+}
+
+#taMemory td:nth-child(5){
+    width: 40px;
+}
+
+#taMemory td:nth-child(6){
+    width: 40px;
+}
+
+#taMemory td:nth-child(7){
+    width: 40px;
+}
+
+#taMemory td:nth-child(8){
+    width: 40px;
+}
+
+#taMemory td:nth-child(9){
+    width: 40px;
+}
+
+/* For the column widths in taProcesses*/
+
+/* PID */
+#taProcesses .tableHeader th:nth-child(1), td:nth-child(1){
+    width: 30px;
+}
+/* PC */
+#taProcesses .tableHeader th:nth-child(2), td:nth-child(2){
+    width: 30px;
+}
+/* IR */
+#taProcesses .tableHeader th:nth-child(3), td:nth-child(3){
+    width: 40px;
+}
+/* ACC */
+#taProcesses .tableHeader th:nth-child(4), td:nth-child(4){
+    width: 20px;
+}
+/* X */
+#taProcesses .tableHeader th:nth-child(5), td:nth-child(5){
+    width: 20px;
+}
+/* Y */
+#taProcesses .tableHeader th:nth-child(6), td:nth-child(6){
+    width: 20px;
+}
+/* Z */
+#taProcesses .tableHeader th:nth-child(7), td:nth-child(7){
+    width: 20px;
+}
+/* Priority */
+#taProcesses .tableHeader th:nth-child(8), td:nth-child(8){
+    width: 60px;
+}
+/* State */
+#taProcesses .tableHeader th:nth-child(9), td:nth-child(9){
+    width: 70px;
+}
+/* Location */
+#taProcesses .tableHeader th:nth-child(10), td:nth-child(10){
+    width: 70px;
+}
+/* Base */
+#taProcesses .tableHeader th:nth-child(11), td:nth-child(11){
+    width: 40px;
+}
+/* Limit */
+#taProcesses .tableHeader th:nth-child(12), td:nth-child(12){
+    width: 40px;
+}
+/* Segment */
+#taProcesses .tableHeader th:nth-child(13), td:nth-child(13){
+    width: 40px;
+}
+/* Quantum */
+#taProcesses .tableHeader th:nth-child(14), td:nth-child(14){
+    width: 40px;
+}
+
+/* For the column widths in taCpu*/
+
+#taCpu .tableHeader th:nth-child(1), td:nth-child(1){
+    width: 30px;
+}
+  
+#taCpu .tableHeader th:nth-child(2), td:nth-child(2){
+    width: 30px;
+}
+
+#taCpu .tableHeader th:nth-child(3), td:nth-child(3){
+    width: 45px;
+}
+
+#taCpu .tableHeader th:nth-child(4), td:nth-child(4){
+    width: 20px;
+}
+
+#taCpu .tableHeader th:nth-child(5), td:nth-child(5){
+    width: 20px;
+}
+
+#taCpu .tableHeader th:nth-child(6), td:nth-child(6){
+    width: 20px;
+}
+

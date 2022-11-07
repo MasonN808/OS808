@@ -20,6 +20,7 @@ const TIMER_IRQ: number = 0;  // Pages 23 (timer), 9 (interrupts), and 561 (inte
                               // NOTE: The timer is different from hardware/host clock pulses. Don't confuse these.
 const KEYBOARD_IRQ: number = 1;
 
+const CONTEXT_SWITCH: number = 2;
 
 //
 // Global Variables
@@ -28,10 +29,11 @@ const KEYBOARD_IRQ: number = 1;
 var _CPU: TSOS.Cpu;  // Utilize TypeScript's type annotation system to ensure that _CPU is an instance of the Cpu class.
 
 //	Hardware	(host)
-var	_Memory:	TSOS.Memory;
-var	_MemoryAccessor:	TSOS.MemoryAccessor;
+// var	_Memory:	TSOS.Memory;
+var	_MemoryAccessor: TSOS.MemoryAccessor;
+
 //	Software	(OS)
-var	_MemoryManager:	any =	null;
+var	_MemoryManager: any =	null;
 
 var _OSclock: number = 0;  // Page 23.
 
@@ -73,6 +75,13 @@ var _SarcasticMode: boolean = false;
 var _krnKeyboardDriver: TSOS.DeviceDriverKeyboard  = null;
 
 var _hardwareClockID: number = null;
+
+// For scheduling
+var _ReadyQueue: TSOS.Queue = null; // for the running processes
+var _ResidentList: number[] = []; // for loaded processes
+var _Scheduler: TSOS.Scheduler;
+// var _Dispatcher: TSOS.Dispatcher;
+
 
 // For testing (and enrichment)...
 var Glados: any = null;  // This is the function Glados() in glados-ip*.js http://alanclasses.github.io/TSOS/test/ .

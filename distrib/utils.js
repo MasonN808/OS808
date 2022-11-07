@@ -55,6 +55,12 @@ var TSOS;
             }
             return str;
         }
+        static removeListElement(list, target) {
+            const index = list.indexOf(target, 0);
+            if (index > -1) {
+                list.splice(index, 1);
+            }
+        }
     }
     TSOS.Utils = Utils;
 })(TSOS || (TSOS = {}));

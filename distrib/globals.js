@@ -16,13 +16,14 @@ const CPU_CLOCK_INTERVAL = 100; // This is in ms (milliseconds) so 1000 = 1 seco
 const TIMER_IRQ = 0; // Pages 23 (timer), 9 (interrupts), and 561 (interrupt priority).
 // NOTE: The timer is different from hardware/host clock pulses. Don't confuse these.
 const KEYBOARD_IRQ = 1;
+const CONTEXT_SWITCH = 2;
 //
 // Global Variables
 // TODO: Make a global object and use that instead of the "_" naming convention in the global namespace.
 //
 var _CPU; // Utilize TypeScript's type annotation system to ensure that _CPU is an instance of the Cpu class.
 //	Hardware	(host)
-var _Memory;
+// var	_Memory:	TSOS.Memory;
 var _MemoryAccessor;
 //	Software	(OS)
 var _MemoryManager = null;
@@ -55,6 +56,11 @@ var _SarcasticMode = false;
 // Global Device Driver Objects - page 12
 var _krnKeyboardDriver = null;
 var _hardwareClockID = null;
+// For scheduling
+var _ReadyQueue = null; // for the running processes
+var _ResidentList = []; // for loaded processes
+var _Scheduler;
+// var _Dispatcher: TSOS.Dispatcher;
 // For testing (and enrichment)...
 var Glados = null; // This is the function Glados() in glados-ip*.js http://alanclasses.github.io/TSOS/test/ .
 var _GLaDOS = null; // If the above is linked in, this is the instantiated instance of Glados.

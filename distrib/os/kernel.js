@@ -8,21 +8,25 @@
      ------------ */
 var TSOS;
 (function (TSOS) {
+    // import { Dispatcher } from './dispatcher'
     class Kernel {
         //
         // OS Startup and Shutdown Routines
         //
         krnBootstrap() {
             TSOS.Control.hostLog("bootstrap", "host"); // Use hostLog because we ALWAYS want this, even if _Trace is off.
+            // Initialize the memory manager
+            _MemoryManager = new TSOS.MemoryManager();
+            _MemoryManager.init();
             // Initialize the memory
             TSOS.Control.hostMemoryInit();
             // Initialize the CPU
             TSOS.Control.hostCpuInit();
-            _MemoryManager = new TSOS.MemoryManager();
             // Initialize our global queues.
             _KernelInterruptQueue = new TSOS.Queue(); // A (currently) non-priority queue for interrupt requests (IRQs).
             _KernelBuffers = new Array(); // Buffers... for the kernel.
             _KernelInputQueue = new TSOS.Queue(); // Where device input lands before being processed out somewhere.
+            _ReadyQueue = new TSOS.Queue(); // Where the processes will be put
             // Initialize the console.
             _Console = new TSOS.Console(); // The command line interface / console I/O device.
             _Console.init();
@@ -118,6 +122,10 @@ var TSOS;
                 case KEYBOARD_IRQ:
                     _krnKeyboardDriver.isr(params); // Kernel mode device driver
                     _StdIn.handleInput();
+                    break;
+                case CONTEXT_SWITCH: // Let the ISR issue a context switch via the dispatchers
+                    // Pull the current PID from the CPU from the enqueued process in the ready queue
+                    TSOS.Dispatcher.contextSwitch(_CPU.PID, params);
                     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");

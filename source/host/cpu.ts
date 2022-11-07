@@ -12,8 +12,6 @@
      ------------ */
 
 module TSOS {
-
-    
     export class Cpu {
         public lastPC: number;
 
@@ -24,8 +22,8 @@ module TSOS {
                     public Yreg: number = 0,
                     public Zflag: number = 0,
                     public isExecuting: boolean = false,
-                    public PID: number = null) {
-
+                    public PID: number = null,
+                    public Quantum: number = 0) {
         }
 
         public init(): void {
@@ -38,25 +36,52 @@ module TSOS {
             this.isExecuting = false;
             this.PID = null;
             this.lastPC = 0;
+            this.Quantum = 0;
+            // _Scheduler.resetQuantum();
         }
 
         public cycle(): void {
             _Kernel.krnTrace('CPU cycle');
 
+            if (this.PID === null && !_ReadyQueue.isEmpty()) {
+                this.PID = _ReadyQueue.dequeue();
+                this.calibratePCBtoCPU(this.PID);
+            }
+            else if (this.PID === null && _ReadyQueue.isEmpty()) {
+                this.init();
+                return;
+            }
+
+            // For the very first running program
+            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+            pcb.processState = "Running";
+            
+            // Validate the current quantum and issue an interrupt if we hit the max quantum
+            _Scheduler.validateQuantum();
+
+            // Now update the displayed PCB
+            TSOS.Control.hostProcesses(this.PID);
+            
             // Get the Op code given the pid and pc
             var opCode = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
-
-            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+            opCode.currentOperator = true;
 
             // Update the intermediate representation in PCB and CPU
             this.updateIR();
 
+            // Use this for to identify D0 operator is reached
+            var entered_D0 = false;
+            var exitProgram = false;
+
             // Have a massive switch statement for all possible Op codes
-            switch (opCode) {
+            switch (opCode.codeString) {
                 // Load the accumulator with a constant
                 case ("A9"):
                     // Get the constant one op code above current PC (i.e, do one op code lookahead)
-                    var constant = TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1);
+                    var constant = TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).codeString;
+
+                    // Change the pointer for coloring
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).currentOperand = true;
 
                     // Update the Accumulator in CPU and PCB
                     this.updateAcc(constant)
@@ -68,10 +93,14 @@ module TSOS {
                 // Load the accumulator from memory
                 case ("AD"):
                     // Get the storage location one op code above current PC (i.e, do one op code lookahead)
-                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1), 16);
+                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).codeString, 16);
+
+                    // Change the pointer(s) for coloring
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).currentOperand = true;
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 2).currentOperand = true;
 
                     // Query constant from memory location
-                    var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation);
+                    var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation).codeString;
                     
                     // Update the Accumulator in CPU and PCB
                     this.updateAcc(constantInMemory)
@@ -90,7 +119,11 @@ module TSOS {
                     }
 
                     // Get the storage location one op code above current PC (i.e, do one op code lookahead)
-                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1), 16);
+                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).codeString, 16);
+
+                    // Change the pointer(s) for coloring
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).currentOperand = true;
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 2).currentOperand = true;
                     
                     // Write the accumulator at the specified storage location
                     TSOS.MemoryAccessor.writeMemory(this.PID, storageLocation, hexAcc)
@@ -103,10 +136,14 @@ module TSOS {
                 // Adds contents of an address to the contents of the accumulator and keeps the result in the accumulator
                 case ("6D"):
                     // Get the storage location one op code above current PC (i.e, do one op code lookahead)
-                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1), 16);
+                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).codeString, 16);
+
+                    // Change the pointer(s) for coloring
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).currentOperand = true;
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 2).currentOperand = true;
                     
                     // Query constant from memory location
-                    var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation);
+                    var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation).codeString;
 
                     // Update the Accumulator by accumulating the accumulator in CPU and PCB
                     this.addToAcc(constantInMemory);
@@ -117,7 +154,10 @@ module TSOS {
                 // Load the X-register with a constant
                 case ("A2"):
                     // Get the constant one op code above current PC (i.e, do one op code lookahead)
-                    var constant = TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1);
+                    var constant = TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).codeString;
+
+                    // Change the pointer(s) for coloring
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).currentOperand = true;
                     
                     this.updateX(constant);
 
@@ -128,10 +168,14 @@ module TSOS {
                 // Load the X-register from memory
                 case ("AE"):
                     // Get the storage location one op code above current PC (i.e, do one op code lookahead)
-                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1), 16);
+                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).codeString, 16);
+
+                    // Change the pointer(s) for coloring
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).currentOperand = true;
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 2).currentOperand = true;
                     
                     // Query constant from memory location
-                    var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation);
+                    var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation).codeString;
                         
                     // Update the X-register in CPU and PCB
                     this.updateX(constantInMemory);
@@ -142,8 +186,11 @@ module TSOS {
                 // Load the Y-register with a constant
                 case ("A0"):
                     // Get the constant one op code above current PC (i.e, do one op code lookahead)
-                    var constant = TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1);
-                    
+                    var constant = TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).codeString;
+
+                    // Change the pointer(s) for coloring
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).currentOperand = true;
+
                     this.updateY(constant);
 
                     // Increase the PC in CPU and PCB
@@ -153,10 +200,14 @@ module TSOS {
                 // Load the Y-register from memory
                 case ("AC"):
                     // Get the storage location one op code above current PC (i.e, do one op code lookahead)
-                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1), 16);
+                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).codeString, 16);
+
+                    // Change the pointer(s) for coloring
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).currentOperand = true;
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 2).currentOperand = true;
                     
                     // Query constant from memory location
-                    var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation);
+                    var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation).codeString;
 
                     // Update the Y-register in CPU and PCB
                     this.updateY(constantInMemory);
@@ -172,10 +223,14 @@ module TSOS {
                 // Compare a byte in memory to the X-register;  Sets the Z (zero) flag to 1 if equal
                 case ("EC"):
                     // Get the storage location one op code above current PC (i.e, do one op code lookahead)
-                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1), 16);
+                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).codeString, 16);
+
+                    // Change the pointer(s) for coloring
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).currentOperand = true;
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 2).currentOperand = true;
 
                     // Query constant from memory location
-                    var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation);
+                    var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation).codeString;
 
                     // Parse to compare with X-register
                     var parsedConstantInMemory = parseInt(constantInMemory, 16);
@@ -192,16 +247,18 @@ module TSOS {
                 
                 // Branch n bytes if Z-flag == 0 
                 case ("D0"):
+                    entered_D0 = true;
+
                     // Get the branch number
-                    var branch = TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1);
+                    var branch = TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).codeString;
+
+                    // Change the pointer(s) for coloring
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).currentOperand = true;
 
                     if (this.Zflag === 0) {
-                        // console.log(parseInt(branch, 16))
-                        // console.log(this.PC)
-                        // console.log(_Memory.limit)
                         // -1 since _Memory.limit = 256 not 255
-                        if (parseInt(branch, 16) > _Memory.limit - this.PC) {
-                            this.updatePC((parseInt(branch, 16) + this.PC) - _Memory.limit + 2);
+                        if (parseInt(branch, 16) > _MemoryManager.limit - this.PC) {
+                            this.updatePC((parseInt(branch, 16) + this.PC) - _MemoryManager.limit + 1);
                         }
                         else {
                             this.updatePC(parseInt(branch, 16) + this.PC + 2)
@@ -215,10 +272,14 @@ module TSOS {
                 // Increment the value of a byte
                 case ("EE"):
                     // Get the storage location one op code above current PC (i.e, do one op code lookahead)
-                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1), 16);
+                    var storageLocation = parseInt(TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).codeString, 16);
+
+                    // Change the pointer(s) for coloring
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 1).currentOperand = true;
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC + 2).currentOperand = true;
 
                     // Query constant from memory location
-                    var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation);
+                    var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, storageLocation).codeString;
                     
                     // Increment the byte and write to same memory location
                     TSOS.MemoryAccessor.writeMemory(this.PID, storageLocation, (parseInt(constantInMemory, 16) + 1).toString(16));
@@ -239,13 +300,12 @@ module TSOS {
                     }
                     else if (this.Xreg === 2) {
                         var memoryIndex = this.Yreg;
-                        var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, memoryIndex);
-                        console.log(constantInMemory);
+                        var constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, memoryIndex).codeString;
                         while (constantInMemory != "00") {
                             // convert the hex into ASCII
                             _StdOut.putText(TSOS.Utils.hex2a(constantInMemory));
                             memoryIndex += 1;
-                            constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, memoryIndex);
+                            constantInMemory = TSOS.MemoryAccessor.readMemory(this.PID, memoryIndex).codeString;
                         }
                     }
                     
@@ -254,26 +314,56 @@ module TSOS {
                 
                 // Check for the end of program marker
                 case ("00"):
-                    // Clear the PCB
-                    TSOS.Control.hostRemoveProcess(this.PID);
-
-                    // Remove the PID from the hash table in the memory manager
-                    _MemoryManager.PIDMap.delete(this.PID);
+                    // NOTE: Dont need to remove from the ready queue, since it has already been done due to queue structure
+                    _MemoryManager.removePIDFromEverywhere(this.PID);
 
                     // Reset all CPU pointers for next executing program
-                    _CPU.init();
-                    TSOS.Control.hostCpu();
-
-                    // TODO: May need to work on this later if multiple processes exist
+                    this.PID = null;
+                    
+                    // Check if the ready queue is empty to determine whether to completly stop CPU execution
+                    if (_ReadyQueue.isEmpty()){
+                        exitProgram = true;
+                        _CPU.init(); // turns .isExecuting to false
+                    }
+                    break;
             }
-            // Now update the displayed PCB
-
-            pcb.programCounter = this.lastPC;
-            
-
-            TSOS.Control.hostProcesses(this.PID);
+        
             TSOS.Control.hostCpu();
             TSOS.Control.hostMemory();
+
+            // If we have not exited quite yet
+            if (this.PID !== null) {
+                // Reset the operator and operand pointers for coloring text
+                if (entered_D0) {
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.lastPC + 1).currentOperand = false;
+                }
+                else {
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC - 1).currentOperand = false;
+                    TSOS.MemoryAccessor.readMemory(this.PID, this.PC - 2).currentOperand = false;
+                }
+                opCode.currentOperator = false;
+            }
+
+            this.incrementQuantum();
+            
+            // Now update the displayed PCB
+            if (!exitProgram && this.PID !== null) {
+                TSOS.Control.hostProcesses(this.PID);
+            }
+        }
+
+        public calibratePCBtoCPU(targetPID: number): void {
+            const pcb = _MemoryManager.PIDMap.get(targetPID)[1];
+
+            this.PID = targetPID;  // TODO: This might be redundant
+            this.PC = pcb.programCounter;
+            this.lastPC = pcb.lastProgramCounter;
+            this.IR = pcb.intermediateRepresentation;
+            this.Acc = pcb.Acc;
+            this.Xreg = pcb.Xreg;
+            this.Yreg = pcb.Yreg;
+            this.Zflag = pcb.Zflag;
+            this.Quantum = pcb.currentQuantum;
         }
 
         private changePC(change: number): void {
@@ -281,10 +371,10 @@ module TSOS {
 
             // Keep track of this to display on PCB without delay
             this.lastPC = this.PC;
+            pcb.lastProgramCounter = this.PC;
             
             this.PC += change;
             pcb.programCounter += change;
-
         }
 
         private updatePC(absolute: number): void {
@@ -292,23 +382,24 @@ module TSOS {
 
             // Keep track of this to display on PCB without delay
             this.lastPC = this.PC;
-            
+            pcb.lastProgramCounter = this.PC;
+
             this.PC = absolute;
             pcb.programCounter = absolute;
-
         }
 
         private addToAcc(addedNum: string): void {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
-            console.log(addedNum)
 
             // If we are adding to the accumulator rather than replacing
             this.Acc += parseInt(addedNum, 16);
             pcb.Acc += parseInt(addedNum, 16);
         }
 
-        private updateAcc(newAccAsHex: string, accumulate = false): void {
+        private updateAcc(newAccAsHex: string): void {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+
+            // parse string to an int to store in Accumulator
             this.Acc = parseInt(newAccAsHex, 16);
             pcb.Acc = parseInt(newAccAsHex, 16);
         }
@@ -317,7 +408,7 @@ module TSOS {
         private updateX(newXAsHex: string): void {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
 
-            // parse string to an int to store in accumulator
+            // parse string to an int to store in X register
             this.Xreg = parseInt(newXAsHex, 16);
             pcb.Xreg = parseInt(newXAsHex, 16);
         }
@@ -325,7 +416,7 @@ module TSOS {
         private updateY(newYAsHex: string): void {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
 
-            // parse string to an int to store in accumulator
+            // parse string to an int to store in Y register
             this.Yreg = parseInt(newYAsHex, 16);
             pcb.Yreg = parseInt(newYAsHex, 16);
         }
@@ -333,7 +424,7 @@ module TSOS {
         private updateZ(newZ: number): void {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
 
-            // parse string to an int to store in accumulator
+            // parse string to an int to store in Z flag
             this.Zflag = newZ;
             pcb.Zflag = newZ;
         }
@@ -342,8 +433,22 @@ module TSOS {
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
 
             // Update the IR given the current PC
-            this.IR = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
-            pcb.intermediateRepresentation = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
+            this.IR = TSOS.MemoryAccessor.readMemory(this.PID, this.PC).codeString;
+            pcb.intermediateRepresentation = TSOS.MemoryAccessor.readMemory(this.PID, this.PC).codeString;
+        }
+
+        private incrementQuantum(): void {
+            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+
+            this.Quantum += 1;
+            pcb.currentQuantum = this.Quantum;
+        }
+
+        public resetQuantum(): void {
+            const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
+
+            this.Quantum = 0;
+            pcb.currentQuantum = this.Quantum;
         }
     }
 }

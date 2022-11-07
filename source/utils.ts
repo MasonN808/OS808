@@ -58,5 +58,12 @@ module TSOS {
             }     
             return str; 
         }
+        
+        public static removeListElement(list: number[], target: number) {
+            const index = list.indexOf(target, 0);
+            if (index > -1) {
+                list.splice(index, 1);
+            }
+        }
     }
 }

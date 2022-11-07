@@ -27,9 +27,7 @@ var TSOS;
             _DrawingContext = _Canvas.getContext("2d");
             //Enable the added-in canvas text functions (see canvastext.ts for provenance and details).
             TSOS.CanvasTextFunctions.enable(_DrawingContext); // Text functionality is now built in to the HTML5 canvas. But this is old-school, and fun, so we'll keep it.
-            var date_time = new Date().toLocaleString();
-            // Use the TypeScript cast to HTMLInputElement
-            document.getElementById("taDate").innerHTML = date_time;
+            this.dateLog();
             // Set focus on the start button.
             // Use the TypeScript cast to HTMLInputElement
             document.getElementById("btnStartOS").focus();
@@ -99,40 +97,61 @@ var TSOS;
         static hostMemoryInit() {
             // Display memory of 00s
             const table = document.getElementById("taMemory");
-            var rowIndex = 0;
-            var leadingZeros = "";
-            var zeroArray = [];
-            // Loop through the memory array to display it
-            while (rowIndex < Math.ceil(_Memory.limit / 8)) {
-                // Check the length to decide whether to add leading zeros
-                if ((rowIndex * 8).toString(16).length === 1) {
-                    leadingZeros = "0";
+            // Loop through all programs
+            for (let loadedProgramIndex = 0; loadedProgramIndex < _MemoryManager.maxLoadedPrograms; loadedProgramIndex++) {
+                var rowIndex = 0 + (32 * loadedProgramIndex);
+                var leadingZeros = "";
+                var zeroArray = [];
+                // Loop through the memory array to display it
+                while (rowIndex < Math.ceil(_MemoryManager.limit / 8) * (loadedProgramIndex + 1)) {
+                    // Check the length to decide whether to add leading zeros
+                    if ((rowIndex * 8).toString(16).length === 1) {
+                        leadingZeros = "0";
+                    }
+                    var row = table.insertRow(-1);
+                    // Use .toString(16) to turn int into hex
+                    // Insert the row label
+                    row.insertCell(0).innerHTML = leadingZeros + (rowIndex * 8).toString(16);
+                    for (let columnIndex = 1; columnIndex < 9; columnIndex++) {
+                        row.insertCell(columnIndex).innerHTML = "00";
+                    }
+                    rowIndex += 1;
+                    // Reset pointers for next line
+                    leadingZeros = "";
+                    zeroArray = [];
                 }
-                var row = table.insertRow(-1);
-                // Use .toString(16) to turn int into hex 
-                row.insertCell(0).innerHTML = leadingZeros + (rowIndex * 8).toString(16);
-                for (let columnIndex = 1; columnIndex < 9; columnIndex++) {
-                    row.insertCell(columnIndex).innerHTML = "00";
-                }
-                rowIndex += 1;
-                // Reset pointers for next line
-                leadingZeros = "";
-                zeroArray = [];
             }
         }
         static hostMemory() {
             // Access the memory and display it
             const table = document.getElementById("taMemory");
-            const memoryArray = _Memory.source;
-            var rowIndex = 0;
-            // Loop through the memory array to display it
-            while (rowIndex < Math.ceil(_Memory.limit / 8)) {
-                const slicedArrayLength = memoryArray.slice(rowIndex * 8, rowIndex * 8 + 8).length;
-                for (let columnIndex = 1; columnIndex < slicedArrayLength + 1; columnIndex++) {
-                    var cell = table.rows[rowIndex].cells[columnIndex];
-                    cell.innerText = memoryArray[rowIndex * 8 + columnIndex - 1];
+            // Loop through all programs in sequence
+            for (let loadedProgramIndex = 0; loadedProgramIndex < _MemoryManager.maxLoadedPrograms; loadedProgramIndex++) {
+                // Get the source memory from the parition in main memory
+                const memoryArray = _MemoryManager.mainMemory[loadedProgramIndex].source;
+                // adjust rowIndex WRT loaded program index
+                var rowIndex = 0 + (32 * loadedProgramIndex);
+                // Loop through the memory array to display it
+                while (rowIndex < Math.ceil(_MemoryManager.limit / 8) * (loadedProgramIndex + 1)) {
+                    const slicedArrayLength = memoryArray.slice((rowIndex - (32 * loadedProgramIndex)) * 8, (rowIndex - (32 * loadedProgramIndex)) * 8 + 8).length;
+                    // Add one for the row label element
+                    for (let columnIndex = 1; columnIndex < slicedArrayLength + 1; columnIndex++) {
+                        var cell = table.rows[rowIndex].cells[columnIndex];
+                        var elementIndex = (rowIndex - (32 * loadedProgramIndex)) * 8 + columnIndex - 1;
+                        cell.innerText = memoryArray[elementIndex].codeString;
+                        // Color the table element text
+                        if (memoryArray[elementIndex].currentOperator) {
+                            cell.style.color = "#e10544"; // Terraria Red
+                        }
+                        else if (memoryArray[elementIndex].currentOperand) {
+                            cell.style.color = "#f29091"; // Terraria Light Red
+                        }
+                        else {
+                            cell.style.color = "black";
+                        }
+                    }
+                    rowIndex += 1;
                 }
-                rowIndex += 1;
             }
         }
         static hostProcessesInit(inputPid) {
@@ -152,11 +171,31 @@ var TSOS;
             row.insertCell(7).innerHTML = pcb.priority;
             row.insertCell(8).innerHTML = pcb.processState;
             row.insertCell(9).innerHTML = pcb.location;
+            row.insertCell(10).innerHTML = pcb.base;
+            row.insertCell(11).innerHTML = pcb.limit;
+            row.insertCell(12).innerHTML = pcb.segment;
+            row.insertCell(13).innerHTML = pcb.currentQuantum;
         }
         static hostProcesses(inputPid) {
             const table = document.getElementById("taProcesses");
             // Get the PCB from the input PID in the hashtable
-            var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
+            const pcb = _MemoryManager.PIDMap.get(inputPid)[1];
+            // give the appropriate rowIndex
+            var addedRowIndex = 1;
+            // loop through hash map to get key-value pairs
+            for (const entry of _MemoryManager.PIDMap.entries()) {
+                // entry[1] is the value
+                // entry[1][1] is the pcb
+                const traversedPCB = entry[1][1];
+                // Check if the key of the entry is in the ready queue or the CPU
+                // entry[0] is the key
+                if (_ReadyQueue.q.indexOf(entry[0]) > -1 || _CPU.PID == entry[0]) {
+                    // Adjust the rowIndex pointers
+                    traversedPCB.rowIndex = addedRowIndex;
+                    addedRowIndex += 1;
+                }
+            }
+            // Update the base, limit, and segment
             table.rows[pcb.rowIndex].cells[0].innerHTML = pcb.processId;
             table.rows[pcb.rowIndex].cells[1].innerHTML = pcb.programCounter;
             table.rows[pcb.rowIndex].cells[2].innerHTML = pcb.intermediateRepresentation;
@@ -167,6 +206,10 @@ var TSOS;
             table.rows[pcb.rowIndex].cells[7].innerHTML = pcb.priority;
             table.rows[pcb.rowIndex].cells[8].innerHTML = pcb.processState;
             table.rows[pcb.rowIndex].cells[9].innerHTML = pcb.location;
+            table.rows[pcb.rowIndex].cells[10].innerHTML = pcb.base;
+            table.rows[pcb.rowIndex].cells[11].innerHTML = pcb.limit;
+            table.rows[pcb.rowIndex].cells[12].innerHTML = pcb.segment;
+            table.rows[pcb.rowIndex].cells[13].innerHTML = pcb.currentQuantum;
         }
         static hostCpuInit() {
             // To display the pointers in the CPU on load with heading
@@ -185,6 +228,7 @@ var TSOS;
             const table = document.getElementById("taCpu");
             table.rows[1].cells[0].innerHTML = _CPU.lastPC.toString();
             table.rows[1].cells[1].innerHTML = _CPU.IR;
+            table.rows[1].cells[1].style.color = "red";
             table.rows[1].cells[2].innerHTML = _CPU.Acc.toString(16);
             table.rows[1].cells[3].innerHTML = _CPU.Xreg.toString(16);
             table.rows[1].cells[4].innerHTML = _CPU.Yreg.toString(16);
@@ -194,8 +238,21 @@ var TSOS;
             const table = document.getElementById("taProcesses");
             // Get the PCB from the input PID in the hashtable
             var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
+            // give the appropriate rowIndex
+            var addedRowIndex = 1;
+            // loop through hash map to get key-value pairs
+            for (const entry of _MemoryManager.PIDMap.entries()) {
+                // entry[1] is the value
+                // entry[1][1] is the pcb
+                const traversedPCB = entry[1][1];
+                // Check if the key of the entry is in the ready queue or the CPU
+                if (_ReadyQueue.q.indexOf(entry[0]) > -1 || _CPU.PID == entry[0]) {
+                    // Adjust the rowIndex pointers
+                    traversedPCB.rowIndex = addedRowIndex;
+                    addedRowIndex += 1;
+                }
+            }
             table.deleteRow(pcb.rowIndex);
-            // TODO: Move around the processes if there exist more than one in PCB
         }
         //
         // Host Events
@@ -209,12 +266,14 @@ var TSOS;
             document.getElementById("btnToggleStepMode").disabled = false;
             // .. set focus on the OS console display ...
             document.getElementById("display").focus();
+            // Initialize the scheduler
+            _Scheduler = new TSOS.Scheduler();
             // ... Create and initialize the CPU (because it's part of the hardware)  ...
             _CPU = new TSOS.Cpu(); // Note: We could simulate multi-core systems by instantiating more than one instance of the CPU here.
             _CPU.init(); //       There's more to do, like dealing with scheduling and such, but this would be a start. Pretty cool.
             // Also initialize the memory
-            _Memory = new TSOS.Memory();
-            _Memory.init();
+            // _Memory	= new Memory();
+            // _Memory.init();
             _MemoryAccessor = new TSOS.MemoryAccessor();
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(TSOS.Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
@@ -239,10 +298,9 @@ var TSOS;
             // page from its cache, which is not what we want.
         }
         static hostBtnToggleStep_click(btn) {
-            console.log("BAD");
             // To change the button color on click
             var style = document.getElementById('btnToggleStepMode').style;
-            console.log(style.backgroundColor);
+            // On initialization, the buttion background color is "", ... strangely
             if (style.backgroundColor == "green" || style.backgroundColor == "") {
                 style.backgroundColor = "red";
                 // Enable the step buttion

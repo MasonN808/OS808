@@ -179,37 +179,38 @@ var TSOS;
         static hostProcesses(inputPid) {
             const table = document.getElementById("taProcesses");
             // Get the PCB from the input PID in the hashtable
-            const pcb = _MemoryManager.PIDMap.get(inputPid)[1];
+            // const pcb = _MemoryManager.PIDMap.get(inputPid)[1];
             // give the appropriate rowIndex
             var addedRowIndex = 1;
             // loop through hash map to get key-value pairs
             for (const entry of _MemoryManager.PIDMap.entries()) {
                 // entry[1] is the value
                 // entry[1][1] is the pcb
-                const traversedPCB = entry[1][1];
+                const pcb = entry[1][1];
                 // Check if the key of the entry is in the ready queue or the CPU
                 // entry[0] is the key
                 if (_ReadyQueue.q.indexOf(entry[0]) > -1 || _CPU.PID == entry[0]) {
                     // Adjust the rowIndex pointers
-                    traversedPCB.rowIndex = addedRowIndex;
+                    pcb.rowIndex = addedRowIndex;
                     addedRowIndex += 1;
+                    // const pcb = _MemoryManager.PIDMap.get(pcb)[1];
+                    // Update the base, limit, and segment
+                    table.rows[pcb.rowIndex].cells[0].innerHTML = pcb.processId;
+                    table.rows[pcb.rowIndex].cells[1].innerHTML = pcb.programCounter;
+                    table.rows[pcb.rowIndex].cells[2].innerHTML = pcb.intermediateRepresentation;
+                    table.rows[pcb.rowIndex].cells[3].innerHTML = pcb.Acc;
+                    table.rows[pcb.rowIndex].cells[4].innerHTML = pcb.Xreg;
+                    table.rows[pcb.rowIndex].cells[5].innerHTML = pcb.Yreg;
+                    table.rows[pcb.rowIndex].cells[6].innerHTML = pcb.Zflag;
+                    table.rows[pcb.rowIndex].cells[7].innerHTML = pcb.priority;
+                    table.rows[pcb.rowIndex].cells[8].innerHTML = pcb.processState;
+                    table.rows[pcb.rowIndex].cells[9].innerHTML = pcb.location;
+                    table.rows[pcb.rowIndex].cells[10].innerHTML = pcb.base;
+                    table.rows[pcb.rowIndex].cells[11].innerHTML = pcb.limit;
+                    table.rows[pcb.rowIndex].cells[12].innerHTML = pcb.segment;
+                    table.rows[pcb.rowIndex].cells[13].innerHTML = pcb.currentQuantum;
                 }
             }
-            // Update the base, limit, and segment
-            table.rows[pcb.rowIndex].cells[0].innerHTML = pcb.processId;
-            table.rows[pcb.rowIndex].cells[1].innerHTML = pcb.programCounter;
-            table.rows[pcb.rowIndex].cells[2].innerHTML = pcb.intermediateRepresentation;
-            table.rows[pcb.rowIndex].cells[3].innerHTML = pcb.Acc;
-            table.rows[pcb.rowIndex].cells[4].innerHTML = pcb.Xreg;
-            table.rows[pcb.rowIndex].cells[5].innerHTML = pcb.Yreg;
-            table.rows[pcb.rowIndex].cells[6].innerHTML = pcb.Zflag;
-            table.rows[pcb.rowIndex].cells[7].innerHTML = pcb.priority;
-            table.rows[pcb.rowIndex].cells[8].innerHTML = pcb.processState;
-            table.rows[pcb.rowIndex].cells[9].innerHTML = pcb.location;
-            table.rows[pcb.rowIndex].cells[10].innerHTML = pcb.base;
-            table.rows[pcb.rowIndex].cells[11].innerHTML = pcb.limit;
-            table.rows[pcb.rowIndex].cells[12].innerHTML = pcb.segment;
-            table.rows[pcb.rowIndex].cells[13].innerHTML = pcb.currentQuantum;
         }
         static hostCpuInit() {
             // To display the pointers in the CPU on load with heading

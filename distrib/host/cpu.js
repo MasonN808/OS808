@@ -13,7 +13,7 @@
 var TSOS;
 (function (TSOS) {
     class Cpu {
-        constructor(PC = 0, IR = "00", Acc = 0, Xreg = 0, Yreg = 0, Zflag = 0, isExecuting = false, PID = null, Quantum = 0) {
+        constructor(PC = 0, IR = "00", Acc = 0, Xreg = 0, Yreg = 0, Zflag = 0, isExecuting = false, PID = null, Quantum = 1) {
             this.PC = PC;
             this.IR = IR;
             this.Acc = Acc;
@@ -34,24 +34,29 @@ var TSOS;
             this.isExecuting = false;
             this.PID = null;
             this.lastPC = 0;
-            this.Quantum = 0;
+            this.Quantum = 1;
             // _Scheduler.resetQuantum();
         }
         cycle() {
             _Kernel.krnTrace('CPU cycle');
-            if (this.PID === null && !_ReadyQueue.isEmpty()) {
+            console.log("_ReadyQueue: " + _ReadyQueue);
+            var contextSwitch = false;
+            // For the initial run routine
+            if (this.PID == null && !_ReadyQueue.isEmpty()) {
                 this.PID = _ReadyQueue.dequeue();
                 this.calibratePCBtoCPU(this.PID);
             }
-            else if (this.PID === null && _ReadyQueue.isEmpty()) {
-                this.init();
-                return;
+            if (this.PID == null) {
+                console.log("ERROR");
             }
+            // else if (this.PID === null && _ReadyQueue.isEmpty()) {
+            //     this.init();
+            //     return;
+            // }
+            console.log("HERE " + this.PID);
             // For the very first running program
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
             pcb.processState = "Running";
-            // Validate the current quantum and issue an interrupt if we hit the max quantum
-            _Scheduler.validateQuantum();
             // Now update the displayed PCB
             TSOS.Control.hostProcesses(this.PID);
             // Get the Op code given the pid and pc
@@ -250,18 +255,34 @@ var TSOS;
                     // NOTE: Dont need to remove from the ready queue, since it has already been done due to queue structure
                     _MemoryManager.removePIDFromEverywhere(this.PID);
                     // Reset all CPU pointers for next executing program
-                    this.PID = null;
+                    // this.PID = null;
+                    // this.Quantum = 1;
                     // Check if the ready queue is empty to determine whether to completly stop CPU execution
                     if (_ReadyQueue.isEmpty()) {
                         exitProgram = true;
                         _CPU.init(); // turns .isExecuting to false
                     }
+                    // Issue a context switch
+                    else {
+                        console.log("type-2 + " + this.PID);
+                        _Scheduler.issueContextSwitchInterrupt("type-2", this.PID);
+                        contextSwitch = true;
+                    }
                     break;
+                // We reached an invalid operator
+                default:
+                    _StdOut.putText("Invalid Operator " + this.IR + " in PID " + this.PID + ", clearing CPU and memory partition");
+                    _MemoryManager.removePIDFromEverywhere(this.PID);
+                    // Restart the CPU
+                    _CPU.init();
+                    // Update displays
+                    TSOS.Control.hostMemory();
+                    TSOS.Control.hostCpu();
             }
             TSOS.Control.hostCpu();
             TSOS.Control.hostMemory();
             // If we have not exited quite yet
-            if (this.PID !== null) {
+            if (this.PID !== null && !contextSwitch) {
                 // Reset the operator and operand pointers for coloring text
                 if (entered_D0) {
                     TSOS.MemoryAccessor.readMemory(this.PID, this.lastPC + 1).currentOperand = false;
@@ -271,10 +292,13 @@ var TSOS;
                     TSOS.MemoryAccessor.readMemory(this.PID, this.PC - 2).currentOperand = false;
                 }
                 opCode.currentOperator = false;
+                // Validate the current quantum and issue an interrupt if we hit the max quantum
+                _Scheduler.validateQuantum(this.PID);
+                this.incrementQuantum();
             }
-            this.incrementQuantum();
             // Now update the displayed PCB
-            if (!exitProgram && this.PID !== null) {
+            if (!exitProgram && this.PID !== null && !contextSwitch) {
+                console.log(this.PID);
                 TSOS.Control.hostProcesses(this.PID);
             }
         }

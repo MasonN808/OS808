@@ -125,7 +125,7 @@ var TSOS;
                     break;
                 case CONTEXT_SWITCH: // Let the ISR issue a context switch via the dispatchers
                     // Pull the current PID from the CPU from the enqueued process in the ready queue
-                    TSOS.Dispatcher.contextSwitch(_CPU.PID, params);
+                    TSOS.Dispatcher.contextSwitch(params);
                     break;
                 default:
                     this.krnTrapError("Invalid Interrupt Request. irq=" + irq + " params=[" + params + "]");

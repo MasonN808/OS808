@@ -159,7 +159,7 @@ var TSOS;
             const table = document.getElementById("taProcesses");
             // Get the PCB from the input PID in the hashtable
             var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
-            // insert the row at the ver bottom relative to all other rows
+            // insert the row at the very bottom relative to all other rows
             var row = table.insertRow(-1);
             row.insertCell(0).innerHTML = pcb.processId;
             row.insertCell(1).innerHTML = pcb.programCounter;
@@ -211,6 +211,20 @@ var TSOS;
                     table.rows[pcb.rowIndex].cells[13].innerHTML = pcb.currentQuantum;
                 }
             }
+        }
+        static hostDiskInit() {
+            // To display the Hard disk heading
+            const table = document.getElementById("taProcesses");
+            // Get the PCB from the input PID in the hashtable
+            const diskMap = _krnDiskDriver.diskMap;
+            // Loop through each key and value pair in the map
+            diskMap.forEach((value, key) => {
+                var row = table.insertRow(-1);
+                row.insertCell(0).innerHTML = key;
+                row.insertCell(1).innerHTML = value.used.toString(); // Turn number into string
+                row.insertCell(2).innerHTML = value.next.join(''); // Turn list of numbers into string
+                row.insertCell(3).innerHTML = value.data.join(' '); // Transform into string first
+            });
         }
         static hostCpuInit() {
             // To display the pointers in the CPU on load with heading

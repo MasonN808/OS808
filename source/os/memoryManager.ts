@@ -13,7 +13,6 @@ module TSOS {
         
         constructor() {
             this.PIDCounter = 1;
-            // this.memoryAndPCB = [];
             this.PIDMap = new Map();
             this.maxLoadedPrograms = 3;
             // Initialize an array of fixed length to simulate memory

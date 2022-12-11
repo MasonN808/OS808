@@ -160,7 +160,8 @@ tr:nth-child(even) {
 /* For the column widths in taHardDrive*/
 
 #taHardDrive {
-    /* white-space: nowrap; */
+    white-space: nowrap;
+    width: 1200px;
 }
 
 #taHardDrive .tableHeader th:nth-child(1), td:nth-child(1){
@@ -175,19 +176,6 @@ tr:nth-child(even) {
     width: 40px;
 }
 
-#taHardDrive .tableHeader th:nth-child(4){
+#taHardDrive .tableHeader th:nth-child(4), td:nth-child(4){
     width: 40px;
-    /* white-space: nowrap; */
-}
-
-/* To avoid line wrap on all the opcodes */
-#taHardDrive .tableHeader td:nth-child(4){
-    white-space: nowrap;
-    /* width: 1000px; */
-    width: 10000px;
-    /* min-width: 0; */
-    /* max-width: 200px; */
-    /* display: inline-block; */
-    /* overflow: auto; */
-    /* overflow:auto; */
 }

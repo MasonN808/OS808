@@ -7,6 +7,7 @@ table {
     background-color: aliceblue;
     height: 150px;
     overflow-y: scroll;
+    overflow-x: scroll;
     display:block;
   }
 
@@ -156,6 +157,11 @@ tr:nth-child(even) {
     width: 20px;
 }
 
+/* For the column widths in taHardDrive*/
+
+#taHardDrive {
+    /* white-space: nowrap; */
+}
 
 #taHardDrive .tableHeader th:nth-child(1), td:nth-child(1){
     width: 40px;
@@ -169,6 +175,19 @@ tr:nth-child(even) {
     width: 40px;
 }
 
-#taHardDrive .tableHeader th:nth-child(4), td:nth-child(4){
+#taHardDrive .tableHeader th:nth-child(4){
     width: 40px;
+    /* white-space: nowrap; */
+}
+
+/* To avoid line wrap on all the opcodes */
+#taHardDrive .tableHeader td:nth-child(4){
+    white-space: nowrap;
+    /* width: 1000px; */
+    width: 10000px;
+    /* min-width: 0; */
+    /* max-width: 200px; */
+    /* display: inline-block; */
+    /* overflow: auto; */
+    /* overflow:auto; */
 }

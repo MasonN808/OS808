@@ -229,7 +229,8 @@ var TSOS;
                     // Append the opcode string
                     opCodes.push(value.data[index].opCodeString);
                 }
-                row.insertCell(3).innerHTML = opCodes.join(' '); // Transform into string first
+                // FIXME: Need to adjust thist to have spaces inbetween for easier readabilty
+                row.insertCell(3).innerHTML = opCodes.join(''); // Transform into string first
             }
         }
         static hostCpuInit() {

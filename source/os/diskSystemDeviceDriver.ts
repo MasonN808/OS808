@@ -33,10 +33,13 @@ module TSOS {
             for (let trackIndex = 0; trackIndex < this.TRACKMAX; trackIndex++) {
                 for (let sectorIndex = 0; sectorIndex < this.SECTORMAX; sectorIndex++) {
                     for (let blockIndex = 0; blockIndex < this.BLOCKMAX; blockIndex++) {
-                        // TODO: Add case for kernel bootstrap
                         const key: [ number, number, number ] = [trackIndex, sectorIndex, blockIndex];
                         const keyStr: string = key.join(':');
                         var diskValue = new DiskValue();
+                        // Case for kernel bootstrap
+                        if (trackIndex == 0 && sectorIndex == 0 && blockIndex == 0) {
+                            diskValue.used = 1;
+                        }
                         this.diskMap.set(keyStr, diskValue)
                     }
                 }

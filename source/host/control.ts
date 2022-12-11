@@ -259,7 +259,7 @@ module TSOS {
 
         }
 
-        public static hostDiskInit(): void {
+        public static hostDisk(): void {
             // To display the Hard disk heading
             const table = <HTMLTableElement> document.getElementById("taHardDrive");
 

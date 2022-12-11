@@ -157,6 +157,12 @@ module TSOS {
                 "- sets the quantum for CPU scheduling");
             this.commandList[this.commandList.length] = sc;
 
+            // format
+            sc = new ShellCommand(this.shellFormat,
+                "format",
+                "- resets the hard drive");
+            this.commandList[this.commandList.length] = sc;
+
 
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -403,6 +409,10 @@ module TSOS {
                     
                     case "quantum":
                         _StdOut.putText("sets the Round Robin quantum for CPU scheduling");
+                        break;
+
+                    case "format":
+                        _StdOut.putText("resets the hard drive");
                         break;
 
                     default:
@@ -720,6 +730,13 @@ module TSOS {
             else {
                 _StdOut.putText("Usage: quantum <int>");
             }
+        }
+
+        public shellFormat() {
+            // resets values in the hashmap
+            _krnDiskDriver.krnDiskFormat();
+            Control.hostDisk();
+            _StdOut.putText("Disk SUCCESSFULLY reset");
         }
     }
 }

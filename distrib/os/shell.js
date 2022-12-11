@@ -87,6 +87,9 @@ var TSOS;
             // quantum <int>
             sc = new TSOS.ShellCommand(this.shellQuantum, "quantum", "- sets the quantum for CPU scheduling");
             this.commandList[this.commandList.length] = sc;
+            // format
+            sc = new TSOS.ShellCommand(this.shellFormat, "format", "- resets the hard drive");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             // Display the initial prompt.
@@ -298,6 +301,9 @@ var TSOS;
                         break;
                     case "quantum":
                         _StdOut.putText("sets the Round Robin quantum for CPU scheduling");
+                        break;
+                    case "format":
+                        _StdOut.putText("resets the hard drive");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -585,6 +591,12 @@ var TSOS;
             else {
                 _StdOut.putText("Usage: quantum <int>");
             }
+        }
+        shellFormat() {
+            // resets values in the hashmap
+            _krnDiskDriver.krnDiskFormat();
+            TSOS.Control.hostDisk();
+            _StdOut.putText("Disk SUCCESSFULLY reset");
         }
     }
     TSOS.Shell = Shell;

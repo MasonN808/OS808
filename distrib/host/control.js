@@ -212,7 +212,7 @@ var TSOS;
                 }
             }
         }
-        static hostDiskInit() {
+        static hostDisk() {
             // To display the Hard disk heading
             const table = document.getElementById("taHardDrive");
             // Get the PCB from the input PID in the hashtable

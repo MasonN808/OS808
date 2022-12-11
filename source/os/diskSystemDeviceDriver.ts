@@ -4,7 +4,7 @@
    The Kernel Hard Drive Device Driver.
    ---------------------------------- */
 
-   module TSOS {
+module TSOS {
 
     // Extends DeviceDriver
     export class DiskSystemDeviceDriver extends DeviceDriver {
@@ -23,6 +23,7 @@
         public krnDiskDriverEntry() {
             // Initialization routine for this, the kernel-mode Keyboard Device Driver.
             this.status = "loaded";
+            this.krnDiskFormat();
             // More?
         }
 

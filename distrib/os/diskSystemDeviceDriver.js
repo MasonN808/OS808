@@ -19,6 +19,7 @@ var TSOS;
         krnDiskDriverEntry() {
             // Initialization routine for this, the kernel-mode Keyboard Device Driver.
             this.status = "loaded";
+            this.krnDiskFormat();
             // More?
         }
         krnDiskFormat() {

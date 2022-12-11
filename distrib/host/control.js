@@ -214,17 +214,23 @@ var TSOS;
         }
         static hostDiskInit() {
             // To display the Hard disk heading
-            const table = document.getElementById("taProcesses");
+            const table = document.getElementById("taHardDrive");
             // Get the PCB from the input PID in the hashtable
             const diskMap = _krnDiskDriver.diskMap;
             // Loop through each key and value pair in the map
-            diskMap.forEach((value, key) => {
+            for (const [key, value] of diskMap) {
                 var row = table.insertRow(-1);
                 row.insertCell(0).innerHTML = key;
                 row.insertCell(1).innerHTML = value.used.toString(); // Turn number into string
                 row.insertCell(2).innerHTML = value.next.join(''); // Turn list of numbers into string
-                row.insertCell(3).innerHTML = value.data.join(' '); // Transform into string first
-            });
+                // Populate a new array of the strings from OpCode objects for display
+                var opCodes = [];
+                for (let index = 0; index < value.data.length; index++) {
+                    // Append the opcode string
+                    opCodes.push(value.data[index].opCodeString);
+                }
+                row.insertCell(3).innerHTML = opCodes.join(' '); // Transform into string first
+            }
         }
         static hostCpuInit() {
             // To display the pointers in the CPU on load with heading

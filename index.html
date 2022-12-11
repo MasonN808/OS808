@@ -32,6 +32,7 @@
    <script type="text/javascript" src="distrib/os/console.js"></script>
    <script type="text/javascript" src="distrib/os/deviceDriver.js"></script>
    <script type="text/javascript" src="distrib/os/deviceDriverKeyboard.js"></script>
+   <script type="text/javascript" src="distrib/os/diskSystemDeviceDriver.js"></script>
    <script type="text/javascript" src="distrib/os/queue.js"></script>
    <script type="text/javascript" src="distrib/os/shell.js"></script>
    <script type="text/javascript" src="distrib/os/shellCommand.js"></script>
@@ -168,7 +169,7 @@
                            <div class="card-body overflow-auto" style="height: 212px;">
                               <span>
                                  <table name="taProcesses"
-                                 id  ="taProcesses">
+                                 id="taProcesses">
                                     <tr class="tableHeader">
                                        <th>PID</th>
                                        <th>PC</th>
@@ -200,7 +201,7 @@
                         <div class="card-body overflow-auto">
                            <span>
                               <table name="taHardDrive"
-                              id  ="taHardDrive">
+                              id="taHardDrive" style="white-space:nowrap;">
                                  <tr class="tableHeader">
                                     <th>T:S:B</th>
                                     <th>Used</th>
@@ -223,7 +224,7 @@
                         <div class="card-body overflow-auto">
                            <span>
                               <table name="taCpu"
-                              id  ="taCpu">
+                              id="taCpu">
                                  <tr class="tableHeader">
                                     <th>PC</th>
                                     <th>IR</th>
@@ -247,7 +248,7 @@
                         <div class="card-body overflow-auto">
                            <span>
                               <table name="taMemory"
-                              id  ="taMemory">
+                              id="taMemory">
                               </table>
                            </span>
                         </div>
@@ -262,7 +263,7 @@
                            </svg></div>
                         <div class="card-body overflow-auto">
                            <textarea name="taProgramInput"
-                                 id  ="taProgramInput"
+                                 id="taProgramInput"
                                  rows="5"
                                  cols="10"
                                  style="resize: none"

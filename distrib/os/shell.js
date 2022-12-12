@@ -650,20 +650,22 @@ var TSOS;
         shellWrite(args) {
             // TODO: The write commeand should reset the file contents everytime we type this command so do a reset contents first
             // Check that input is a string with no spaces
-            if (args.length === 2) {
-                const fileName = args[0];
-                const data = args[1];
+            // TODO: Do some smart string parsing to adjust the args array with spaces in quotes
+            const newArgs = TSOS.Utils.smartArgsParsing(args);
+            if (newArgs != null) {
+                const fileName = newArgs[0];
+                const data = newArgs[1];
                 // Check that it is the correct file name
-                if (TSOS.Utils.fileNameInFiles(_krnDiskDriver.filesInUse, fileName)) {
+                if (!TSOS.Utils.fileNameInFiles(_krnDiskDriver.filesInUse, fileName)) {
                     _StdOut.putText("ERROR: file name not found");
                 }
                 // Check that the data is in parenthesis
-                else if (data[0] != "\"" || data[data.length - 1] != "\"") {
-                    _StdOut.putText("ERROR: data not in parenthesis");
-                }
+                // else if (data[0] != "\"" || data[data.length-1] != "\"") {
+                //     _StdOut.putText("ERROR: data not in parenthesis");
+                // }
                 else {
                     // Remove the parenthesis before injecting into hard drive
-                    const truncatedData = data.substring(1, data.length - 2);
+                    const truncatedData = data.substring(1, data.length - 1);
                     // Find the TSB associated with the file name
                     const fileTSB = TSOS.Utils.TSBInFileInFiles(_krnDiskDriver.filesInUse, fileName);
                     // Get the DiskValue associated with this TSB to get the next TSB
@@ -678,6 +680,9 @@ var TSOS;
                     // queriedDiskValue.used = 1;
                     // Change the data
                     queriedDiskValue.data = _krnDiskDriver.fillData(hexData);
+                    // Update the display
+                    TSOS.Control.hostDisk();
+                    _StdOut.putText("File Updated: " + fileName);
                 }
                 // // TODO: THIS IS FOR SWAPPING NOT FILE WRITING
                 // var dataTSB = fileDiskValue.next;
@@ -696,7 +701,6 @@ var TSOS;
                 // }
             }
             else {
-                console.log(args.length);
                 _StdOut.putText("Usage: write <fileName> \"data\"");
             }
         }

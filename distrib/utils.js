@@ -94,6 +94,22 @@ var TSOS;
                 a.length === b.length &&
                 a.every((val, index) => val === b[index]);
         }
+        static smartArgsParsing(args) {
+            // TODO: Finish this!!
+            const truncatedArgs = args.slice(1, args.length);
+            // console.log("args: " + args)
+            // console.log("Truncated args: " + truncatedArgs)
+            const data = truncatedArgs.join(' ');
+            // Check that the parenthesis exist
+            if (data[0] != '"' || data[data.length - 1] != '"') {
+                // _StdOut.putText("ERROR: data not in parenthesis");
+                // console.log(data[0])
+                // console.log(data[data.length])
+                // console.log(data)
+                return null;
+            }
+            return [args[0], data];
+        }
     }
     TSOS.Utils = Utils;
 })(TSOS || (TSOS = {}));

@@ -753,6 +753,10 @@ module TSOS {
             // Check that input is a string with no spaces
             if (args.length === 1) {
                 const newFileName = args[0];
+                // Check if name is too long
+                if (newFileName.length > 32) {
+                    _StdOut.putText("ERROR: file too long");
+                }
                 // Check to see if the name is already taken
                 if (_krnDiskDriver.fileNamesInUse.indexOf(newFileName) > -1) {
                     _StdOut.putText("ERROR: file name already in use");

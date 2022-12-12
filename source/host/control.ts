@@ -262,6 +262,11 @@ module TSOS {
         public static hostDisk(): void {
             // To display the Hard disk heading
             const table = <HTMLTableElement> document.getElementById("taHardDrive");
+            
+            // Remove all the rows except for the headers to repopulate
+            while (table.rows.length > 1) {
+                table.deleteRow(-1);
+            }
 
             // Get the PCB from the input PID in the hashtable
             const diskMap = _krnDiskDriver.diskMap;

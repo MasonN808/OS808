@@ -65,5 +65,15 @@ module TSOS {
                 list.splice(index, 1);
             }
         }
+
+        // https://stackoverflow.com/questions/21647928/javascript-unicode-string-to-hex
+        // To convert from a string to hex
+        public static toHex(str) {
+            var result = '';
+            for (var i=0; i<str.length; i++) {
+              result += str.charCodeAt(i).toString(16);
+            }
+            return result;
+          }
     }
 }

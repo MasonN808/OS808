@@ -215,6 +215,11 @@ var TSOS;
         static hostDisk() {
             // To display the Hard disk heading
             const table = document.getElementById("taHardDrive");
+            // table.innerHTML = "";
+            while (table.rows.length > 1) {
+                console.log(table.rows.length);
+                table.deleteRow(-1);
+            }
             // Get the PCB from the input PID in the hashtable
             const diskMap = _krnDiskDriver.diskMap;
             // Loop through each key and value pair in the map
@@ -229,7 +234,6 @@ var TSOS;
                     // Append the opcode string
                     opCodes.push(value.data[index].opCodeString);
                 }
-                // FIXME: Need to adjust thist to have spaces inbetween for easier readabilty
                 row.insertCell(3).innerHTML = opCodes.join(' '); // Transform into string first
             }
         }

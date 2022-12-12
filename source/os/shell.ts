@@ -162,7 +162,13 @@ module TSOS {
                 "format",
                 "- resets the hard drive");
             this.commandList[this.commandList.length] = sc;
+            
 
+            // create <filename>
+            sc = new ShellCommand(this.shellCreate,
+                "create",
+                "- creates a new file with specified name");
+            this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -413,6 +419,10 @@ module TSOS {
 
                     case "format":
                         _StdOut.putText("resets the hard drive");
+                        break;
+
+                    case "create":
+                        _StdOut.putText("creates a new file with specified name");
                         break;
 
                     default:
@@ -737,6 +747,48 @@ module TSOS {
             _krnDiskDriver.krnDiskFormat();
             Control.hostDisk();
             _StdOut.putText("Disk SUCCESSFULLY reset");
+        }
+
+        public shellCreate(args: string[]) {
+            // Check that input is a string with no spaces
+            if (args.length === 1) {
+                const newFileName = args[0];
+                // Check to see if the name is already taken
+                if (_krnDiskDriver.fileNamesInUse.indexOf(newFileName) > -1) {
+                    _StdOut.putText("ERROR: file name already in use");
+                }
+                else {
+                    // Add the file name to the list
+                    _krnDiskDriver.fileNamesInUse.push(newFileName);
+
+                    // First find a TSB that is not used
+                    const unusedFileTSB = _krnDiskDriver.queryUnusedTSB("Directory");
+                    // Query the TSB the returns the associated DiskValue
+                    var queriedDiskValue = _krnDiskDriver.queryTSB(unusedFileTSB[0], unusedFileTSB[1], unusedFileTSB[2]);
+
+                    // Set to used
+                    queriedDiskValue.used = 1;
+                    const hexFileName = Utils.toHex(newFileName);
+
+                    // Change the data
+                    queriedDiskValue.data = _krnDiskDriver.fillData(hexFileName);
+
+                    // Set the next TSB pointer
+                    const unusedDataTSB = _krnDiskDriver.queryUnusedTSB("Data");
+                    // Set the data TSB pointer with a used pointer too
+                    var queriedDataDiskValue = _krnDiskDriver.queryTSB(unusedDataTSB[0], unusedDataTSB[1], unusedDataTSB[2]);
+                    queriedDataDiskValue.used = 1;
+                    queriedDiskValue.next = [unusedDataTSB[0], unusedDataTSB[1], unusedDataTSB[2]];
+
+                    // Update the display
+                    Control.hostDisk();
+
+                    _StdOut.putText("File Created: " + newFileName);
+                }
+            } 
+            else {
+                _StdOut.putText("ERROR: spaces not allowed in file name");
+            }
         }
     }
 }

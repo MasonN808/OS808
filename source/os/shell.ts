@@ -792,7 +792,6 @@ module TSOS {
 
                     // Update the display
                     Control.hostDisk();
-
                     _StdOut.putText("File Created: " + newFileName);
                 }
             } 
@@ -813,10 +812,6 @@ module TSOS {
                 if (!Utils.fileNameInFiles(_krnDiskDriver.filesInUse, fileName)) {
                     _StdOut.putText("ERROR: file name not found");
                 }
-                // Check that the data is in parenthesis
-                // else if (data[0] != "\"" || data[data.length-1] != "\"") {
-                //     _StdOut.putText("ERROR: data not in parenthesis");
-                // }
                 else {
                     // Remove the parenthesis before injecting into hard drive
                     const truncatedData = data.substring(1, data.length-1);
@@ -831,14 +826,11 @@ module TSOS {
                     var queriedDiskValue = _krnDiskDriver.queryTSB(dataTSB[0], dataTSB[1], dataTSB[2]);
                     // Convert the string of data to hex
                     const hexData = Utils.toHex(truncatedData);
-                     // Set to used
-                    // queriedDiskValue.used = 1;
                     // Change the data
                     queriedDiskValue.data = _krnDiskDriver.fillData(hexData);
 
                     // Update the display
                     Control.hostDisk();
-
                     _StdOut.putText("File Updated: " + fileName);
                 }
                 

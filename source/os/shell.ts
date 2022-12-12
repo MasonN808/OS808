@@ -755,7 +755,7 @@ module TSOS {
                 const newFileName = args[0];
                 // Check if name is too long
                 if (newFileName.length > 32) {
-                    _StdOut.putText("ERROR: file too long");
+                    _StdOut.putText("ERROR: file name too long");
                 }
                 // Check to see if the name is already taken
                 if (_krnDiskDriver.fileNamesInUse.indexOf(newFileName) > -1) {

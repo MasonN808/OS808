@@ -9,7 +9,7 @@ module TSOS {
     // Extends DeviceDriver
     export class DiskSystemDeviceDriver extends DeviceDriver {
         public diskMap;
-        public fileNamesInUse = [];
+        public filesInUse = new Array<File>();
         public TRACKMAX = 4;
         public SECTORMAX = 8;
         public BLOCKMAX = 8;
@@ -25,7 +25,6 @@ module TSOS {
             // Initialization routine for this, the kernel-mode Keyboard Device Driver.
             this.status = "loaded";
             this.krnDiskFormat();
-            // More?
         }
 
         public krnDiskFormat() {
@@ -101,6 +100,20 @@ module TSOS {
             this.next = [0,0,0];
             // initialize byte list of specified size to be stored with specified key
             this.data = new Array<OpCode>(_krnDiskDriver.BLOCKSIZEMAX).fill(new OpCode("00"));
+        }
+    }
+
+    // File Object for easily finding whether the file name is in use or not without hashmap search
+    export class File {
+        // May use this for deletion recovery
+        public inUse: number;
+        public name: string;
+        public TSB: Array<number>;
+        
+        constructor (name: string, TSB: number[]){
+            this.inUse = 1;
+            this.name = name;
+            this.TSB = TSB;
         }
     }
 }

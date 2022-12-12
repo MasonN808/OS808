@@ -9,7 +9,7 @@ var TSOS;
     class DiskSystemDeviceDriver extends TSOS.DeviceDriver {
         constructor() {
             super();
-            this.fileNamesInUse = [];
+            this.filesInUse = new Array();
             this.TRACKMAX = 4;
             this.SECTORMAX = 8;
             this.BLOCKMAX = 8;
@@ -21,7 +21,6 @@ var TSOS;
             // Initialization routine for this, the kernel-mode Keyboard Device Driver.
             this.status = "loaded";
             this.krnDiskFormat();
-            // More?
         }
         krnDiskFormat() {
             // Reformat the diskMap by clearing it and resetting structure
@@ -92,5 +91,14 @@ var TSOS;
         }
     }
     TSOS.DiskValue = DiskValue;
+    // File Object for easily finding whether the file name is in use or not without hashmap search
+    class File {
+        constructor(name, TSB) {
+            this.inUse = 1;
+            this.name = name;
+            this.TSB = TSB;
+        }
+    }
+    TSOS.File = File;
 })(TSOS || (TSOS = {}));
 //# sourceMappingURL=diskSystemDeviceDriver.js.map

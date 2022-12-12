@@ -170,11 +170,13 @@ module TSOS {
                 "- creates a new file with specified name");
             this.commandList[this.commandList.length] = sc;
 
-            // ps  - list the running processes and their IDs
-            // kill <id> - kills the specified process id.
+            // write <filename> "data"
+            sc = new ShellCommand(this.shellWrite,
+                "write",
+                "- writes data/text to a specified file name");
+            this.commandList[this.commandList.length] = sc;
 
             // Display the initial prompt.
-            
             this.putPrompt();
         }
 
@@ -423,6 +425,10 @@ module TSOS {
 
                     case "create":
                         _StdOut.putText("creates a new file with specified name");
+                        break;
+
+                    case "write":
+                        _StdOut.putText("writes data/text to a specified <file name>");
                         break;
 
                     default:
@@ -758,18 +764,18 @@ module TSOS {
                     _StdOut.putText("ERROR: file name too long");
                 }
                 // Check to see if the name is already taken
-                if (_krnDiskDriver.fileNamesInUse.indexOf(newFileName) > -1) {
+                else if (Utils.fileNameInFiles(_krnDiskDriver.filesInUse, newFileName)) {
                     _StdOut.putText("ERROR: file name already in use");
                 }
                 else {
-                    // Add the file name to the list
-                    _krnDiskDriver.fileNamesInUse.push(newFileName);
-
+                    
                     // First find a TSB that is not used
                     const unusedFileTSB = _krnDiskDriver.queryUnusedTSB("Directory");
                     // Query the TSB the returns the associated DiskValue
                     var queriedDiskValue = _krnDiskDriver.queryTSB(unusedFileTSB[0], unusedFileTSB[1], unusedFileTSB[2]);
-
+                    // Add the file name to the list
+                    _krnDiskDriver.filesInUse.push(new File(newFileName, unusedFileTSB));
+                    
                     // Set to used
                     queriedDiskValue.used = 1;
                     const hexFileName = Utils.toHex(newFileName);
@@ -791,7 +797,67 @@ module TSOS {
                 }
             } 
             else {
-                _StdOut.putText("ERROR: spaces not allowed in file name");
+                _StdOut.putText("ERROR: spaces not allowed in <fileName>");
+            }
+        }
+
+        public shellWrite(args: string[]) {
+            // TODO: The write commeand should reset the file contents everytime we type this command so do a reset contents first
+            // Check that input is a string with no spaces
+            // TODO: Do some smart string parsing to adjust the args array with spaces in quotes
+            const newArgs = Utils.smartArgsParsing(args);
+            if (args.length === 2) {
+                const fileName = args[0];
+                const data = args[1];
+                // Check that it is the correct file name
+                if (Utils.fileNameInFiles(_krnDiskDriver.filesInUse, fileName)) {
+                    _StdOut.putText("ERROR: file name not found");
+                }
+                // Check that the data is in parenthesis
+                else if (data[0] != "\"" || data[data.length-1] != "\"") {
+                    _StdOut.putText("ERROR: data not in parenthesis");
+                }
+                else {
+                    // Remove the parenthesis before injecting into hard drive
+                    const truncatedData = data.substring(1, data.length-2);
+                    // Find the TSB associated with the file name
+                    const fileTSB = Utils.TSBInFileInFiles(_krnDiskDriver.filesInUse, fileName);
+                    // Get the DiskValue associated with this TSB to get the next TSB
+                    const fileDiskValue = _krnDiskDriver.queryTSB(fileTSB[0], fileTSB[1], fileTSB[2]);
+                    // Get the next TSB from the DiskValue
+                    var dataTSB = fileDiskValue.next;
+
+                    // Query the TSB the returns the associated DiskValue
+                    var queriedDiskValue = _krnDiskDriver.queryTSB(dataTSB[0], dataTSB[1], dataTSB[2]);
+                    // Convert the string of data to hex
+                    const hexData = Utils.toHex(truncatedData);
+                     // Set to used
+                    // queriedDiskValue.used = 1;
+                    // Change the data
+                    queriedDiskValue.data = _krnDiskDriver.fillData(hexData);
+                }
+                
+                // // TODO: THIS IS FOR SWAPPING NOT FILE WRITING
+                // var dataTSB = fileDiskValue.next;
+                // //TODO: Put a while loop here to loop through all next values until there is none (i.e., 000)
+                // var leafFound = false;
+                // while (!leafFound) {
+                //     // Get the DiskValue associated with this TSB to get the next TSB
+                //     const dataDiskValue = _krnDiskDriver.queryTSB(dataTSB[0], dataTSB[1], dataTSB[2]);
+                //     // Get the next TSB from the DiskValue
+                //     const dataNextTSB = dataDiskValue.next;
+
+                //     dataTSB = dataNextTSB;
+                //     // Check if we hit the leaf
+                //     if (Utils.arrayEquals(dataNextTSB, [0, 0, 0])) {
+                //         leafFound = true;
+                //     }
+                // }
+
+            } 
+            else {
+                console.log(args.length);
+                _StdOut.putText("Usage: write <fileName> \"data\"");
             }
         }
     }

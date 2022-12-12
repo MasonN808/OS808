@@ -215,9 +215,8 @@ var TSOS;
         static hostDisk() {
             // To display the Hard disk heading
             const table = document.getElementById("taHardDrive");
-            // table.innerHTML = "";
+            // Remove all the rows except for the headers to repopulate
             while (table.rows.length > 1) {
-                console.log(table.rows.length);
                 table.deleteRow(-1);
             }
             // Get the PCB from the input PID in the hashtable

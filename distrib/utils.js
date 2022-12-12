@@ -70,6 +70,30 @@ var TSOS;
             }
             return result;
         }
+        // Check if the queried file name is in the list of files in use
+        static fileNameInFiles(filesInUse, queriedfileName) {
+            for (const file of filesInUse) {
+                if (file.name == queriedfileName) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        static TSBInFileInFiles(filesInUse, queriedfileName) {
+            for (const file of filesInUse) {
+                if (file.name == queriedfileName) {
+                    return file.TSB;
+                }
+            }
+            return null;
+        }
+        // https://masteringjs.io/tutorials/fundamentals/compare-arrays
+        static arrayEquals(a, b) {
+            return Array.isArray(a) &&
+                Array.isArray(b) &&
+                a.length === b.length &&
+                a.every((val, index) => val === b[index]);
+        }
     }
     TSOS.Utils = Utils;
 })(TSOS || (TSOS = {}));

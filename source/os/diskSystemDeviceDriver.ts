@@ -51,8 +51,8 @@ module TSOS {
         }
 
         // Query the DiskValue object from the specified track, sector, and block
-        public queryTSB(track: number, sector: number, block: number): DiskValue {
-            const keyStr = [track, sector, block].join(':');
+        public queryTSB(TSB: number[]): DiskValue {
+            const keyStr = [TSB[0], TSB[1], TSB[2]].join(':');
             var diskValue = this.diskMap.get(keyStr);
             return diskValue;
         }
@@ -102,6 +102,15 @@ module TSOS {
             return null;
         }
 
+        public removeFileInFilesInUse(fileName: string) {
+            for (let index=0; index < this.filesInUse.length; index++) {
+                if (this.filesInUse[index].name == fileName) {
+                    // remove the File object from the array
+                    this.filesInUse.splice(index, 1);
+                }
+            }
+        }
+
         // Update the current data with the new data
         public formatData(hexStr: string): OpCode[] {
             var data = new Array<OpCode>(_krnDiskDriver.BLOCKSIZEMAX).fill(new OpCode("00"));
@@ -119,7 +128,7 @@ module TSOS {
             for (let blockIndex = 0; blockIndex < Math.ceil(hexStr.length/(this.BLOCKSIZEMAX*2)); blockIndex++) {
                 // Get the queried disk value
                 const truncatedHexStr = hexStr.substring(blockIndex*this.BLOCKSIZEMAX*2, (blockIndex+1)*this.BLOCKSIZEMAX*2);
-                var queriedDiskValue = this.queryTSB(startTSB[0], startTSB[1], startTSB[2]);
+                var queriedDiskValue = this.queryTSB(startTSB);
                 queriedDiskValue.data = this.formatData(truncatedHexStr);
                 queriedDiskValue.used = 1;
                 const unusedTSB = this.queryUnusedTSB("Data");
@@ -133,8 +142,32 @@ module TSOS {
             }
         }
 
-        public removeFileContents(fileName: string) {
-            
+        public removeFileContents(fileName: string, shallowDelete: boolean) {
+            const fileTSB = this.TSBInFileInFiles(fileName);
+            var diskValue = this.queryTSB(fileTSB);
+            // Traverse down the path graph until we hit the leaf and reset pointers while doing so
+            var leafFound = false;
+            while (!leafFound) {
+                if (Utils.arrayEquals(diskValue.next, [0,0,0])) {
+                    leafFound = true;
+                }
+                // Shallow delete is to not reset the file name and pointers in directory parition when rewriting file
+                if (shallowDelete) {
+                    // Go to the next disk value
+                    diskValue = this.queryTSB(diskValue.next);
+                    shallowDelete = false;
+                }
+                else {
+                    // Reset the pointers
+                    diskValue.data = new Array<OpCode>(_krnDiskDriver.BLOCKSIZEMAX).fill(new OpCode("00"));
+                    diskValue.used = 0;
+                    var tempDiskValue = diskValue;
+                    // Go to the next disk value
+                    diskValue = this.queryTSB(diskValue.next);
+                    // Also change the next pointer
+                    tempDiskValue.next = [0,0,0];
+                }
+            }
         }
     }
     

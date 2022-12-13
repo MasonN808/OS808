@@ -783,7 +783,7 @@ module TSOS {
                     // First find a TSB that is not used
                     const unusedFileTSB = _krnDiskDriver.queryUnusedTSB("Directory");
                     // Query the TSB the returns the associated DiskValue
-                    var queriedDiskValue = _krnDiskDriver.queryTSB(unusedFileTSB[0], unusedFileTSB[1], unusedFileTSB[2]);
+                    var queriedDiskValue = _krnDiskDriver.queryTSB(unusedFileTSB);
                     // Add the file name to the list
                     _krnDiskDriver.filesInUse.push(new File(newFileName, unusedFileTSB));
                     
@@ -797,7 +797,7 @@ module TSOS {
                     // Set the next TSB pointer
                     const unusedDataTSB = _krnDiskDriver.queryUnusedTSB("Data");
                     // Set the data TSB pointer with a used pointer too
-                    var queriedDataDiskValue = _krnDiskDriver.queryTSB(unusedDataTSB[0], unusedDataTSB[1], unusedDataTSB[2]);
+                    var queriedDataDiskValue = _krnDiskDriver.queryTSB(unusedDataTSB);
                     queriedDataDiskValue.used = 1;
                     queriedDiskValue.next = [unusedDataTSB[0], unusedDataTSB[1], unusedDataTSB[2]];
 
@@ -823,12 +823,14 @@ module TSOS {
                     _StdOut.putText("ERROR: file name not found");
                 }
                 else {
+                    // Be sure to reset all data of the file before writing with a shallow delete
+                    _krnDiskDriver.removeFileContents(fileName, true);
                     // Remove the parenthesis before injecting into hard drive
                     const truncatedData = data.substring(1, data.length-1);
                     // Find the TSB associated with the file name
                     const fileTSB = _krnDiskDriver.TSBInFileInFiles(fileName);
                     // Get the DiskValue associated with this TSB to get the next TSB
-                    const fileDiskValue = _krnDiskDriver.queryTSB(fileTSB[0], fileTSB[1], fileTSB[2]);
+                    const fileDiskValue = _krnDiskDriver.queryTSB(fileTSB);
                     // Get the next TSB from the DiskValue
                     var dataTSB = fileDiskValue.next;
 
@@ -877,7 +879,14 @@ module TSOS {
                     _StdOut.putText("ERROR: file name not found");
                 }
                 else {
+                    // Full delete, no shallow delete
+                    _krnDiskDriver.removeFileContents(fileName, false);
+                    // Remove the file from filesInUse array
+                    _krnDiskDriver.removeFileInFilesInUse(fileName);
 
+                    // Update the display
+                    Control.hostDisk();
+                    _StdOut.putText("File Removed: " + fileName);
                 }
             }
         }

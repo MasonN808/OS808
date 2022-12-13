@@ -96,6 +96,9 @@ var TSOS;
             // write <filename> "data"
             sc = new TSOS.ShellCommand(this.shellWrite, "write", "- writes data/text to a specified file name");
             this.commandList[this.commandList.length] = sc;
+            // delete <filename>
+            sc = new TSOS.ShellCommand(this.shellDelete, "delete", "- deletes a file and its contents");
+            this.commandList[this.commandList.length] = sc;
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -314,6 +317,9 @@ var TSOS;
                         break;
                     case "write":
                         _StdOut.putText("writes data/text to a specified <file name>");
+                        break;
+                    case "delete":
+                        _StdOut.putText("deletes a <fileName> and its contents");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -618,14 +624,14 @@ var TSOS;
                     _StdOut.putText("ERROR: file name too long");
                 }
                 // Check to see if the name is already taken
-                else if (TSOS.Utils.fileNameInFiles(_krnDiskDriver.filesInUse, newFileName)) {
+                else if (_krnDiskDriver.fileNameInFiles(newFileName)) {
                     _StdOut.putText("ERROR: file name already in use");
                 }
                 else {
                     // First find a TSB that is not used
                     const unusedFileTSB = _krnDiskDriver.queryUnusedTSB("Directory");
                     // Query the TSB the returns the associated DiskValue
-                    var queriedDiskValue = _krnDiskDriver.queryTSB(unusedFileTSB[0], unusedFileTSB[1], unusedFileTSB[2]);
+                    var queriedDiskValue = _krnDiskDriver.queryTSB(unusedFileTSB);
                     // Add the file name to the list
                     _krnDiskDriver.filesInUse.push(new TSOS.File(newFileName, unusedFileTSB));
                     // Set to used
@@ -636,7 +642,7 @@ var TSOS;
                     // Set the next TSB pointer
                     const unusedDataTSB = _krnDiskDriver.queryUnusedTSB("Data");
                     // Set the data TSB pointer with a used pointer too
-                    var queriedDataDiskValue = _krnDiskDriver.queryTSB(unusedDataTSB[0], unusedDataTSB[1], unusedDataTSB[2]);
+                    var queriedDataDiskValue = _krnDiskDriver.queryTSB(unusedDataTSB);
                     queriedDataDiskValue.used = 1;
                     queriedDiskValue.next = [unusedDataTSB[0], unusedDataTSB[1], unusedDataTSB[2]];
                     // Update the display
@@ -651,31 +657,28 @@ var TSOS;
         shellWrite(args) {
             // TODO: The write commeand should reset the file contents everytime we type this command so do a reset contents first
             // Check that input is a string with no spaces
-            // TODO: Do some smart string parsing to adjust the args array with spaces in quotes
             const newArgs = TSOS.Utils.smartArgsParsing(args);
             if (newArgs != null) {
                 const fileName = newArgs[0];
                 const data = newArgs[1];
                 // Check that it is the correct file name
-                if (!TSOS.Utils.fileNameInFiles(_krnDiskDriver.filesInUse, fileName)) {
+                if (!_krnDiskDriver.fileNameInFiles(fileName)) {
                     _StdOut.putText("ERROR: file name not found");
                 }
                 else {
+                    // Be sure to reset all data of the file before writing with a shallow delete
+                    _krnDiskDriver.removeFileContents(fileName, true);
                     // Remove the parenthesis before injecting into hard drive
                     const truncatedData = data.substring(1, data.length - 1);
                     // Find the TSB associated with the file name
-                    const fileTSB = TSOS.Utils.TSBInFileInFiles(_krnDiskDriver.filesInUse, fileName);
+                    const fileTSB = _krnDiskDriver.TSBInFileInFiles(fileName);
                     // Get the DiskValue associated with this TSB to get the next TSB
-                    const fileDiskValue = _krnDiskDriver.queryTSB(fileTSB[0], fileTSB[1], fileTSB[2]);
+                    const fileDiskValue = _krnDiskDriver.queryTSB(fileTSB);
                     // Get the next TSB from the DiskValue
                     var dataTSB = fileDiskValue.next;
-                    // Query the TSB the returns the associated DiskValue
-                    // var queriedDiskValue = _krnDiskDriver.queryTSB(dataTSB[0], dataTSB[1], dataTSB[2]);
                     // Convert the string of data to hex
                     const hexData = TSOS.Utils.toHex(truncatedData);
-                    // // Change the data
-                    // queriedDiskValue.data = _krnDiskDriver.fillData(hexData, dataTSB);
-                    // Change the data
+                    // Fillin the data
                     _krnDiskDriver.fillData(hexData, dataTSB);
                     // Update the display
                     TSOS.Control.hostDisk();
@@ -699,6 +702,28 @@ var TSOS;
             }
             else {
                 _StdOut.putText("Usage: write <fileName> \"data\"");
+            }
+        }
+        shellDelete(args) {
+            // Check if only one argument inserted
+            if (args.length > 1) {
+                _StdOut.putText("Usage: delete <fileName>");
+            }
+            else {
+                const fileName = args[0];
+                // Check if the filename exists
+                if (!_krnDiskDriver.fileNameInFiles(fileName)) {
+                    _StdOut.putText("ERROR: file name not found");
+                }
+                else {
+                    // Full delete, no shallow delete
+                    _krnDiskDriver.removeFileContents(fileName, false);
+                    // Remove the file from filesInUse array
+                    _krnDiskDriver.removeFileInFilesInUse(fileName);
+                    // Update the display
+                    TSOS.Control.hostDisk();
+                    _StdOut.putText("File Removed: " + fileName);
+                }
             }
         }
     }

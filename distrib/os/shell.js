@@ -102,6 +102,9 @@ var TSOS;
             // delete <filename>
             sc = new TSOS.ShellCommand(this.shellDelete, "delete", "- deletes a file and its contents");
             this.commandList[this.commandList.length] = sc;
+            // copy <existing filename> <new filename>
+            sc = new TSOS.ShellCommand(this.shellCopy, "copy", "- copies an existing file to an already existing file or new file");
+            this.commandList[this.commandList.length] = sc;
             // rename <current filename> <new filename>
             sc = new TSOS.ShellCommand(this.shellRename, "rename", "- renames an existing file");
             this.commandList[this.commandList.length] = sc;
@@ -330,8 +333,11 @@ var TSOS;
                     case "delete":
                         _StdOut.putText("deletes a <file name> and its contents");
                         break;
+                    case "copy":
+                        _StdOut.putText("copies an <existing file name> to an already <existing file name> or <new file name>");
+                        break;
                     case "rename":
-                        _StdOut.putText("renames a file with name <file name> to <new file name");
+                        _StdOut.putText("renames a file with name <file name> to <new file name>");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -635,7 +641,7 @@ var TSOS;
                 }
                 // Check to see if the name is already taken
                 else if (_krnDiskDriver.fileNameInFiles(newFileName)) {
-                    _StdOut.putText("ERROR: file name already in use");
+                    _StdOut.putText("ERROR: file name [" + newFileName + "] already taken");
                 }
                 else {
                     // First find a TSB that is not used
@@ -673,7 +679,7 @@ var TSOS;
                 const data = newArgs[1];
                 // Check that it is the correct file name
                 if (!_krnDiskDriver.fileNameInFiles(fileName)) {
-                    _StdOut.putText("ERROR: file name not found");
+                    _StdOut.putText("ERROR: file name [" + fileName + "] not found");
                 }
                 else {
                     // Be sure to reset all data of the file before writing with a shallow delete
@@ -723,7 +729,7 @@ var TSOS;
                 const fileName = args[0];
                 // Check if the filename exists
                 if (!_krnDiskDriver.fileNameInFiles(fileName)) {
-                    _StdOut.putText("ERROR: file name not found");
+                    _StdOut.putText("ERROR: file name [" + fileName + "] not found");
                 }
                 else {
                     // Full delete, no shallow delete
@@ -745,11 +751,59 @@ var TSOS;
                 const fileName = args[0];
                 // Check if the filename exists
                 if (!_krnDiskDriver.fileNameInFiles(fileName)) {
-                    _StdOut.putText("ERROR: file name not found");
+                    _StdOut.putText("ERROR: file name [" + fileName + "] not found");
                 }
                 else {
                     _krnDiskDriver.readFile(fileName);
                 }
+            }
+        }
+        shellCopy(args) {
+            // Check if only one argument inserted
+            if (args.length != 2) {
+                _StdOut.putText("Usage: rename <file name> <new file name>");
+            }
+            else {
+                const currentFileName = args[0];
+                const newFileName = args[1];
+                // Check if file names are equal
+                if (currentFileName == newFileName) {
+                    _StdOut.putText("ERROR: can not copy file into itself");
+                }
+                if (newFileName.length > 32) {
+                    _StdOut.putText("ERROR: file name too long");
+                }
+                // Check if the filename exists
+                if (!_krnDiskDriver.fileNameInFiles(currentFileName)) {
+                    _StdOut.putText("ERROR: file name [" + currentFileName + "] not found");
+                }
+                // Check if the new file name exists
+                else if (!_krnDiskDriver.fileNameInFiles(newFileName)) {
+                    // We create a new file as a copy
+                    _OsShell.shellCreate([newFileName]);
+                    // Find the TSB associated with the file name
+                    const fileTSB = _krnDiskDriver.TSBInFileInFiles(newFileName);
+                    // Get the DiskValue associated with this TSB to get the next TSB
+                    const fileDiskValue = _krnDiskDriver.queryTSB(fileTSB);
+                    // Get the next TSB from the DiskValue
+                    var dataTSB = fileDiskValue.next;
+                    // Accumulate the string from each data block of the copied file
+                    const strData = _krnDiskDriver.getDataFromFile(currentFileName);
+                    // Turn the text into hex
+                    const hexData = TSOS.Utils.toHex(strData);
+                    // Fill in the data
+                    _krnDiskDriver.fillData(hexData, dataTSB);
+                }
+                // Otherwise, we overwrite the exisitng file
+                else {
+                    // Accumulate the string from each data block of the copied file
+                    const strData = _krnDiskDriver.getDataFromFile(currentFileName);
+                    // Delete the file contents to override with a simple write command
+                    _OsShell.shellWrite([newFileName, "\"" + strData + "\""]);
+                }
+                // Update the display
+                TSOS.Control.hostDisk();
+                _StdOut.putText("File Copied: " + currentFileName + " --> " + newFileName);
             }
         }
         shellRename(args) {
@@ -765,12 +819,12 @@ var TSOS;
                 }
                 // Check if the filename exists
                 if (!_krnDiskDriver.fileNameInFiles(currentFileName)) {
-                    _StdOut.putText("ERROR: file name not found");
+                    _StdOut.putText("ERROR: file name [" + currentFileName + "] not found");
                 }
                 else {
                     // Check if the new file name is not already taken
                     if (_krnDiskDriver.fileNameInFiles(newFileName)) {
-                        _StdOut.putText("ERROR: new file name already taken");
+                        _StdOut.putText("ERROR: file name [" + newFileName + "] already taken");
                     }
                     else {
                         // Get the TSB of the current file name

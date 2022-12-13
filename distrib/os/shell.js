@@ -631,7 +631,7 @@ var TSOS;
             TSOS.Control.hostDisk();
             _StdOut.putText("Disk SUCCESSFULLY reset");
         }
-        shellCreate(args) {
+        shellCreate(args, verbose = true) {
             // Check that input is a string with no spaces
             if (args.length === 1) {
                 const newFileName = args[0];
@@ -663,14 +663,17 @@ var TSOS;
                     queriedDiskValue.next = [unusedDataTSB[0], unusedDataTSB[1], unusedDataTSB[2]];
                     // Update the display
                     TSOS.Control.hostDisk();
-                    _StdOut.putText("File Created: " + newFileName);
+                    // For instances if another shell command uses this
+                    if (verbose) {
+                        _StdOut.putText("File Created: " + newFileName);
+                    }
                 }
             }
             else {
                 _StdOut.putText("ERROR: spaces not allowed in <file name>");
             }
         }
-        shellWrite(args) {
+        shellWrite(args, verbose = true) {
             // TODO: The write commeand should reset the file contents everytime we type this command so do a reset contents first
             // Check that input is a string with no spaces
             const newArgs = TSOS.Utils.smartArgsParsing(args);
@@ -698,7 +701,9 @@ var TSOS;
                     _krnDiskDriver.fillData(hexData, dataTSB);
                     // Update the display
                     TSOS.Control.hostDisk();
-                    _StdOut.putText("File Updated: " + fileName);
+                    if (verbose) {
+                        _StdOut.putText("File Updated: " + fileName);
+                    }
                 }
                 // // TODO: THIS IS FOR SWAPPING NOT FILE WRITING
                 // var dataTSB = fileDiskValue.next;
@@ -758,7 +763,7 @@ var TSOS;
                 }
             }
         }
-        shellCopy(args) {
+        shellCopy(args, verbose = true) {
             // Check if only one argument inserted
             if (args.length != 2) {
                 _StdOut.putText("Usage: rename <file name> <new file name>");
@@ -781,6 +786,7 @@ var TSOS;
                 else if (!_krnDiskDriver.fileNameInFiles(newFileName)) {
                     // We create a new file as a copy
                     _OsShell.shellCreate([newFileName]);
+                    _StdOut.advanceLine();
                     // Find the TSB associated with the file name
                     const fileTSB = _krnDiskDriver.TSBInFileInFiles(newFileName);
                     // Get the DiskValue associated with this TSB to get the next TSB
@@ -799,11 +805,14 @@ var TSOS;
                     // Accumulate the string from each data block of the copied file
                     const strData = _krnDiskDriver.getDataFromFile(currentFileName);
                     // Delete the file contents to override with a simple write command
-                    _OsShell.shellWrite([newFileName, "\"" + strData + "\""]);
+                    _OsShell.shellWrite([newFileName, "\"" + strData + "\""], false);
                 }
                 // Update the display
                 TSOS.Control.hostDisk();
-                _StdOut.putText("File Copied: " + currentFileName + " --> " + newFileName);
+                console.log(verbose);
+                if (verbose) {
+                    _StdOut.putText("File Copied: " + currentFileName + " --> " + newFileName);
+                }
             }
         }
         shellRename(args) {

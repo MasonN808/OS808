@@ -793,7 +793,7 @@ module TSOS {
             _StdOut.putText("Disk SUCCESSFULLY reset");
         }
 
-        public shellCreate(args: string[]) {
+        public shellCreate(args: string[], verbose = true) {
             // Check that input is a string with no spaces
             if (args.length === 1) {
                 const newFileName = args[0];
@@ -830,7 +830,11 @@ module TSOS {
 
                     // Update the display
                     Control.hostDisk();
-                    _StdOut.putText("File Created: " + newFileName);
+                    
+                    // For instances if another shell command uses this
+                    if (verbose) {
+                        _StdOut.putText("File Created: " + newFileName);
+                    }
                 }
             } 
             else {
@@ -838,7 +842,7 @@ module TSOS {
             }
         }
 
-        public shellWrite(args: string[]) {
+        public shellWrite(args: string[], verbose = true) {
             // TODO: The write commeand should reset the file contents everytime we type this command so do a reset contents first
             // Check that input is a string with no spaces
             const newArgs = Utils.smartArgsParsing(args);
@@ -868,7 +872,9 @@ module TSOS {
 
                     // Update the display
                     Control.hostDisk();
-                    _StdOut.putText("File Updated: " + fileName);
+                    if (verbose) {
+                        _StdOut.putText("File Updated: " + fileName);
+                    }
                 }
                 
                 // // TODO: THIS IS FOR SWAPPING NOT FILE WRITING
@@ -935,7 +941,7 @@ module TSOS {
             }
         }
 
-        public shellCopy(args: string[]) {
+        public shellCopy(args: string[], verbose = true) {
             // Check if only one argument inserted
             if (args.length != 2) {
                 _StdOut.putText("Usage: rename <file name> <new file name>");
@@ -959,6 +965,7 @@ module TSOS {
                 else if (!_krnDiskDriver.fileNameInFiles(newFileName)) {
                     // We create a new file as a copy
                     _OsShell.shellCreate([newFileName]);
+                    _StdOut.advanceLine();
 
                     // Find the TSB associated with the file name
                     const fileTSB = _krnDiskDriver.TSBInFileInFiles(newFileName);
@@ -980,11 +987,14 @@ module TSOS {
                     const strData = _krnDiskDriver.getDataFromFile(currentFileName);
 
                     // Delete the file contents to override with a simple write command
-                    _OsShell.shellWrite([newFileName, "\"" + strData + "\""]);
+                    _OsShell.shellWrite([newFileName, "\"" + strData + "\""], false);
                 }
                 // Update the display
                 Control.hostDisk();
-                _StdOut.putText("File Copied: " + currentFileName + " --> " + newFileName);
+                console.log(verbose);
+                if (verbose) {
+                    _StdOut.putText("File Copied: " + currentFileName + " --> " + newFileName);
+                }
             }
         }
 

@@ -162,12 +162,17 @@ module TSOS {
                 "format",
                 "- resets the hard drive");
             this.commandList[this.commandList.length] = sc;
-            
 
             // create <filename>
             sc = new ShellCommand(this.shellCreate,
                 "create",
                 "- creates a new file with specified name");
+            this.commandList[this.commandList.length] = sc;
+
+            // read <filename>
+            sc = new ShellCommand(this.shellRead,
+                "read",
+                "- outputs the contents of a specified file name");
             this.commandList[this.commandList.length] = sc;
 
             // write <filename> "data"
@@ -433,8 +438,12 @@ module TSOS {
                         _StdOut.putText("creates a new file with specified name");
                         break;
 
+                    case "read":
+                        _StdOut.putText("outputs the contents of a specified <fileName>");
+                        break;
+
                     case "write":
-                        _StdOut.putText("writes data/text to a specified <file name>");
+                        _StdOut.putText("writes data/text to a specified <fileName>");
                         break;
 
                     case "delete":
@@ -887,6 +896,26 @@ module TSOS {
                     // Update the display
                     Control.hostDisk();
                     _StdOut.putText("File Removed: " + fileName);
+                }
+            }
+        }
+
+        public shellRead(args: string[]) {
+            // Check if only one argument inserted
+            if (args.length > 1) {
+                _StdOut.putText("Usage: read <fileName>");
+            }
+            else {
+                const fileName = args[0];
+                // Check if the filename exists
+                if (!_krnDiskDriver.fileNameInFiles(fileName)) {
+                    _StdOut.putText("ERROR: file name not found");
+                }
+                else {
+                    _krnDiskDriver.readFile(fileName);
+                    
+                    // Update the display
+                    Control.hostDisk();
                 }
             }
         }

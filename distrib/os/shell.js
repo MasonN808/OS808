@@ -93,6 +93,9 @@ var TSOS;
             // create <filename>
             sc = new TSOS.ShellCommand(this.shellCreate, "create", "- creates a new file with specified name");
             this.commandList[this.commandList.length] = sc;
+            // read <filename>
+            sc = new TSOS.ShellCommand(this.shellRead, "read", "- outputs the contents of a specified file name");
+            this.commandList[this.commandList.length] = sc;
             // write <filename> "data"
             sc = new TSOS.ShellCommand(this.shellWrite, "write", "- writes data/text to a specified file name");
             this.commandList[this.commandList.length] = sc;
@@ -315,8 +318,11 @@ var TSOS;
                     case "create":
                         _StdOut.putText("creates a new file with specified name");
                         break;
+                    case "read":
+                        _StdOut.putText("outputs the contents of a specified <fileName>");
+                        break;
                     case "write":
-                        _StdOut.putText("writes data/text to a specified <file name>");
+                        _StdOut.putText("writes data/text to a specified <fileName>");
                         break;
                     case "delete":
                         _StdOut.putText("deletes a <fileName> and its contents");
@@ -723,6 +729,24 @@ var TSOS;
                     // Update the display
                     TSOS.Control.hostDisk();
                     _StdOut.putText("File Removed: " + fileName);
+                }
+            }
+        }
+        shellRead(args) {
+            // Check if only one argument inserted
+            if (args.length > 1) {
+                _StdOut.putText("Usage: read <fileName>");
+            }
+            else {
+                const fileName = args[0];
+                // Check if the filename exists
+                if (!_krnDiskDriver.fileNameInFiles(fileName)) {
+                    _StdOut.putText("ERROR: file name not found");
+                }
+                else {
+                    _krnDiskDriver.readFile(fileName);
+                    // Update the display
+                    TSOS.Control.hostDisk();
                 }
             }
         }

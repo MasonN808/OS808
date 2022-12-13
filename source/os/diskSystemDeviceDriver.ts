@@ -169,6 +169,36 @@ module TSOS {
                 }
             }
         }
+
+        public readFile(fileName: string) {
+            const fileTSB = this.TSBInFileInFiles(fileName);
+            var diskValue = this.queryTSB(fileTSB);
+            // Traverse down the path graph until we hit the leaf and output the data while doing so
+            var leafFound = false;
+            var atFileTSB = true;
+            while (!leafFound) {
+                if (Utils.arrayEquals(diskValue.next, [0,0,0])) {
+                    leafFound = true;
+                }
+                // Don't read the data from the file head in directory partition
+                if (atFileTSB) {
+                    // Go to the next disk value
+                    diskValue = this.queryTSB(diskValue.next);
+                    atFileTSB = false;
+                }
+                else {
+                    // Convert the data/hex into a string from OpCode objects
+                    var data = '';
+                    for (let i=0; i < diskValue.data.length; i++) {
+                        data += diskValue.data[i].codeString;
+                    }
+                    // Turn the hex into ASCII and output
+                    _StdOut.putText(Utils.hex2a(data));
+                    // Go to the next disk value
+                    diskValue = this.queryTSB(diskValue.next);
+                }
+            }
+        }
     }
     
     export class DiskValue {

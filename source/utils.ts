@@ -44,12 +44,12 @@ module TSOS {
             return retVal;
         }
 
-        public static isInt(str) {
+        public static isInt(str): boolean {
             return !isNaN(str) && Number.isInteger(parseFloat(str));
         }
 
         // From https://stackoverflow.com/questions/3745666/how-to-convert-from-hex-to-ascii-in-javascript
-        public static hex2a(hexx) {
+        public static hex2a(hexx): string {
             //force conversion
             var hex = hexx.toString();
             var str = '';
@@ -68,7 +68,7 @@ module TSOS {
 
         // https://stackoverflow.com/questions/21647928/javascript-unicode-string-to-hex
         // To convert from a string to hex
-        public static toHex(str) {
+        public static toHex(str): string {
             var result = '';
             for (var i=0; i<str.length; i++) {
               result += str.charCodeAt(i).toString(16);

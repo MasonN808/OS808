@@ -808,7 +808,7 @@ module TSOS {
             if (args.length === 1) {
                 const newFileName = args[0];
                 // Check if name is too long
-                if (newFileName.length > 32) {
+                if (newFileName.length > _krnDiskDriver.BLOCKSIZEMAX) {
                     _StdOut.putText("ERROR: file name too long");
                 }
                 // Check to see if the name is already taken
@@ -964,7 +964,7 @@ module TSOS {
                 if (currentFileName == newFileName) {
                     _StdOut.putText("ERROR: can not copy file into itself");
                 }
-                if (newFileName.length > 32) {
+                if (newFileName.length > _krnDiskDriver.BLOCKSIZEMAX) {
                     _StdOut.putText("ERROR: file name too long");
                 }
                 // Check if the filename exists
@@ -1017,7 +1017,7 @@ module TSOS {
             else {
                 const currentFileName = args[0];
                 const newFileName = args[1];
-                if (newFileName.length > 32) {
+                if (newFileName.length > _krnDiskDriver.BLOCKSIZEMAX) {
                     _StdOut.putText("ERROR: file name too long");
                 }
                 // Check if the filename exists

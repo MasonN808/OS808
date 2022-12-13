@@ -173,12 +173,11 @@ var TSOS;
                     atFileTSB = false;
                 }
                 else {
-                    // Convert the data into a string
+                    // Convert the data/hex into a string from OpCode objects
                     var data = '';
                     for (let i = 0; i < diskValue.data.length; i++) {
                         data += diskValue.data[i].codeString;
                     }
-                    console.log(TSOS.Utils.hex2a(data));
                     // Turn the hex into ASCII and output
                     _StdOut.putText(TSOS.Utils.hex2a(data));
                     // Go to the next disk value

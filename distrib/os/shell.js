@@ -102,6 +102,9 @@ var TSOS;
             // delete <filename>
             sc = new TSOS.ShellCommand(this.shellDelete, "delete", "- deletes a file and its contents");
             this.commandList[this.commandList.length] = sc;
+            // rename <current filename> <new filename>
+            sc = new TSOS.ShellCommand(this.shellRename, "rename", "- renames an existing file");
+            this.commandList[this.commandList.length] = sc;
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -319,13 +322,16 @@ var TSOS;
                         _StdOut.putText("creates a new file with specified name");
                         break;
                     case "read":
-                        _StdOut.putText("outputs the contents of a specified <fileName>");
+                        _StdOut.putText("outputs the contents of a specified <file name>");
                         break;
                     case "write":
-                        _StdOut.putText("writes data/text to a specified <fileName>");
+                        _StdOut.putText("writes data/text to a specified <file name>");
                         break;
                     case "delete":
-                        _StdOut.putText("deletes a <fileName> and its contents");
+                        _StdOut.putText("deletes a <file name> and its contents");
+                        break;
+                    case "rename":
+                        _StdOut.putText("renames a file with name <file name> to <new file name");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -573,8 +579,6 @@ var TSOS;
                             _CPU.init();
                         }
                         else {
-                            // _Scheduler.resetQuantum();
-                            // _CPU.resetQuantum();
                             // Issue a context switch interrupt
                             // "type-2" indicates that we DO NOT store the current processes PCB
                             _Scheduler.issueContextSwitchInterrupt("type-2", _CPU.PID);
@@ -657,7 +661,7 @@ var TSOS;
                 }
             }
             else {
-                _StdOut.putText("ERROR: spaces not allowed in <fileName>");
+                _StdOut.putText("ERROR: spaces not allowed in <file name>");
             }
         }
         shellWrite(args) {
@@ -707,12 +711,12 @@ var TSOS;
                 // }
             }
             else {
-                _StdOut.putText("Usage: write <fileName> \"data\"");
+                _StdOut.putText("Usage: write <file name> \"data\"");
             }
         }
         shellDelete(args) {
             // Check if only one argument inserted
-            if (args.length > 1) {
+            if (args.length != 1) {
                 _StdOut.putText("Usage: delete <fileName>");
             }
             else {
@@ -734,8 +738,8 @@ var TSOS;
         }
         shellRead(args) {
             // Check if only one argument inserted
-            if (args.length > 1) {
-                _StdOut.putText("Usage: read <fileName>");
+            if (args.length != 1) {
+                _StdOut.putText("Usage: read <file name>");
             }
             else {
                 const fileName = args[0];
@@ -745,8 +749,46 @@ var TSOS;
                 }
                 else {
                     _krnDiskDriver.readFile(fileName);
+                }
+            }
+        }
+        shellRename(args) {
+            // Check if only one argument inserted
+            if (args.length != 2) {
+                _StdOut.putText("Usage: rename <file name> <new file name>");
+            }
+            else {
+                const currentFileName = args[0];
+                const newFileName = args[1];
+                if (newFileName.length > 32) {
+                    _StdOut.putText("ERROR: file name too long");
+                }
+                // Check if the filename exists
+                if (!_krnDiskDriver.fileNameInFiles(currentFileName)) {
+                    _StdOut.putText("ERROR: file name not found");
+                }
+                else {
+                    // Check if the new file name is not already taken
+                    if (_krnDiskDriver.fileNameInFiles(newFileName)) {
+                        _StdOut.putText("ERROR: new file name already taken");
+                    }
+                    else {
+                        // Get the TSB of the current file name
+                        const currentFileTSB = _krnDiskDriver.TSBInFileInFiles(currentFileName);
+                        // Get the data value
+                        var fileDataValue = _krnDiskDriver.queryTSB(currentFileTSB);
+                        // Add the new file name to the list
+                        _krnDiskDriver.filesInUse.push(new TSOS.File(newFileName, currentFileTSB));
+                        // Remove the past file name from the list
+                        _krnDiskDriver.removeFileInFilesInUse(currentFileName);
+                        // Convert the file name to hex
+                        const newHexFileName = TSOS.Utils.toHex(newFileName);
+                        // to fill the rest with 0s
+                        fileDataValue.data = _krnDiskDriver.formatData(newHexFileName);
+                    }
                     // Update the display
                     TSOS.Control.hostDisk();
+                    _StdOut.putText("File Renamed: " + currentFileName + " --> " + newFileName);
                 }
             }
         }

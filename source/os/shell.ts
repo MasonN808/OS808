@@ -199,6 +199,12 @@ module TSOS {
                 "- renames an existing file");
             this.commandList[this.commandList.length] = sc;
 
+            // ls
+            sc = new ShellCommand(this.shellList,
+                "ls",
+                "- list the files currently stored on the disk");
+            this.commandList[this.commandList.length] = sc;
+
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -468,6 +474,10 @@ module TSOS {
 
                     case "rename":
                         _StdOut.putText("renames a file with name <file name> to <new file name>");
+                        break;
+
+                    case "ls":
+                        _StdOut.putText("list the files currently stored on the disk");
                         break;
 
                     default:
@@ -1039,6 +1049,12 @@ module TSOS {
                     Control.hostDisk();
                     _StdOut.putText("File Renamed: " + currentFileName + " --> " + newFileName);
                 }
+            }
+        }
+
+        public shellList() {
+            for (let fileIndex=0; fileIndex < _krnDiskDriver.filesInUse.length; fileIndex++) {
+                _StdOut.putText('-' + _krnDiskDriver.filesInUse[fileIndex].name + ' ');
             }
         }
     }

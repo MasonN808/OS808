@@ -108,6 +108,9 @@ var TSOS;
             // rename <current filename> <new filename>
             sc = new TSOS.ShellCommand(this.shellRename, "rename", "- renames an existing file");
             this.commandList[this.commandList.length] = sc;
+            // ls
+            sc = new TSOS.ShellCommand(this.shellList, "ls", "- list the files currently stored on the disk");
+            this.commandList[this.commandList.length] = sc;
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -338,6 +341,9 @@ var TSOS;
                         break;
                     case "rename":
                         _StdOut.putText("renames a file with name <file name> to <new file name>");
+                        break;
+                    case "ls":
+                        _StdOut.putText("list the files currently stored on the disk");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -763,6 +769,7 @@ var TSOS;
                 }
             }
         }
+        // FIXME: Weird table distortion when 1) create <file> 2) write file "some data" then 3) copy <file> <new file>
         shellCopy(args, verbose = true) {
             // Check if only one argument inserted
             if (args.length != 2) {
@@ -853,6 +860,11 @@ var TSOS;
                     TSOS.Control.hostDisk();
                     _StdOut.putText("File Renamed: " + currentFileName + " --> " + newFileName);
                 }
+            }
+        }
+        shellList() {
+            for (let fileIndex = 0; fileIndex < _krnDiskDriver.filesInUse.length; fileIndex++) {
+                _StdOut.putText('-' + _krnDiskDriver.filesInUse[fileIndex].name + ' ');
             }
         }
     }

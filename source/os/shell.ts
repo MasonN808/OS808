@@ -941,6 +941,7 @@ module TSOS {
             }
         }
 
+        // FIXME: Weird table distortion when 1) create <file> 2) write file "some data" then 3) copy <file> <new file>
         public shellCopy(args: string[], verbose = true) {
             // Check if only one argument inserted
             if (args.length != 2) {

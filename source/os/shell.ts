@@ -751,6 +751,7 @@ module TSOS {
         public shellFormat() {
             // resets values in the hashmap
             _krnDiskDriver.krnDiskFormat();
+            // Reset
             Control.hostDisk();
             _StdOut.putText("Disk SUCCESSFULLY reset");
         }

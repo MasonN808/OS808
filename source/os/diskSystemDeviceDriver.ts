@@ -29,6 +29,10 @@ module TSOS {
 
         public krnDiskFormat() {
             // Reformat the diskMap by clearing it and resetting structure
+            // Reset the filesInUse Array
+            this.filesInUse = new Array<File>();
+            // Reset the Map
+            this.diskMap =  new Map();
             // https://stackoverflow.com/questions/43592760/typescript-javascript-using-tuple-as-key-of-map
             for (let trackIndex = 0; trackIndex < this.TRACKMAX; trackIndex++) {
                 for (let sectorIndex = 0; sectorIndex < this.SECTORMAX; sectorIndex++) {

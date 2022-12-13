@@ -83,6 +83,25 @@ module TSOS {
             clearInterval(_hardwareClockID);
         }
 
+        // Check if the queried file name is in the list of files in use
+        public fileNameInFiles(queriedfileName: string): boolean {
+            for (const file of this.filesInUse) {
+                if (file.name == queriedfileName) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        public TSBInFileInFiles(queriedfileName: string): number[] {
+            for (const file of this.filesInUse) {
+                if (file.name == queriedfileName) {
+                    return file.TSB;
+                }
+            }
+            return null;
+        }
+
         // Update the current data with the new data
         public formatData(hexStr: string): OpCode[] {
             var data = new Array<OpCode>(_krnDiskDriver.BLOCKSIZEMAX).fill(new OpCode("00"));
@@ -112,6 +131,10 @@ module TSOS {
             if (tempQueriedDiskValue != null) {
                 tempQueriedDiskValue.next = [0,0,0];
             }
+        }
+
+        public removeFileContents(fileName: string) {
+            
         }
     }
     

@@ -176,6 +176,12 @@ module TSOS {
                 "- writes data/text to a specified file name");
             this.commandList[this.commandList.length] = sc;
 
+            // delete <filename>
+            sc = new ShellCommand(this.shellDelete,
+                "delete",
+                "- deletes a file and its contents");
+            this.commandList[this.commandList.length] = sc;
+
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -429,6 +435,10 @@ module TSOS {
 
                     case "write":
                         _StdOut.putText("writes data/text to a specified <file name>");
+                        break;
+
+                    case "delete":
+                        _StdOut.putText("deletes a <fileName> and its contents");
                         break;
 
                     default:
@@ -765,7 +775,7 @@ module TSOS {
                     _StdOut.putText("ERROR: file name too long");
                 }
                 // Check to see if the name is already taken
-                else if (Utils.fileNameInFiles(_krnDiskDriver.filesInUse, newFileName)) {
+                else if (_krnDiskDriver.fileNameInFiles(newFileName)) {
                     _StdOut.putText("ERROR: file name already in use");
                 }
                 else {
@@ -804,20 +814,19 @@ module TSOS {
         public shellWrite(args: string[]) {
             // TODO: The write commeand should reset the file contents everytime we type this command so do a reset contents first
             // Check that input is a string with no spaces
-            // TODO: Do some smart string parsing to adjust the args array with spaces in quotes
             const newArgs = Utils.smartArgsParsing(args);
             if (newArgs != null) {
                 const fileName = newArgs[0];
                 const data = newArgs[1];
                 // Check that it is the correct file name
-                if (!Utils.fileNameInFiles(_krnDiskDriver.filesInUse, fileName)) {
+                if (!_krnDiskDriver.fileNameInFiles(fileName)) {
                     _StdOut.putText("ERROR: file name not found");
                 }
                 else {
                     // Remove the parenthesis before injecting into hard drive
                     const truncatedData = data.substring(1, data.length-1);
                     // Find the TSB associated with the file name
-                    const fileTSB = Utils.TSBInFileInFiles(_krnDiskDriver.filesInUse, fileName);
+                    const fileTSB = _krnDiskDriver.TSBInFileInFiles(fileName);
                     // Get the DiskValue associated with this TSB to get the next TSB
                     const fileDiskValue = _krnDiskDriver.queryTSB(fileTSB[0], fileTSB[1], fileTSB[2]);
                     // Get the next TSB from the DiskValue
@@ -853,6 +862,23 @@ module TSOS {
             } 
             else {
                 _StdOut.putText("Usage: write <fileName> \"data\"");
+            }
+        }
+
+        public shellDelete(args: string[]) {
+            // Check if only one argument inserted
+            if (args.length > 1) {
+                _StdOut.putText("Usage: delete <fileName>");
+            }
+            else {
+                const fileName = args[0];
+                // Check if the filename exists
+                if (!_krnDiskDriver.fileNameInFiles(fileName)) {
+                    _StdOut.putText("ERROR: file name not found");
+                }
+                else {
+
+                }
             }
         }
     }

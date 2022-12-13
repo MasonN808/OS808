@@ -76,25 +76,6 @@ module TSOS {
             return result;
         }
 
-        // Check if the queried file name is in the list of files in use
-        public static fileNameInFiles(filesInUse: File[], queriedfileName: string): boolean {
-            for (const file of filesInUse) {
-                if (file.name == queriedfileName) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        
-        public static TSBInFileInFiles(filesInUse: File[], queriedfileName: string): number[] {
-            for (const file of filesInUse) {
-                if (file.name == queriedfileName) {
-                    return file.TSB;
-                }
-            }
-            return null;
-        }
-
         // https://masteringjs.io/tutorials/fundamentals/compare-arrays
         public static arrayEquals(a, b) {
             return Array.isArray(a) &&

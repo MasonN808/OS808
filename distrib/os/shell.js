@@ -605,6 +605,7 @@ var TSOS;
         shellFormat() {
             // resets values in the hashmap
             _krnDiskDriver.krnDiskFormat();
+            // Reset
             TSOS.Control.hostDisk();
             _StdOut.putText("Disk SUCCESSFULLY reset");
         }
@@ -631,7 +632,7 @@ var TSOS;
                     queriedDiskValue.used = 1;
                     const hexFileName = TSOS.Utils.toHex(newFileName);
                     // Change the data
-                    queriedDiskValue.data = _krnDiskDriver.fillData(hexFileName);
+                    queriedDiskValue.data = _krnDiskDriver.formatData(hexFileName);
                     // Set the next TSB pointer
                     const unusedDataTSB = _krnDiskDriver.queryUnusedTSB("Data");
                     // Set the data TSB pointer with a used pointer too
@@ -669,11 +670,13 @@ var TSOS;
                     // Get the next TSB from the DiskValue
                     var dataTSB = fileDiskValue.next;
                     // Query the TSB the returns the associated DiskValue
-                    var queriedDiskValue = _krnDiskDriver.queryTSB(dataTSB[0], dataTSB[1], dataTSB[2]);
+                    // var queriedDiskValue = _krnDiskDriver.queryTSB(dataTSB[0], dataTSB[1], dataTSB[2]);
                     // Convert the string of data to hex
                     const hexData = TSOS.Utils.toHex(truncatedData);
+                    // // Change the data
+                    // queriedDiskValue.data = _krnDiskDriver.fillData(hexData, dataTSB);
                     // Change the data
-                    queriedDiskValue.data = _krnDiskDriver.fillData(hexData);
+                    _krnDiskDriver.fillData(hexData, dataTSB);
                     // Update the display
                     TSOS.Control.hostDisk();
                     _StdOut.putText("File Updated: " + fileName);

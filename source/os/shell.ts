@@ -782,7 +782,7 @@ module TSOS {
                     const hexFileName = Utils.toHex(newFileName);
 
                     // Change the data
-                    queriedDiskValue.data = _krnDiskDriver.fillData(hexFileName);
+                    queriedDiskValue.data = _krnDiskDriver.formatData(hexFileName);
 
                     // Set the next TSB pointer
                     const unusedDataTSB = _krnDiskDriver.queryUnusedTSB("Data");
@@ -824,11 +824,14 @@ module TSOS {
                     var dataTSB = fileDiskValue.next;
 
                     // Query the TSB the returns the associated DiskValue
-                    var queriedDiskValue = _krnDiskDriver.queryTSB(dataTSB[0], dataTSB[1], dataTSB[2]);
+                    // var queriedDiskValue = _krnDiskDriver.queryTSB(dataTSB[0], dataTSB[1], dataTSB[2]);
                     // Convert the string of data to hex
                     const hexData = Utils.toHex(truncatedData);
+                    
+                    // // Change the data
+                    // queriedDiskValue.data = _krnDiskDriver.fillData(hexData, dataTSB);
                     // Change the data
-                    queriedDiskValue.data = _krnDiskDriver.fillData(hexData);
+                    _krnDiskDriver.fillData(hexData, dataTSB);
 
                     // Update the display
                     Control.hostDisk();

@@ -84,13 +84,34 @@ module TSOS {
         }
 
         // Update the current data with the new data
-        public fillData(hexStr: string): OpCode[] {
+        public formatData(hexStr: string): OpCode[] {
             var data = new Array<OpCode>(_krnDiskDriver.BLOCKSIZEMAX).fill(new OpCode("00"));
             for (let i=0; i < hexStr.length; i+=2) {
                 data[i/2] = new OpCode(hexStr[i]+hexStr[i+1]);
             }
-            console.log(data);
             return data;
+        }
+
+        // Fills the data in the hashmap no matter the length of the input hex string
+        public fillData(hexStr: string, startTSB: number[]) {
+            var tempQueriedDiskValue = null;
+            // Loop through how many times we need a new block
+            // Multiply block size by 2 since op codes take up two chars
+            for (let blockIndex = 0; blockIndex < Math.ceil(hexStr.length/(this.BLOCKSIZEMAX*2)); blockIndex++) {
+                // Get the queried disk value
+                const truncatedHexStr = hexStr.substring(blockIndex*this.BLOCKSIZEMAX*2, (blockIndex+1)*this.BLOCKSIZEMAX*2);
+                var queriedDiskValue = this.queryTSB(startTSB[0], startTSB[1], startTSB[2]);
+                queriedDiskValue.data = this.formatData(truncatedHexStr);
+                queriedDiskValue.used = 1;
+                const unusedTSB = this.queryUnusedTSB("Data");
+                queriedDiskValue.next = unusedTSB;
+                tempQueriedDiskValue = queriedDiskValue;
+                // Reassign the startTSB pointer
+                startTSB = unusedTSB;
+            }
+            if (tempQueriedDiskValue != null) {
+                tempQueriedDiskValue.next = [0,0,0];
+            }
         }
     }
     

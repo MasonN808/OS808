@@ -24,6 +24,10 @@ var TSOS;
         }
         krnDiskFormat() {
             // Reformat the diskMap by clearing it and resetting structure
+            // Reset the filesInUse Array
+            this.filesInUse = new Array();
+            // Reset the Map
+            this.diskMap = new Map();
             // https://stackoverflow.com/questions/43592760/typescript-javascript-using-tuple-as-key-of-map
             for (let trackIndex = 0; trackIndex < this.TRACKMAX; trackIndex++) {
                 for (let sectorIndex = 0; sectorIndex < this.SECTORMAX; sectorIndex++) {
@@ -72,13 +76,33 @@ var TSOS;
             clearInterval(_hardwareClockID);
         }
         // Update the current data with the new data
-        fillData(hexStr) {
+        formatData(hexStr) {
             var data = new Array(_krnDiskDriver.BLOCKSIZEMAX).fill(new TSOS.OpCode("00"));
             for (let i = 0; i < hexStr.length; i += 2) {
                 data[i / 2] = new TSOS.OpCode(hexStr[i] + hexStr[i + 1]);
             }
-            console.log(data);
             return data;
+        }
+        // Fills the data in the hashmap no matter the length of the input hex string
+        fillData(hexStr, startTSB) {
+            var tempQueriedDiskValue = null;
+            // Loop through how many times we need a new block
+            // Multiply block size by 2 since op codes take up two chars
+            for (let blockIndex = 0; blockIndex < Math.ceil(hexStr.length / (this.BLOCKSIZEMAX * 2)); blockIndex++) {
+                // Get the queried disk value
+                const truncatedHexStr = hexStr.substring(blockIndex * this.BLOCKSIZEMAX * 2, (blockIndex + 1) * this.BLOCKSIZEMAX * 2);
+                var queriedDiskValue = this.queryTSB(startTSB[0], startTSB[1], startTSB[2]);
+                queriedDiskValue.data = this.formatData(truncatedHexStr);
+                queriedDiskValue.used = 1;
+                const unusedTSB = this.queryUnusedTSB("Data");
+                queriedDiskValue.next = unusedTSB;
+                tempQueriedDiskValue = queriedDiskValue;
+                // Reassign the startTSB pointer
+                startTSB = unusedTSB;
+            }
+            if (tempQueriedDiskValue != null) {
+                tempQueriedDiskValue.next = [0, 0, 0];
+            }
         }
     }
     TSOS.DiskSystemDeviceDriver = DiskSystemDeviceDriver;

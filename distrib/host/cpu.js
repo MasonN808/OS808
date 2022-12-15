@@ -13,7 +13,7 @@
 var TSOS;
 (function (TSOS) {
     class Cpu {
-        constructor(PC = 0, IR = "00", Acc = 0, Xreg = 0, Yreg = 0, Zflag = 0, isExecuting = false, PID = null, Quantum = 1) {
+        constructor(PC = 0, IR = "00", Acc = 0, Xreg = 0, Yreg = 0, Zflag = 0, isExecuting = false, PID = null, Quantum = 1, lastPID = null) {
             this.PC = PC;
             this.IR = IR;
             this.Acc = Acc;
@@ -23,6 +23,7 @@ var TSOS;
             this.isExecuting = isExecuting;
             this.PID = PID;
             this.Quantum = Quantum;
+            this.lastPID = lastPID;
         }
         init() {
             this.PC = 0;
@@ -35,6 +36,7 @@ var TSOS;
             this.PID = null;
             this.lastPC = 0;
             this.Quantum = 1;
+            this.lastPID = null;
         }
         cycle() {
             _Kernel.krnTrace('CPU cycle');
@@ -47,12 +49,9 @@ var TSOS;
             }
             // For the very first running program
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
-            pcb.processState = "Running";
             // If the process is in the hard drive call roll-out and roll-in routines
             if (pcb.location == "Hard Drive") {
-                console.log("In hard drive");
                 const PID_TSB = _krnDiskDriver.queryPID_TSB();
-                console.log("PID TSB : " + PID_TSB);
                 if (PID_TSB != null) {
                     // Copy the data from the blocks
                     const opCodesStr = _krnDiskDriver.getOpCodesFromFile(PID_TSB);
@@ -61,18 +60,22 @@ var TSOS;
                     // Generate the opCodes from the File in the Drive
                     var memory = new TSOS.Memory(this.PID);
                     memory.source = opCodes;
-                    // Check if there is an empty memory parition
+                    // Check if there is an empty memory partition
                     if (_MemoryManager.canLoadProgramInMemory()) {
                         // Load the program into memory
                         _MemoryManager.loadProgramInMemory(memory, false);
-                    }
-                    else {
-                        // Now, clear a memory segment and save the relevant information before rolling in
-                        // TODO: Use the last previously used PID; currently set to the 0th partition
-                        const poppedMemory = _MemoryManager.popProgramInMemory(0);
                         // Do a Deep Clean
                         _krnDiskDriver.removeFileContents(PID_TSB, false);
-                        // Roll in the program from the drive
+                    }
+                    else {
+                        // FIXME: I think the memory isn't getting wiped somewhere in here
+                        // Now, clear a memory segment and save the relevant information before rolling in
+                        // TODO: Use the last previously used PID; currently set to the 0th partition
+                        const poppedMemory = _MemoryManager.popProgramInMemory(_MemoryManager.swappedMemoryPartition);
+                        _MemoryManager.swappedMemoryPartition = (_MemoryManager.swappedMemoryPartition + 1) % _MemoryManager.maxLoadedPrograms;
+                        // Do a Deep Clean
+                        _krnDiskDriver.removeFileContents(PID_TSB, false);
+                        // Roll in the program from the drive into memory
                         _MemoryManager.loadProgramInMemory(memory, false);
                         // Save the popped Memory to the Drive
                         _MemoryManager.loadProgramInMemory(poppedMemory, false);
@@ -82,7 +85,9 @@ var TSOS;
                 pcb.location = "Memory";
             }
             // Now update the displayed PCB
+            pcb.processState = "Running";
             TSOS.Control.hostProcesses(this.PID);
+            TSOS.Control.hostDisk();
             // Get the Op code given the pid and pc
             var opCode = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
             opCode.currentOperator = true;
@@ -278,9 +283,6 @@ var TSOS;
                 case ("00"):
                     // NOTE: Dont need to remove from the ready queue, since it has already been done due to queue structure
                     _MemoryManager.removePIDFromEverywhere(this.PID);
-                    // Reset all CPU pointers for next executing program
-                    // this.PID = null;
-                    // this.Quantum = 1;
                     // Check if the ready queue is empty to determine whether to completly stop CPU execution
                     if (_ReadyQueue.isEmpty()) {
                         exitProgram = true;

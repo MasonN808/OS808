@@ -128,7 +128,16 @@ var TSOS;
             // Loop through all programs in sequence
             for (let loadedProgramIndex = 0; loadedProgramIndex < _MemoryManager.maxLoadedPrograms; loadedProgramIndex++) {
                 // Get the source memory from the parition in main memory
-                const memoryArray = _MemoryManager.mainMemory[loadedProgramIndex].source;
+                // OLD
+                // const memoryArray = _MemoryManager.mainMemory[loadedProgramIndex].source;
+                // NEW
+                const pid = _MemoryManager.mainMemory[loadedProgramIndex].PID;
+                if (pid == -1 || pid == null) {
+                    var memoryArray = _MemoryManager.mainMemory[loadedProgramIndex].source;
+                }
+                else {
+                    var memoryArray = _MemoryManager.PIDMap.get(pid)[0].source; // get the memory
+                }
                 // adjust rowIndex WRT loaded program index
                 var rowIndex = 0 + (32 * loadedProgramIndex);
                 // Loop through the memory array to display it

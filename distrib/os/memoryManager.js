@@ -9,6 +9,7 @@ var TSOS;
             this.mainMemory = new Array(this.maxLoadedPrograms);
             this.base = 0;
             this.limit = 255;
+            this.swappedMemoryPartition = 0;
         }
         init() {
             this.initializeMainMemory();
@@ -77,12 +78,13 @@ var TSOS;
             pcb.location = "Hard Drive";
             pcb.base = -1;
             pcb.limit = -1;
+            pcb.segment = -1;
             const unassignedFileTSB = _krnDiskDriver.queryUnusedTSB("Directory");
             const unassignedFileDataValue = _krnDiskDriver.queryTSB(unassignedFileTSB);
             // Change the pointers
             unassignedFileDataValue.used = 1;
             // Assign the pid to the file name
-            var PIDStr = pcb.processID.toString();
+            var PIDStr = memory.PID.toString();
             PIDStr = '0'.repeat(3 - PIDStr.length) + PIDStr;
             const PIDHex = TSOS.Utils.toHex(PIDStr);
             unassignedFileDataValue.data = _krnDiskDriver.formatData(PIDHex);
@@ -237,16 +239,20 @@ var TSOS;
                 console.log("incorrect partition index");
             }
             this.mainMemory[partitionIndex] = new TSOS.Memory();
-            this.mainMemory[partitionIndex].empty;
         }
         removeProgramInMemory(targetProgram) {
             for (let memoryPartitionIndex = 0; memoryPartitionIndex < _MemoryManager.maxLoadedPrograms; memoryPartitionIndex++) {
                 // Check if the target Program is the same Memory object as any Memory partition in main memory
-                if (Object.is(targetProgram, this.mainMemory[memoryPartitionIndex])) {
+                // if (Object.is(targetProgram, this.mainMemory[memoryPartitionIndex])) {
+                //     this.mainMemory[memoryPartitionIndex] = new Memory();
+                //     break;
+                // }
+                if (targetProgram.PID == this.mainMemory[memoryPartitionIndex].PID) {
                     this.mainMemory[memoryPartitionIndex] = new TSOS.Memory();
                     break;
                 }
             }
+            // console.log("TEST:" + targetProgram.)
         }
         // Returns the memory object at the memory parition being cleared
         popProgramInMemory(partitionIndex) {

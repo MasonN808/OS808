@@ -10,6 +10,7 @@ module TSOS {
         public base: number;
         public limit: number;
         public test: number;
+        public swappedMemoryPartition: number;
         
         constructor() {
             this.PIDCounter = 1;
@@ -19,6 +20,7 @@ module TSOS {
             this.mainMemory = new Array<Memory>(this.maxLoadedPrograms);
             this.base = 0;
             this.limit = 255;
+            this.swappedMemoryPartition = 0
         }
 
         public init(): void {
@@ -96,13 +98,14 @@ module TSOS {
             pcb.location = "Hard Drive";
             pcb.base = -1;
             pcb.limit = -1;
+            pcb.segment = -1;
 
             const unassignedFileTSB = _krnDiskDriver.queryUnusedTSB("Directory");
             const unassignedFileDataValue = _krnDiskDriver.queryTSB(unassignedFileTSB);
             // Change the pointers
             unassignedFileDataValue.used = 1;
             // Assign the pid to the file name
-            var PIDStr = pcb.processID.toString();
+            var PIDStr = memory.PID.toString();
             PIDStr = '0'.repeat(3-PIDStr.length) + PIDStr;
 
             const PIDHex = Utils.toHex(PIDStr);
@@ -155,7 +158,7 @@ module TSOS {
             // Increase PID for next PID
             this.PIDCounter += 1;
         }
-        
+
         // This is for roll-in and roll-out routines
         public assignPIDtoMemory(memory: Memory, memorySegment: number): void {
             // Check that the pid counter is never over FF (255)
@@ -271,17 +274,21 @@ module TSOS {
                 console.log("incorrect partition index");
             }
             this.mainMemory[partitionIndex] = new Memory();
-            this.mainMemory[partitionIndex].empty;
         }
 
         public removeProgramInMemory(targetProgram: Memory): void {
             for (let memoryPartitionIndex = 0; memoryPartitionIndex < _MemoryManager.maxLoadedPrograms; memoryPartitionIndex++) {
                 // Check if the target Program is the same Memory object as any Memory partition in main memory
-                if (Object.is(targetProgram, this.mainMemory[memoryPartitionIndex])) {
+                // if (Object.is(targetProgram, this.mainMemory[memoryPartitionIndex])) {
+                //     this.mainMemory[memoryPartitionIndex] = new Memory();
+                //     break;
+                // }
+                if (targetProgram.PID == this.mainMemory[memoryPartitionIndex].PID) {
                     this.mainMemory[memoryPartitionIndex] = new Memory();
                     break;
                 }
             }
+            // console.log("TEST:" + targetProgram.)
         }
 
         // Returns the memory object at the memory parition being cleared

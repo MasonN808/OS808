@@ -93,5 +93,17 @@ module TSOS {
             }
             return [args[0], data];
         }
+
+        // Truncates a string of Op codes
+
+        // Turns a list of op codes into a string with no spaces
+        public static opCodetoString(opCodes: Array<OpCode>): string {
+            var accumulatedStr = '';
+            console.log(opCodes.length)
+            for (let i=0; i < opCodes.length; i++) {
+                accumulatedStr += opCodes[i].codeString;
+            }
+            return accumulatedStr
+        }
     }
 }

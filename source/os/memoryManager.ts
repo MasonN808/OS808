@@ -24,8 +24,40 @@ module TSOS {
         public init(): void {
             this.initializeMainMemory();
         }
+
+        // Assign the PID to Drive
+        public assignPIDtoDrive(memory: Memory) {
+            const unassignedFileTSB = _krnDiskDriver.queryUnusedTSB("Directory");
+            const unassignedFileDataValue = _krnDiskDriver.queryTSB(unassignedFileTSB);
+            // Change the pointers
+            unassignedFileDataValue.used = 1;
+            // Assign the pid to the file name
+            var PIDStr = this.PIDCounter.toString();
+            if (PIDStr.length == 1) {
+                PIDStr = '0' + PIDStr;
+            }
+            const PIDHex = Utils.toHex(PIDStr);
+            unassignedFileDataValue.data = _krnDiskDriver.formatData(PIDHex);
+
+            // Get the unassinged data ponter
+            const unassignedDataTSB = _krnDiskDriver.queryUnusedTSB("Data");
+            // Assign the next pointer in file
+            unassignedFileDataValue.next = unassignedDataTSB;
+
+            // Convert the list of OpCodes to a string
+            const opCodeStr = Utils.opCodetoString(memory.source);
+            console.log(opCodeStr.length)
+            // Now fill the data blocks with the op codes
+            _krnDiskDriver.fillData(opCodeStr, unassignedDataTSB);
+
+            // Update the display
+            Control.hostDisk();
+
+            // Increase PID for next PID
+            this.PIDCounter += 1;
+        }
         
-        public assignPID(memory: Memory, memorySegment: number): void {
+        public assignPIDtoMemory(memory: Memory, memorySegment: number): void {
             // Check that the pid counter is never over FF (255)
             if (this.PIDCounter >= 255) {
                 Control.hostLog("PID has reached 255", "host");
@@ -78,10 +110,19 @@ module TSOS {
                 // Add it to the end of resident list
                 _ResidentList.push(loadedProgram.PID)
                 // and apply PID to PCB
-                this.assignPID(loadedProgram, memorySegment);
+                this.assignPIDtoMemory(loadedProgram, memorySegment);
             }
+            // Put it in the hard drive
             else {
-                _StdOut.putText("Memory exhausted: max loaded program reached")
+                // Apply the PID to memory object
+                loadedProgram.PID = this.PIDCounter;
+                // Add it to the end of resident list
+                _ResidentList.push(loadedProgram.PID)
+                // and apply PID to PCB
+                this.assignPIDtoDrive(loadedProgram);
+                // Update the base and limit pointers in memory object
+                loadedProgram.limit = -1;
+                loadedProgram.base = -1;
             }
         }
         

@@ -759,6 +759,7 @@ var TSOS;
                 _StdOut.putText("Usage: read <file name>");
             }
             else {
+                console.log(TSOS.Utils.hex2a("7e33"));
                 const fileName = args[0];
                 // Check if the filename exists
                 if (!_krnDiskDriver.fileNameInFiles(fileName)) {

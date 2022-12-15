@@ -95,6 +95,7 @@ module TSOS {
         }
 
         // Truncates a string of Op codes
+        // TODO: Finish
 
         // Turns a list of op codes into a string with no spaces
         public static opCodetoString(opCodes: Array<OpCode>): string {
@@ -104,6 +105,28 @@ module TSOS {
                 accumulatedStr += opCodes[i].codeString;
             }
             return accumulatedStr
+        }
+
+        // Turns a list of op codes into a string with no spaces
+        public static filePIDNametoString(opCodes: Array<OpCode>): string {
+            var accumulatedStr = '';
+            for (let i=0; i < opCodes.length; i++) {
+                if (opCodes[i].codeString == "00") {
+                    // Hit end of PID
+                    break;
+                }
+                accumulatedStr += Utils.hex2a(opCodes[i].codeString);
+            }
+            return accumulatedStr
+        }
+
+        // Turns a string of Opcodes with no spaces into a list of op codes
+        public static stringToOpCode(str: string): Array<OpCode> {
+            var finalArray = [];
+            for (let i=0; i < str.length; i += 2) {
+                finalArray.push(new OpCode(str[i] + str[i+1]));
+            }
+            return finalArray;
         }
     }
 }

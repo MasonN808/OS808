@@ -864,12 +864,12 @@ module TSOS {
                     _StdOut.putText("ERROR: file name [" + fileName + "] not found");
                 }
                 else {
-                    // Be sure to reset all data of the file before writing with a shallow delete
-                    _krnDiskDriver.removeFileContents(fileName, true);
-                    // Remove the parenthesis before injecting into hard drive
-                    const truncatedData = data.substring(1, data.length-1);
                     // Find the TSB associated with the file name
                     const fileTSB = _krnDiskDriver.TSBInFileInFiles(fileName);
+                    // Be sure to reset all data of the file before writing with a shallow delete
+                    _krnDiskDriver.removeFileContents(fileTSB, true);
+                    // Remove the parenthesis before injecting into hard drive
+                    const truncatedData = data.substring(1, data.length-1);
                     // Get the DiskValue associated with this TSB to get the next TSB
                     const fileDiskValue = _krnDiskDriver.queryTSB(fileTSB);
                     // Get the next TSB from the DiskValue
@@ -922,8 +922,10 @@ module TSOS {
                     _StdOut.putText("ERROR: file name [" + fileName + "] not found");
                 }
                 else {
+                    // Find the TSB associated with the file name
+                    const fileTSB = _krnDiskDriver.TSBInFileInFiles(fileName);
                     // Full delete, no shallow delete
-                    _krnDiskDriver.removeFileContents(fileName, false);
+                    _krnDiskDriver.removeFileContents(fileTSB, false);
                     // Remove the file from filesInUse array
                     _krnDiskDriver.removeFileInFilesInUse(fileName);
 
@@ -947,7 +949,8 @@ module TSOS {
                     _StdOut.putText("ERROR: file name [" + fileName + "] not found");
                 }
                 else {
-                    _krnDiskDriver.readFile(fileName);
+                    const fileTSB = _krnDiskDriver.TSBInFileInFiles(fileName);
+                    _krnDiskDriver.readFile(fileTSB);
                 }
             }
         }

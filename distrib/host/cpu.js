@@ -35,28 +35,52 @@ var TSOS;
             this.PID = null;
             this.lastPC = 0;
             this.Quantum = 1;
-            // _Scheduler.resetQuantum();
         }
         cycle() {
             _Kernel.krnTrace('CPU cycle');
-            console.log("_ReadyQueue: " + _ReadyQueue);
+            // console.log("_ReadyQueue: " + _ReadyQueue);
             var contextSwitch = false;
             // For the initial run routine
             if (this.PID == null && !_ReadyQueue.isEmpty()) {
                 this.PID = _ReadyQueue.dequeue();
                 this.calibratePCBtoCPU(this.PID);
             }
-            if (this.PID == null) {
-                console.log("ERROR");
-            }
-            // else if (this.PID === null && _ReadyQueue.isEmpty()) {
-            //     this.init();
-            //     return;
-            // }
-            console.log("HERE " + this.PID);
             // For the very first running program
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
             pcb.processState = "Running";
+            // If the process is in the hard drive call roll-out and roll-in routines
+            if (pcb.location == "Hard Drive") {
+                console.log("In hard drive");
+                const PID_TSB = _krnDiskDriver.queryPID_TSB();
+                console.log("PID TSB : " + PID_TSB);
+                if (PID_TSB != null) {
+                    // Copy the data from the blocks
+                    const opCodesStr = _krnDiskDriver.getOpCodesFromFile(PID_TSB);
+                    // Turn the string of OpCodes into an array of OpCodes
+                    const opCodes = TSOS.Utils.stringToOpCode(opCodesStr);
+                    // Generate the opCodes from the File in the Drive
+                    var memory = new TSOS.Memory(this.PID);
+                    memory.source = opCodes;
+                    // Check if there is an empty memory parition
+                    if (_MemoryManager.canLoadProgramInMemory()) {
+                        // Load the program into memory
+                        _MemoryManager.loadProgramInMemory(memory, false);
+                    }
+                    else {
+                        // Now, clear a memory segment and save the relevant information before rolling in
+                        // TODO: Use the last previously used PID; currently set to the 0th partition
+                        const poppedMemory = _MemoryManager.popProgramInMemory(0);
+                        // Do a Deep Clean
+                        _krnDiskDriver.removeFileContents(PID_TSB, false);
+                        // Roll in the program from the drive
+                        _MemoryManager.loadProgramInMemory(memory, false);
+                        // Save the popped Memory to the Drive
+                        _MemoryManager.loadProgramInMemory(poppedMemory, false);
+                    }
+                }
+                // Set it as in Memory
+                pcb.location = "Memory";
+            }
             // Now update the displayed PCB
             TSOS.Control.hostProcesses(this.PID);
             // Get the Op code given the pid and pc
@@ -264,7 +288,6 @@ var TSOS;
                     }
                     // Issue a context switch
                     else {
-                        console.log("type-2 + " + this.PID);
                         _Scheduler.issueContextSwitchInterrupt("type-2", this.PID);
                         contextSwitch = true;
                     }
@@ -298,7 +321,6 @@ var TSOS;
             }
             // Now update the displayed PCB
             if (!exitProgram && this.PID !== null && !contextSwitch) {
-                console.log(this.PID);
                 TSOS.Control.hostProcesses(this.PID);
             }
         }

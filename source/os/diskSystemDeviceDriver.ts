@@ -70,7 +70,7 @@ module TSOS {
                     continue;
                 }
                 if (diskValue.used == 0) {
-                    return [TSB[0], TSB[1], TSB[2]]
+                    return [TSB[0], TSB[1], TSB[2]];
                 }
             }
             // If we didn't return, then memory is full
@@ -81,6 +81,27 @@ module TSOS {
             _Kernel.krnShutdown();
             // Stop the interval that's simulating our clock pulse.
             clearInterval(_hardwareClockID);
+        }
+
+        // Query the TSB of the closest available/unused DiskValue in either the Directory of Data partitions
+        public queryPID_TSB(): number[] {
+            for (let [key, diskValue] of this.diskMap) {
+                const TSB = key.split(':');
+                if (TSB[0] > 1) {
+                    // Not in Directory
+                    return null;
+                }
+                // At this point, the PID should be on the CPU
+                var PIDStr = _CPU.PID.toString();
+                PIDStr = '0'.repeat(3-PIDStr.length) + PIDStr;
+                // Also check that it isn't a file name in filesInUse
+                if (Utils.filePIDNametoString(diskValue.data) == PIDStr && !this.fileNameInFiles(PIDStr)) {
+                    // console.log("A: " + Utils.filePIDNametoString(diskValue.data));
+                    // console.log("B: " + PIDStr);
+                    return [TSB[0], TSB[1], TSB[2]];
+                }
+            }
+            return null;
         }
 
         // Check if the queried file name is in the list of files in use
@@ -142,8 +163,7 @@ module TSOS {
             }
         }
 
-        public removeFileContents(fileName: string, shallowDelete: boolean) {
-            const fileTSB = this.TSBInFileInFiles(fileName);
+        public removeFileContents(fileTSB: number[], shallowDelete: boolean) {
             var diskValue = this.queryTSB(fileTSB);
             // Traverse down the path graph until we hit the leaf and reset pointers while doing so
             var leafFound = false;
@@ -170,8 +190,7 @@ module TSOS {
             }
         }
 
-        public readFile(fileName: string) {
-            const fileTSB = this.TSBInFileInFiles(fileName);
+        public readFile(fileTSB: number[]) {
             var diskValue = this.queryTSB(fileTSB);
             // Traverse down the path graph until we hit the leaf and output the data while doing so
             var leafFound = false;
@@ -198,6 +217,37 @@ module TSOS {
                     diskValue = this.queryTSB(diskValue.next);
                 }
             }
+        }
+
+        public getOpCodesFromFile(fileTSB: number[]): string {
+            var diskValue = this.queryTSB(fileTSB);
+            // Traverse down the path graph until we hit the leaf and output the data while doing so
+            var leafFound = false;
+            var atFileTSB = true;
+            var aggregatedData = '';
+            while (!leafFound) {
+                if (Utils.arrayEquals(diskValue.next, [0,0,0])) {
+                    leafFound = true;
+                }
+                // Don't read the data from the file head in directory partition
+                if (atFileTSB) {
+                    // Go to the next disk value
+                    diskValue = this.queryTSB(diskValue.next);
+                    atFileTSB = false;
+                }
+                else {
+                    // Convert the data/hex into a string from OpCode objects
+                    var data = '';
+                    for (let i=0; i < diskValue.data.length; i++) {
+                        data += diskValue.data[i].codeString;
+                    }
+                    // Turn the hex into ASCII and output
+                    aggregatedData += data;
+                    // Go to the next disk value
+                    diskValue = this.queryTSB(diskValue.next);
+                }
+            }
+            return aggregatedData;
         }
 
         public getDataFromFile(fileName: string): string {

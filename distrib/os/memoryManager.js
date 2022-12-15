@@ -13,8 +13,9 @@ var TSOS;
         init() {
             this.initializeMainMemory();
         }
-        // Assign the PID to Drive
-        assignPIDtoDrive(memory) {
+        // This is for loading process from load shell command
+        // Which creates a new PCB
+        assignPIDtoDriveInitial(memory) {
             // Check that the pid counter is never over FF (255)
             if (this.PIDCounter >= 255) {
                 TSOS.Control.hostLog("PID has reached 255", "host");
@@ -41,9 +42,7 @@ var TSOS;
             unassignedFileDataValue.used = 1;
             // Assign the pid to the file name
             var PIDStr = this.PIDCounter.toString();
-            if (PIDStr.length == 1) {
-                PIDStr = '0' + PIDStr;
-            }
+            PIDStr = '0'.repeat(3 - PIDStr.length) + PIDStr;
             const PIDHex = TSOS.Utils.toHex(PIDStr);
             unassignedFileDataValue.data = _krnDiskDriver.formatData(PIDHex);
             // Get the unassinged data ponter
@@ -60,7 +59,48 @@ var TSOS;
             // Increase PID for next PID
             this.PIDCounter += 1;
         }
-        assignPIDtoMemory(memory, memorySegment) {
+        // This is for roll-in and roll-out routines
+        assignPIDtoDrive(memory) {
+            // Check that the pid counter is never over FF (255)
+            if (this.PIDCounter >= 255) {
+                TSOS.Control.hostLog("PID has reached 255", "host");
+                TSOS.Control.hostLog("Emergency halt", "host");
+                TSOS.Control.hostLog("Attempting Kernel shutdown", "host");
+                // Call the OS shutdown routine.
+                _Kernel.krnShutdown();
+                // Stop the interval that's simulating our clock pulse.
+                clearInterval(_hardwareClockID);
+            }
+            // Create a new PCB for our loaded program that has not executed yet (i.e., a process)
+            const pcb = this.PIDMap.get(memory.PID)[1];
+            // Change it to stored on Drive
+            pcb.location = "Hard Drive";
+            pcb.base = -1;
+            pcb.limit = -1;
+            const unassignedFileTSB = _krnDiskDriver.queryUnusedTSB("Directory");
+            const unassignedFileDataValue = _krnDiskDriver.queryTSB(unassignedFileTSB);
+            // Change the pointers
+            unassignedFileDataValue.used = 1;
+            // Assign the pid to the file name
+            var PIDStr = pcb.processID.toString();
+            PIDStr = '0'.repeat(3 - PIDStr.length) + PIDStr;
+            const PIDHex = TSOS.Utils.toHex(PIDStr);
+            unassignedFileDataValue.data = _krnDiskDriver.formatData(PIDHex);
+            // Get the unassinged data ponter
+            const unassignedDataTSB = _krnDiskDriver.queryUnusedTSB("Data");
+            // Assign the next pointer in file
+            unassignedFileDataValue.next = unassignedDataTSB;
+            // Convert the list of OpCodes to a string
+            const opCodeStr = TSOS.Utils.opCodetoString(memory.source);
+            console.log(opCodeStr.length);
+            // Now fill the data blocks with the op codes
+            _krnDiskDriver.fillData(opCodeStr, unassignedDataTSB);
+            // Update the display
+            TSOS.Control.hostDisk();
+        }
+        // This is for loading process from load shell command
+        // Which creates a new PCB
+        assignPIDtoMemoryInitial(memory, memorySegment) {
             // Check that the pid counter is never over FF (255)
             if (this.PIDCounter >= 255) {
                 TSOS.Control.hostLog("PID has reached 255", "host");
@@ -88,7 +128,42 @@ var TSOS;
             // Increase PID for next PID
             this.PIDCounter += 1;
         }
-        loadProgramInMemory(loadedProgram) {
+        // This is for roll-in and roll-out routines
+        assignPIDtoMemory(memory, memorySegment) {
+            // Check that the pid counter is never over FF (255)
+            if (this.PIDCounter >= 255) {
+                TSOS.Control.hostLog("PID has reached 255", "host");
+                TSOS.Control.hostLog("Emergency halt", "host");
+                TSOS.Control.hostLog("Attempting Kernel shutdown", "host");
+                // Call the OS shutdown routine.
+                _Kernel.krnShutdown();
+                // Stop the interval that's simulating our clock pulse.
+                clearInterval(_hardwareClockID);
+            }
+            // Create a new PCB for our loaded program that has not executed yet (i.e., a process)
+            const pcb = this.PIDMap.get(memory.PID)[1];
+            // Change it to stored on Drive
+            pcb.location = "Memory";
+            // Update the base, limit, and the segment pointers in the pcb
+            var additionalIndex = 0;
+            pcb.limit = (this.limit) * (memorySegment + 1);
+            if (memorySegment > 0) {
+                additionalIndex = 1;
+            }
+            pcb.base = (this.limit) * (memorySegment) + additionalIndex;
+            pcb.segment = memorySegment;
+        }
+        // See if we can load a program into memory
+        canLoadProgramInMemory() {
+            var foundValidSlot = false;
+            for (let index = 0; index < _MemoryManager.maxLoadedPrograms; index++) {
+                if (this.mainMemory[index].empty) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        loadProgramInMemory(loadedProgram, residentListPush = true) {
             var foundValidSlot = false;
             var memorySegment = -1;
             // Check if we can load the source into memory, if possible, greedily
@@ -104,22 +179,32 @@ var TSOS;
                     break;
                 }
             }
-            if (foundValidSlot) {
+            if (loadedProgram.PID == -1) {
                 // Apply the PID to memory object
                 loadedProgram.PID = this.PIDCounter;
+            }
+            if (residentListPush) {
                 // Add it to the end of resident list
                 _ResidentList.push(loadedProgram.PID);
+            }
+            if (foundValidSlot) {
                 // and apply PID to PCB
-                this.assignPIDtoMemory(loadedProgram, memorySegment);
+                if (residentListPush) {
+                    this.assignPIDtoMemoryInitial(loadedProgram, memorySegment);
+                }
+                else {
+                    this.assignPIDtoMemory(loadedProgram, memorySegment);
+                }
             }
             // Put it in the hard drive
             else {
-                // Apply the PID to memory object
-                loadedProgram.PID = this.PIDCounter;
-                // Add it to the end of resident list
-                _ResidentList.push(loadedProgram.PID);
-                // and apply PID to PCB
-                this.assignPIDtoDrive(loadedProgram);
+                if (residentListPush) {
+                    // and apply PID to PCB
+                    this.assignPIDtoDriveInitial(loadedProgram);
+                }
+                else {
+                    this.assignPIDtoDrive(loadedProgram);
+                }
                 // Update the base and limit pointers in memory object
                 loadedProgram.limit = -1;
                 loadedProgram.base = -1;
@@ -146,6 +231,14 @@ var TSOS;
             }
             this.initializeMainMemory();
         }
+        clearMainMemoryPartition(partitionIndex) {
+            // Make sure partition index is valid
+            if (partitionIndex > this.maxLoadedPrograms - 1 || partitionIndex < 0) {
+                console.log("incorrect partition index");
+            }
+            this.mainMemory[partitionIndex] = new TSOS.Memory();
+            this.mainMemory[partitionIndex].empty;
+        }
         removeProgramInMemory(targetProgram) {
             for (let memoryPartitionIndex = 0; memoryPartitionIndex < _MemoryManager.maxLoadedPrograms; memoryPartitionIndex++) {
                 // Check if the target Program is the same Memory object as any Memory partition in main memory
@@ -154,6 +247,18 @@ var TSOS;
                     break;
                 }
             }
+        }
+        // Returns the memory object at the memory parition being cleared
+        popProgramInMemory(partitionIndex) {
+            // Make sure partition index is valid
+            if (partitionIndex > this.maxLoadedPrograms - 1 || partitionIndex < 0) {
+                console.log("incorrect partition index");
+            }
+            // Save the memory at the specified index
+            const savedMemory = this.mainMemory[partitionIndex];
+            // Clear the segment
+            this.clearMainMemoryPartition(partitionIndex);
+            return savedMemory;
         }
         removePIDFromEverywhere(targetPID) {
             // Clear the PCB

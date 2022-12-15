@@ -86,6 +86,7 @@ var TSOS;
             }
             return [args[0], data];
         }
+        // Truncates a string of Op codes
         // Turns a list of op codes into a string with no spaces
         static opCodetoString(opCodes) {
             var accumulatedStr = '';

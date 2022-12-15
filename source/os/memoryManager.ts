@@ -27,6 +27,27 @@ module TSOS {
 
         // Assign the PID to Drive
         public assignPIDtoDrive(memory: Memory) {
+            // Check that the pid counter is never over FF (255)
+            if (this.PIDCounter >= 255) {
+                Control.hostLog("PID has reached 255", "host");
+                Control.hostLog("Emergency halt", "host");
+                Control.hostLog("Attempting Kernel shutdown", "host");
+                // Call the OS shutdown routine.
+                _Kernel.krnShutdown();
+                // Stop the interval that's simulating our clock pulse.
+                clearInterval(_hardwareClockID);
+            }
+            // Create a new PCB for our loaded program that has not executed yet (i.e., a process)
+            const pcb = new TSOS.Pcb(this.PIDCounter);
+            // Change it to stored on Drive
+            pcb.location = "Hard Drive";
+            pcb.segment = -1;
+            pcb.limit = -1;
+            // Create a list of the memory and PCB to be added to Hash table
+            const memoryAndPCB = [memory, pcb];
+            // Map the PID to the memory and PCB for the loaded process
+            this.PIDMap.set(this.PIDCounter, memoryAndPCB);
+
             const unassignedFileTSB = _krnDiskDriver.queryUnusedTSB("Directory");
             const unassignedFileDataValue = _krnDiskDriver.queryTSB(unassignedFileTSB);
             // Change the pointers
@@ -75,7 +96,6 @@ module TSOS {
             // Map the PID to the memory and PCB for the loaded process
             this.PIDMap.set(this.PIDCounter, memoryAndPCB);
 
-            // TODO: this will be changed in iP4
             // Update the base, limit, and the segment pointers in the pcb
             var additionalIndex = 0;
             pcb.limit = (this.limit) * (memorySegment + 1);

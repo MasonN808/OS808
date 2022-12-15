@@ -23,7 +23,8 @@ module TSOS {
                     public Zflag: number = 0,
                     public isExecuting: boolean = false,
                     public PID: number = null,
-                    public Quantum: number = 1) {
+                    public Quantum: number = 1,
+                    public lastPID: number = null) {
         }
 
         public init(): void {
@@ -37,13 +38,13 @@ module TSOS {
             this.PID = null;
             this.lastPC = 0;
             this.Quantum = 1;
-            // _Scheduler.resetQuantum();
+            this.lastPID = null;
         }
 
         public cycle(): void {
             _Kernel.krnTrace('CPU cycle');
 
-            console.log("_ReadyQueue: " + _ReadyQueue);
+            // console.log("_ReadyQueue: " + _ReadyQueue);
 
             var contextSwitch = false;
             
@@ -52,22 +53,51 @@ module TSOS {
                 this.PID = _ReadyQueue.dequeue();
                 this.calibratePCBtoCPU(this.PID);
             }
-            if (this.PID == null) {
-                console.log("ERROR");
-            }
 
-            // else if (this.PID === null && _ReadyQueue.isEmpty()) {
-            //     this.init();
-            //     return;
-            // }
-
-            console.log("HERE " + this.PID);
             // For the very first running program
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
-            pcb.processState = "Running";
-
+            // If the process is in the hard drive call roll-out and roll-in routines
+            if (pcb.location == "Hard Drive") {
+                const PID_TSB = _krnDiskDriver.queryPID_TSB();
+                if (PID_TSB != null) {
+                    // Copy the data from the blocks
+                    const opCodesStr = _krnDiskDriver.getOpCodesFromFile(PID_TSB);
+                    // Turn the string of OpCodes into an array of OpCodes
+                    const opCodes = Utils.stringToOpCode(opCodesStr);
+                    
+                    // Generate the opCodes from the File in the Drive
+                    var memory = new Memory(this.PID);
+                    memory.source = opCodes;
+                    
+                    // Check if there is an empty memory partition
+                    if (_MemoryManager.canLoadProgramInMemory()) {
+                        // Load the program into memory
+                        _MemoryManager.loadProgramInMemory(memory, false);
+                        // Do a Deep Clean
+                        _krnDiskDriver.removeFileContents(PID_TSB, false);
+                    }
+                    else {
+                        // FIXME: I think the memory isn't getting wiped somewhere in here
+                        // Now, clear a memory segment and save the relevant information before rolling in
+                        // TODO: Use the last previously used PID; currently set to the 0th partition
+                        const poppedMemory = _MemoryManager.popProgramInMemory(_MemoryManager.swappedMemoryPartition);
+                        _MemoryManager.swappedMemoryPartition = (_MemoryManager.swappedMemoryPartition +1) % _MemoryManager.maxLoadedPrograms;
+                        // Do a Deep Clean
+                        _krnDiskDriver.removeFileContents(PID_TSB, false);
+                        // Roll in the program from the drive into memory
+                        _MemoryManager.loadProgramInMemory(memory, false);
+                        // Save the popped Memory to the Drive
+                        _MemoryManager.loadProgramInMemory(poppedMemory, false);
+                    }
+                }
+                // Set it as in Memory
+                pcb.location = "Memory";
+            }
+            
             // Now update the displayed PCB
+            pcb.processState = "Running";
             TSOS.Control.hostProcesses(this.PID);
+            TSOS.Control.hostDisk();
             
             // Get the Op code given the pid and pc
             var opCode = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
@@ -324,10 +354,6 @@ module TSOS {
                     // NOTE: Dont need to remove from the ready queue, since it has already been done due to queue structure
                     _MemoryManager.removePIDFromEverywhere(this.PID);
 
-                    // Reset all CPU pointers for next executing program
-                    // this.PID = null;
-                    // this.Quantum = 1;
-                    
                     // Check if the ready queue is empty to determine whether to completly stop CPU execution
                     if (_ReadyQueue.isEmpty()){
                         exitProgram = true;
@@ -335,7 +361,6 @@ module TSOS {
                     }
                     // Issue a context switch
                     else {
-                        console.log("type-2 + " + this.PID);
                         _Scheduler.issueContextSwitchInterrupt("type-2", this.PID);
                         contextSwitch = true;
                     }
@@ -374,7 +399,6 @@ module TSOS {
             
             // Now update the displayed PCB
             if (!exitProgram && this.PID !== null && !contextSwitch) {
-                console.log(this.PID)
                 TSOS.Control.hostProcesses(this.PID);
             }
         }

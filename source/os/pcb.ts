@@ -1,7 +1,7 @@
 
 module TSOS {
     export class Pcb {
-        public processId;
+        public processId: number;
         public programCounter: number = 0;
         public lastProgramCounter = 0;
         public intermediateRepresentation: string = "0";

@@ -13,7 +13,8 @@ module TSOS {
         public possible_commands = ["ver", "help", "shutdown", "cls", "man",
                                     "trace", "rot13", "prompt", "date", "whereami",
                                     "howareu", "whoismason", "status", "bsod", "load", "run",
-                                    "clearmem", "runall", "kill", "killall", "quantum"];
+                                    "clearmem", "runall", "kill", "killall", "quantum",
+                                    "format", "create", "write", "read", "delete"];
 
         constructor(public currentFont = _DefaultFontFamily,
                     public currentFontSize = _DefaultFontSize,

@@ -27,7 +27,7 @@ module TSOS {
             _MemoryManager.PIDMap.get(pid)[0].source[pc] = new OpCode(code);
         }
 
-        public static rewriteAllMemory(memory: Memory, source: string[]): any {
+        public static rewriteAllMemory(memory: Memory, source: string[]): Memory {
             for (let index = 0; index < memory.limit; index++) {
                 memory.source[index] = new OpCode(source[index]);
             }

@@ -87,8 +87,30 @@ var TSOS;
             // quantum <int>
             sc = new TSOS.ShellCommand(this.shellQuantum, "quantum", "- sets the quantum for CPU scheduling");
             this.commandList[this.commandList.length] = sc;
-            // ps  - list the running processes and their IDs
-            // kill <id> - kills the specified process id.
+            // format
+            sc = new TSOS.ShellCommand(this.shellFormat, "format", "- resets the hard drive");
+            this.commandList[this.commandList.length] = sc;
+            // create <filename>
+            sc = new TSOS.ShellCommand(this.shellCreate, "create", "- creates a new file with specified name");
+            this.commandList[this.commandList.length] = sc;
+            // read <filename>
+            sc = new TSOS.ShellCommand(this.shellRead, "read", "- outputs the contents of a specified file name");
+            this.commandList[this.commandList.length] = sc;
+            // write <filename> "data"
+            sc = new TSOS.ShellCommand(this.shellWrite, "write", "- writes data/text to a specified file name");
+            this.commandList[this.commandList.length] = sc;
+            // delete <filename>
+            sc = new TSOS.ShellCommand(this.shellDelete, "delete", "- deletes a file and its contents");
+            this.commandList[this.commandList.length] = sc;
+            // copy <existing filename> <new filename>
+            sc = new TSOS.ShellCommand(this.shellCopy, "copy", "- copies an existing file to an already existing file or new file");
+            this.commandList[this.commandList.length] = sc;
+            // rename <current filename> <new filename>
+            sc = new TSOS.ShellCommand(this.shellRename, "rename", "- renames an existing file");
+            this.commandList[this.commandList.length] = sc;
+            // ls
+            sc = new TSOS.ShellCommand(this.shellList, "ls", "- list the files currently stored on the disk");
+            this.commandList[this.commandList.length] = sc;
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -298,6 +320,30 @@ var TSOS;
                         break;
                     case "quantum":
                         _StdOut.putText("sets the Round Robin quantum for CPU scheduling");
+                        break;
+                    case "format":
+                        _StdOut.putText("resets the hard drive");
+                        break;
+                    case "create":
+                        _StdOut.putText("creates a new file with specified name");
+                        break;
+                    case "read":
+                        _StdOut.putText("outputs the contents of a specified <file name>");
+                        break;
+                    case "write":
+                        _StdOut.putText("writes data/text to a specified <file name>");
+                        break;
+                    case "delete":
+                        _StdOut.putText("deletes a <file name> and its contents");
+                        break;
+                    case "copy":
+                        _StdOut.putText("copies an <existing file name> to an already <existing file name> or <new file name>");
+                        break;
+                    case "rename":
+                        _StdOut.putText("renames a file with name <file name> to <new file name>");
+                        break;
+                    case "ls":
+                        _StdOut.putText("list the files currently stored on the disk");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -545,8 +591,6 @@ var TSOS;
                             _CPU.init();
                         }
                         else {
-                            // _Scheduler.resetQuantum();
-                            // _CPU.resetQuantum();
                             // Issue a context switch interrupt
                             // "type-2" indicates that we DO NOT store the current processes PCB
                             _Scheduler.issueContextSwitchInterrupt("type-2", _CPU.PID);
@@ -584,6 +628,247 @@ var TSOS;
             }
             else {
                 _StdOut.putText("Usage: quantum <int>");
+            }
+        }
+        shellFormat() {
+            // resets values in the hashmap
+            _krnDiskDriver.krnDiskFormat();
+            // Reset
+            TSOS.Control.hostDisk();
+            _StdOut.putText("Disk SUCCESSFULLY reset");
+        }
+        shellCreate(args, verbose = true) {
+            // Check that input is a string with no spaces
+            if (args.length === 1) {
+                const newFileName = args[0];
+                // Check if name is too long
+                if (newFileName.length > _krnDiskDriver.BLOCKSIZEMAX) {
+                    _StdOut.putText("ERROR: file name too long");
+                }
+                // Check to see if the name is already taken
+                else if (_krnDiskDriver.fileNameInFiles(newFileName)) {
+                    _StdOut.putText("ERROR: file name [" + newFileName + "] already taken");
+                }
+                else {
+                    // First find a TSB that is not used
+                    const unusedFileTSB = _krnDiskDriver.queryUnusedTSB("Directory");
+                    // Query the TSB the returns the associated DiskValue
+                    var queriedDiskValue = _krnDiskDriver.queryTSB(unusedFileTSB);
+                    // Add the file name to the list
+                    _krnDiskDriver.filesInUse.push(new TSOS.File(newFileName, unusedFileTSB));
+                    // Set to used
+                    queriedDiskValue.used = 1;
+                    const hexFileName = TSOS.Utils.toHex(newFileName);
+                    // Change the data
+                    queriedDiskValue.data = _krnDiskDriver.formatData(hexFileName);
+                    // Set the next TSB pointer
+                    const unusedDataTSB = _krnDiskDriver.queryUnusedTSB("Data");
+                    // Set the data TSB pointer with a used pointer too
+                    var queriedDataDiskValue = _krnDiskDriver.queryTSB(unusedDataTSB);
+                    queriedDataDiskValue.used = 1;
+                    queriedDiskValue.next = [unusedDataTSB[0], unusedDataTSB[1], unusedDataTSB[2]];
+                    // Update the display
+                    TSOS.Control.hostDisk();
+                    // For instances if another shell command uses this
+                    if (verbose) {
+                        _StdOut.putText("File Created: " + newFileName);
+                    }
+                }
+            }
+            else {
+                _StdOut.putText("ERROR: spaces not allowed in <file name>");
+            }
+        }
+        shellWrite(args, verbose = true) {
+            // TODO: The write commeand should reset the file contents everytime we type this command so do a reset contents first
+            // Check that input is a string with no spaces
+            const newArgs = TSOS.Utils.smartArgsParsing(args);
+            if (newArgs != null) {
+                const fileName = newArgs[0];
+                const data = newArgs[1];
+                // Check that it is the correct file name
+                if (!_krnDiskDriver.fileNameInFiles(fileName)) {
+                    _StdOut.putText("ERROR: file name [" + fileName + "] not found");
+                }
+                else {
+                    // Find the TSB associated with the file name
+                    const fileTSB = _krnDiskDriver.TSBInFileInFiles(fileName);
+                    // Be sure to reset all data of the file before writing with a shallow delete
+                    _krnDiskDriver.removeFileContents(fileTSB, true);
+                    // Remove the parenthesis before injecting into hard drive
+                    const truncatedData = data.substring(1, data.length - 1);
+                    // Get the DiskValue associated with this TSB to get the next TSB
+                    const fileDiskValue = _krnDiskDriver.queryTSB(fileTSB);
+                    // Get the next TSB from the DiskValue
+                    var dataTSB = fileDiskValue.next;
+                    // Convert the string of data to hex
+                    const hexData = TSOS.Utils.toHex(truncatedData);
+                    // Fillin the data
+                    _krnDiskDriver.fillData(hexData, dataTSB);
+                    // Update the display
+                    TSOS.Control.hostDisk();
+                    if (verbose) {
+                        _StdOut.putText("File Updated: " + fileName);
+                    }
+                }
+                // // TODO: THIS IS FOR SWAPPING NOT FILE WRITING
+                // var dataTSB = fileDiskValue.next;
+                // //TODO: Put a while loop here to loop through all next values until there is none (i.e., 000)
+                // var leafFound = false;
+                // while (!leafFound) {
+                //     // Get the DiskValue associated with this TSB to get the next TSB
+                //     const dataDiskValue = _krnDiskDriver.queryTSB(dataTSB[0], dataTSB[1], dataTSB[2]);
+                //     // Get the next TSB from the DiskValue
+                //     const dataNextTSB = dataDiskValue.next;
+                //     dataTSB = dataNextTSB;
+                //     // Check if we hit the leaf
+                //     if (Utils.arrayEquals(dataNextTSB, [0, 0, 0])) {
+                //         leafFound = true;
+                //     }
+                // }
+            }
+            else {
+                _StdOut.putText("Usage: write <file name> \"data\"");
+            }
+        }
+        shellDelete(args) {
+            // Check if only one argument inserted
+            if (args.length != 1) {
+                _StdOut.putText("Usage: delete <fileName>");
+            }
+            else {
+                const fileName = args[0];
+                // Check if the filename exists
+                if (!_krnDiskDriver.fileNameInFiles(fileName)) {
+                    _StdOut.putText("ERROR: file name [" + fileName + "] not found");
+                }
+                else {
+                    // Find the TSB associated with the file name
+                    const fileTSB = _krnDiskDriver.TSBInFileInFiles(fileName);
+                    // Full delete, no shallow delete
+                    _krnDiskDriver.removeFileContents(fileTSB, false);
+                    // Remove the file from filesInUse array
+                    _krnDiskDriver.removeFileInFilesInUse(fileName);
+                    // Update the display
+                    TSOS.Control.hostDisk();
+                    _StdOut.putText("File Removed: " + fileName);
+                }
+            }
+        }
+        shellRead(args) {
+            // Check if only one argument inserted
+            if (args.length != 1) {
+                _StdOut.putText("Usage: read <file name>");
+            }
+            else {
+                console.log(TSOS.Utils.hex2a("7e33"));
+                const fileName = args[0];
+                // Check if the filename exists
+                if (!_krnDiskDriver.fileNameInFiles(fileName)) {
+                    _StdOut.putText("ERROR: file name [" + fileName + "] not found");
+                }
+                else {
+                    const fileTSB = _krnDiskDriver.TSBInFileInFiles(fileName);
+                    _krnDiskDriver.readFile(fileTSB);
+                }
+            }
+        }
+        // FIXME: Weird table distortion when 1) create <file> 2) write file "some data" then 3) copy <file> <new file>
+        shellCopy(args, verbose = true) {
+            // Check if only one argument inserted
+            if (args.length != 2) {
+                _StdOut.putText("Usage: rename <file name> <new file name>");
+            }
+            else {
+                const currentFileName = args[0];
+                const newFileName = args[1];
+                // Check if file names are equal
+                if (currentFileName == newFileName) {
+                    _StdOut.putText("ERROR: can not copy file into itself");
+                }
+                if (newFileName.length > _krnDiskDriver.BLOCKSIZEMAX) {
+                    _StdOut.putText("ERROR: file name too long");
+                }
+                // Check if the filename exists
+                if (!_krnDiskDriver.fileNameInFiles(currentFileName)) {
+                    _StdOut.putText("ERROR: file name [" + currentFileName + "] not found");
+                }
+                // Check if the new file name exists
+                else if (!_krnDiskDriver.fileNameInFiles(newFileName)) {
+                    // We create a new file as a copy
+                    _OsShell.shellCreate([newFileName]);
+                    _StdOut.advanceLine();
+                    // Find the TSB associated with the file name
+                    const fileTSB = _krnDiskDriver.TSBInFileInFiles(newFileName);
+                    // Get the DiskValue associated with this TSB to get the next TSB
+                    const fileDiskValue = _krnDiskDriver.queryTSB(fileTSB);
+                    // Get the next TSB from the DiskValue
+                    var dataTSB = fileDiskValue.next;
+                    // Accumulate the string from each data block of the copied file
+                    const strData = _krnDiskDriver.getDataFromFile(currentFileName);
+                    // Turn the text into hex
+                    const hexData = TSOS.Utils.toHex(strData);
+                    // Fill in the data
+                    _krnDiskDriver.fillData(hexData, dataTSB);
+                }
+                // Otherwise, we overwrite the exisitng file
+                else {
+                    // Accumulate the string from each data block of the copied file
+                    const strData = _krnDiskDriver.getDataFromFile(currentFileName);
+                    // Delete the file contents to override with a simple write command
+                    _OsShell.shellWrite([newFileName, "\"" + strData + "\""], false);
+                }
+                // Update the display
+                TSOS.Control.hostDisk();
+                console.log(verbose);
+                if (verbose) {
+                    _StdOut.putText("File Copied: " + currentFileName + " --> " + newFileName);
+                }
+            }
+        }
+        shellRename(args) {
+            // Check if only one argument inserted
+            if (args.length != 2) {
+                _StdOut.putText("Usage: rename <file name> <new file name>");
+            }
+            else {
+                const currentFileName = args[0];
+                const newFileName = args[1];
+                if (newFileName.length > _krnDiskDriver.BLOCKSIZEMAX) {
+                    _StdOut.putText("ERROR: file name too long");
+                }
+                // Check if the filename exists
+                if (!_krnDiskDriver.fileNameInFiles(currentFileName)) {
+                    _StdOut.putText("ERROR: file name [" + currentFileName + "] not found");
+                }
+                else {
+                    // Check if the new file name is not already taken
+                    if (_krnDiskDriver.fileNameInFiles(newFileName)) {
+                        _StdOut.putText("ERROR: file name [" + newFileName + "] already taken");
+                    }
+                    else {
+                        // Get the TSB of the current file name
+                        const currentFileTSB = _krnDiskDriver.TSBInFileInFiles(currentFileName);
+                        // Get the data value
+                        var fileDataValue = _krnDiskDriver.queryTSB(currentFileTSB);
+                        // Add the new file name to the list
+                        _krnDiskDriver.filesInUse.push(new TSOS.File(newFileName, currentFileTSB));
+                        // Remove the past file name from the list
+                        _krnDiskDriver.removeFileInFilesInUse(currentFileName);
+                        // Convert the file name to hex
+                        const newHexFileName = TSOS.Utils.toHex(newFileName);
+                        // to fill the rest with 0s
+                        fileDataValue.data = _krnDiskDriver.formatData(newHexFileName);
+                    }
+                    // Update the display
+                    TSOS.Control.hostDisk();
+                    _StdOut.putText("File Renamed: " + currentFileName + " --> " + newFileName);
+                }
+            }
+        }
+        shellList() {
+            for (let fileIndex = 0; fileIndex < _krnDiskDriver.filesInUse.length; fileIndex++) {
+                _StdOut.putText('-' + _krnDiskDriver.filesInUse[fileIndex].name + ' ');
             }
         }
     }

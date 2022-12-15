@@ -128,7 +128,16 @@ var TSOS;
             // Loop through all programs in sequence
             for (let loadedProgramIndex = 0; loadedProgramIndex < _MemoryManager.maxLoadedPrograms; loadedProgramIndex++) {
                 // Get the source memory from the parition in main memory
-                const memoryArray = _MemoryManager.mainMemory[loadedProgramIndex].source;
+                // OLD
+                // const memoryArray = _MemoryManager.mainMemory[loadedProgramIndex].source;
+                // NEW
+                const pid = _MemoryManager.mainMemory[loadedProgramIndex].PID;
+                if (pid == -1 || pid == null) {
+                    var memoryArray = _MemoryManager.mainMemory[loadedProgramIndex].source;
+                }
+                else {
+                    var memoryArray = _MemoryManager.PIDMap.get(pid)[0].source; // get the memory
+                }
                 // adjust rowIndex WRT loaded program index
                 var rowIndex = 0 + (32 * loadedProgramIndex);
                 // Loop through the memory array to display it
@@ -159,7 +168,7 @@ var TSOS;
             const table = document.getElementById("taProcesses");
             // Get the PCB from the input PID in the hashtable
             var pcb = _MemoryManager.PIDMap.get(inputPid)[1];
-            // insert the row at the ver bottom relative to all other rows
+            // insert the row at the very bottom relative to all other rows
             var row = table.insertRow(-1);
             row.insertCell(0).innerHTML = pcb.processId;
             row.insertCell(1).innerHTML = pcb.programCounter;
@@ -179,37 +188,62 @@ var TSOS;
         static hostProcesses(inputPid) {
             const table = document.getElementById("taProcesses");
             // Get the PCB from the input PID in the hashtable
-            const pcb = _MemoryManager.PIDMap.get(inputPid)[1];
+            // const pcb = _MemoryManager.PIDMap.get(inputPid)[1];
             // give the appropriate rowIndex
             var addedRowIndex = 1;
             // loop through hash map to get key-value pairs
             for (const entry of _MemoryManager.PIDMap.entries()) {
                 // entry[1] is the value
                 // entry[1][1] is the pcb
-                const traversedPCB = entry[1][1];
+                const pcb = entry[1][1];
                 // Check if the key of the entry is in the ready queue or the CPU
                 // entry[0] is the key
                 if (_ReadyQueue.q.indexOf(entry[0]) > -1 || _CPU.PID == entry[0]) {
                     // Adjust the rowIndex pointers
-                    traversedPCB.rowIndex = addedRowIndex;
+                    pcb.rowIndex = addedRowIndex;
                     addedRowIndex += 1;
+                    // const pcb = _MemoryManager.PIDMap.get(pcb)[1];
+                    // Update the base, limit, and segment
+                    table.rows[pcb.rowIndex].cells[0].innerHTML = pcb.processId;
+                    table.rows[pcb.rowIndex].cells[1].innerHTML = pcb.programCounter;
+                    table.rows[pcb.rowIndex].cells[2].innerHTML = pcb.intermediateRepresentation;
+                    table.rows[pcb.rowIndex].cells[3].innerHTML = pcb.Acc;
+                    table.rows[pcb.rowIndex].cells[4].innerHTML = pcb.Xreg;
+                    table.rows[pcb.rowIndex].cells[5].innerHTML = pcb.Yreg;
+                    table.rows[pcb.rowIndex].cells[6].innerHTML = pcb.Zflag;
+                    table.rows[pcb.rowIndex].cells[7].innerHTML = pcb.priority;
+                    table.rows[pcb.rowIndex].cells[8].innerHTML = pcb.processState;
+                    table.rows[pcb.rowIndex].cells[9].innerHTML = pcb.location;
+                    table.rows[pcb.rowIndex].cells[10].innerHTML = pcb.base;
+                    table.rows[pcb.rowIndex].cells[11].innerHTML = pcb.limit;
+                    table.rows[pcb.rowIndex].cells[12].innerHTML = pcb.segment;
+                    table.rows[pcb.rowIndex].cells[13].innerHTML = pcb.currentQuantum;
                 }
             }
-            // Update the base, limit, and segment
-            table.rows[pcb.rowIndex].cells[0].innerHTML = pcb.processId;
-            table.rows[pcb.rowIndex].cells[1].innerHTML = pcb.programCounter;
-            table.rows[pcb.rowIndex].cells[2].innerHTML = pcb.intermediateRepresentation;
-            table.rows[pcb.rowIndex].cells[3].innerHTML = pcb.Acc;
-            table.rows[pcb.rowIndex].cells[4].innerHTML = pcb.Xreg;
-            table.rows[pcb.rowIndex].cells[5].innerHTML = pcb.Yreg;
-            table.rows[pcb.rowIndex].cells[6].innerHTML = pcb.Zflag;
-            table.rows[pcb.rowIndex].cells[7].innerHTML = pcb.priority;
-            table.rows[pcb.rowIndex].cells[8].innerHTML = pcb.processState;
-            table.rows[pcb.rowIndex].cells[9].innerHTML = pcb.location;
-            table.rows[pcb.rowIndex].cells[10].innerHTML = pcb.base;
-            table.rows[pcb.rowIndex].cells[11].innerHTML = pcb.limit;
-            table.rows[pcb.rowIndex].cells[12].innerHTML = pcb.segment;
-            table.rows[pcb.rowIndex].cells[13].innerHTML = pcb.currentQuantum;
+        }
+        static hostDisk() {
+            // To display the Hard disk heading
+            const table = document.getElementById("taHardDrive");
+            // Remove all the rows except for the headers to repopulate
+            while (table.rows.length > 1) {
+                table.deleteRow(-1);
+            }
+            // Get the PCB from the input PID in the hashtable
+            const diskMap = _krnDiskDriver.diskMap;
+            // Loop through each key and value pair in the map
+            for (const [key, value] of diskMap) {
+                var row = table.insertRow(-1);
+                row.insertCell(0).innerHTML = key;
+                row.insertCell(1).innerHTML = value.used.toString(); // Turn number into string
+                row.insertCell(2).innerHTML = value.next.join(''); // Turn list of numbers into string
+                // Populate a new array of the strings from OpCode objects for display
+                var opCodes = [];
+                for (let index = 0; index < value.data.length; index++) {
+                    // Append the opcode string
+                    opCodes.push(value.data[index].opCodeString);
+                }
+                row.insertCell(3).innerHTML = opCodes.join(' '); // Transform into string first
+            }
         }
         static hostCpuInit() {
             // To display the pointers in the CPU on load with heading

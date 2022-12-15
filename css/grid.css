@@ -10,7 +10,7 @@
     /* grid-auto-columns: minmax(0px, auto);
     grid-auto-rows: minmax(0px, auto); */
     grid-template-rows: 288px 210px 205px;
-    grid-template-columns: 395px 165px 590px;
+    grid-template-columns: 395px 165px 358px 227px;
     gap: 5px;
 }
 .console {
@@ -19,16 +19,12 @@
     grid-row: 1 / 3;
 }
 .hostLog {
-    grid-column: 3;
+    grid-column: 3/4;
     grid-row: 1;
 }
 .processes {
-    grid-column: 3;
+    grid-column: 3/4;
     grid-row: 2;
-}
-.programInput {
-    grid-column: 1;
-    grid-row: 3;
 }
 .cpu {
     grid-column: 2;
@@ -36,6 +32,14 @@
 }
 .memory {
     grid-column: 3;
+    grid-row: 3;
+}
+.programInput {
+    grid-column: 4;
+    grid-row: 3;
+}
+.hardDrive {
+    grid-column: 1;
     grid-row: 3;
 }
 

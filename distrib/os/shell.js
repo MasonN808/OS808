@@ -112,10 +112,10 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellList, "ls", "- list the files currently stored on the disk");
             this.commandList[this.commandList.length] = sc;
             // getschedule
-            sc = new TSOS.ShellCommand(this.shellGetSchedule, "getschedule", "- gets the current schedule");
+            sc = new TSOS.ShellCommand(this.shellGetSchedule, "getschedule", "- gets the current scheduler");
             this.commandList[this.commandList.length] = sc;
             // setschedule <type>
-            sc = new TSOS.ShellCommand(this.shellSetSchedule, "setschedule", "- sets the current schedule");
+            sc = new TSOS.ShellCommand(this.shellSetSchedule, "setschedule", "- sets the current scheduler");
             this.commandList[this.commandList.length] = sc;
             // setpriority <PID> <priority>
             sc = new TSOS.ShellCommand(this.shellSetPriority, "setpriority", "- sets the priority of a process");
@@ -961,14 +961,23 @@ var TSOS;
         }
         shellSetPriority(args) {
             if (args.length == 2) {
-                const PID = args[0];
+                const PID = parseInt(args[0], 10);
                 const priority = args[1];
                 // Check that the PID is valid
                 if (_MemoryManager.PIDMap.get(PID) != null) {
                     // Check if it's a number
-                    if (isFinite(priority)) {
-                        if (parseInt(priority, 10) < 0) {
+                    if (TSOS.Utils.isInt(priority)) {
+                        if (parseInt(priority, 10) >= 0) {
+                            const pcb = _MemoryManager.PIDMap.get(PID)[1];
+                            pcb.priority = priority;
+                            TSOS.Control.hostProcesses();
                         }
+                        else {
+                            _StdOut.putText("Given priority is less than zero");
+                        }
+                    }
+                    else {
+                        _StdOut.putText("Given priority is not a number");
                     }
                 }
                 else {

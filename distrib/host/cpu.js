@@ -70,7 +70,6 @@ var TSOS;
                     }
                     else {
                         // Now, clear a memory segment and save the relevant information before rolling in
-                        // TODO: Use the last previously used PID; currently set to the 0th partition
                         const poppedMemory = _MemoryManager.popProgramInMemory(_MemoryManager.swappedMemoryPartition);
                         _MemoryManager.swappedMemoryPartition = (((_MemoryManager.swappedMemoryPartition + 1) % _MemoryManager.maxLoadedPrograms) - 2) % _MemoryManager.maxLoadedPrograms;
                         // Do a Deep Clean
@@ -86,7 +85,7 @@ var TSOS;
             }
             // Now update the displayed PCB
             pcb.processState = "Running";
-            TSOS.Control.hostProcesses(this.PID);
+            TSOS.Control.hostProcesses();
             TSOS.Control.hostDisk();
             // Get the Op code given the pid and pc
             var opCode = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
@@ -290,16 +289,6 @@ var TSOS;
                     }
                     // Issue a context switch
                     else {
-                        // // If we are in a Round Robin scheduling scheme
-                        // if (_Scheduler.schedulerType == "RR") {
-                        //     // TODO: Finish this
-                        // }
-                        // // If we are in a Non-preemptive scheduling scheme
-                        // else if (_Scheduler.schedulerType == "NPP") {
-                        // }
-                        // // If we are in a First Come First Serve scheduling scheme
-                        // else {
-                        // }
                         // type-2 indicates that we don't store the processes PCB
                         _Scheduler.issueContextSwitchInterrupt("type-2", this.PID);
                         contextSwitch = true;
@@ -337,7 +326,7 @@ var TSOS;
             }
             // Now update the displayed PCB
             if (!exitProgram && this.PID !== null && !contextSwitch) {
-                TSOS.Control.hostProcesses(this.PID);
+                TSOS.Control.hostProcesses();
             }
         }
         calibratePCBtoCPU(targetPID) {

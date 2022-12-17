@@ -208,13 +208,13 @@ module TSOS {
             // getschedule
             sc = new ShellCommand(this.shellGetSchedule,
                 "getschedule",
-                "- gets the current schedule");
+                "- gets the current scheduler");
             this.commandList[this.commandList.length] = sc;
 
             // setschedule <type>
             sc = new ShellCommand(this.shellSetSchedule,
                 "setschedule",
-                "- sets the current schedule");
+                "- sets the current scheduler");
             this.commandList[this.commandList.length] = sc;
             
             // setpriority <PID> <priority>
@@ -1165,15 +1165,23 @@ module TSOS {
 
         public shellSetPriority(args: string[]) {
             if (args.length == 2) {
-                const PID = args[0];
+                const PID = parseInt(args[0], 10);
                 const priority = args[1];
                 // Check that the PID is valid
                 if (_MemoryManager.PIDMap.get(PID) != null) {
                     // Check if it's a number
-                    if (isFinite(priority)) {
-                        if (parseInt(priority,10) < 0) {
-                            
+                    if (Utils.isInt(priority)) {
+                        if (parseInt(priority,10) >= 0) {
+                            const pcb = _MemoryManager.PIDMap.get(PID)[1];
+                            pcb.priority = priority;
+                            Control.hostProcesses();
                         }
+                        else {
+                            _StdOut.putText("Given priority is less than zero")
+                        }
+                    }
+                    else {
+                        _StdOut.putText("Given priority is not a number")
                     }
                 }
                 else {

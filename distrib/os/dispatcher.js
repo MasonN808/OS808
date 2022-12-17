@@ -12,7 +12,7 @@ var TSOS;
                 const pcb1 = _MemoryManager.PIDMap.get(currentPID)[1];
                 pcb1.processState = "Ready";
                 // Update the displayed PCB
-                TSOS.Control.hostProcesses(currentPID);
+                TSOS.Control.hostProcesses();
             }
             console.log(_MemoryManager.PIDMap);
             // If we have different scheduling schemes we act on that here
@@ -38,7 +38,7 @@ var TSOS;
                 _CPU.PID = poppedPID;
                 _CPU.calibratePCBtoCPU(_CPU.PID);
                 // Update the displayed PCB
-                TSOS.Control.hostProcesses(poppedPID);
+                TSOS.Control.hostProcesses();
             }
             // For First Come First Serve
             else {
@@ -50,7 +50,7 @@ var TSOS;
                 _CPU.PID = dequeuedPID;
                 _CPU.calibratePCBtoCPU(_CPU.PID);
                 // Update the displayed PCB
-                TSOS.Control.hostProcesses(dequeuedPID);
+                TSOS.Control.hostProcesses();
             }
         }
     }

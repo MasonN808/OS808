@@ -13,7 +13,7 @@ module TSOS {
                 pcb1.processState = "Ready";
                 
                 // Update the displayed PCB
-                TSOS.Control.hostProcesses(currentPID);
+                TSOS.Control.hostProcesses();
             }
             console.log(_MemoryManager.PIDMap)
             
@@ -42,7 +42,7 @@ module TSOS {
                 _CPU.calibratePCBtoCPU(_CPU.PID);
     
                 // Update the displayed PCB
-                TSOS.Control.hostProcesses(poppedPID);
+                TSOS.Control.hostProcesses();
             }
             // For First Come First Serve
             else {
@@ -57,7 +57,7 @@ module TSOS {
                 _CPU.calibratePCBtoCPU(_CPU.PID);
     
                 // Update the displayed PCB
-                TSOS.Control.hostProcesses(dequeuedPID);
+                TSOS.Control.hostProcesses();
             }
         }
     }

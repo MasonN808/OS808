@@ -827,7 +827,7 @@ var TSOS;
             }
         }
         shellRename(args) {
-            // Check if only one argument inserted
+            // Check if only two argument inserted
             if (args.length != 2) {
                 _StdOut.putText("Usage: rename <file name> <new file name>");
             }
@@ -866,9 +866,24 @@ var TSOS;
                 }
             }
         }
-        shellList() {
-            for (let fileIndex = 0; fileIndex < _krnDiskDriver.filesInUse.length; fileIndex++) {
-                _StdOut.putText('-' + _krnDiskDriver.filesInUse[fileIndex].name + ' ');
+        shellList(args) {
+            // Check if only one argument inserted
+            if (args.length == 1 && args[0] == "-a") {
+                for (let fileIndex = 0; fileIndex < _krnDiskDriver.filesInUse.length; fileIndex++) {
+                    // print all files inlcuding hidden files
+                    _StdOut.putText('-' + _krnDiskDriver.filesInUse[fileIndex].name + ' ');
+                }
+            }
+            else if (args.length == 0) {
+                for (let fileIndex = 0; fileIndex < _krnDiskDriver.filesInUse.length; fileIndex++) {
+                    // Check if its a hidden file
+                    if (_krnDiskDriver.filesInUse[fileIndex].name.substring(0, 1) != ".") {
+                        _StdOut.putText('-' + _krnDiskDriver.filesInUse[fileIndex].name + ' ');
+                    }
+                }
+            }
+            else {
+                _StdOut.putText("Usage: ls <-a>");
             }
         }
     }

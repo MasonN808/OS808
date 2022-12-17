@@ -2,20 +2,12 @@ module TSOS {
     export class Scheduler {
         // The scheduler selects a process from a list of processes by applying some process scheduling algorithm.
         public max_quantum: number; 
-        // public quantum: number;
+        public schedulerType: string;
 
         constructor () {
             this.max_quantum = 6; // This is the default quantum
-            // this.quantum = 0;
+            this.schedulerType = "RR"; // Default is round robin
         }
-
-        // public resetQuantum(): void {
-        //     this.quantum = 0;
-        // }
-
-        // public incrementQuantum(): void {
-        //     this.quantum += 1;
-        // }
 
         public changeMaxQuantum(newMaxQuantum: number): void {
             this.max_quantum = newMaxQuantum;
@@ -35,7 +27,6 @@ module TSOS {
         public issueContextSwitchInterrupt(type: string, PID: number): void {
             if (!_ReadyQueue.isEmpty()) {
                 // Enqueue this interrupt on the kernel interrupt queue so that it gets to the Interrupt handler.
-                console.log(type)
                 _KernelInterruptQueue.enqueue(new Interrupt(CONTEXT_SWITCH, [type, PID]));
             }
         }

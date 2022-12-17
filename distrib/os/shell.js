@@ -111,6 +111,12 @@ var TSOS;
             // ls
             sc = new TSOS.ShellCommand(this.shellList, "ls", "- list the files currently stored on the disk");
             this.commandList[this.commandList.length] = sc;
+            // getschedule
+            sc = new TSOS.ShellCommand(this.shellGetSchedule, "getschedule", "- gets the current schedule");
+            this.commandList[this.commandList.length] = sc;
+            // setschedule <type>
+            sc = new TSOS.ShellCommand(this.shellSetSchedule, "setschedule", "- sets the current schedule");
+            this.commandList[this.commandList.length] = sc;
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -344,6 +350,9 @@ var TSOS;
                         break;
                     case "ls":
                         _StdOut.putText("list the files currently stored on the disk");
+                        break;
+                    case "getschedule":
+                        _StdOut.putText("Gets the currently active schduling algorithm");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -852,18 +861,18 @@ var TSOS;
         shellList(args) {
             // Check if only one argument inserted
             if (args.length == 1 && args[0] == "-a") {
-                _StdOut.putText("-------------------------------------------");
+                _StdOut.putText(" -------------------------------------------");
                 _StdOut.advanceLine();
                 for (let fileIndex = 0; fileIndex < _krnDiskDriver.filesInUse.length; fileIndex++) {
                     // print all files inlcuding hidden files
                     const file = _krnDiskDriver.filesInUse[fileIndex];
-                    _StdOut.putText("Name: " + file.name);
+                    _StdOut.putText(" Name: " + file.name);
                     _StdOut.advanceLine();
-                    _StdOut.putText("Size: " + file.size + " bytes");
+                    _StdOut.putText(" Size: " + file.size + " bytes");
                     _StdOut.advanceLine();
-                    _StdOut.putText("Created: " + file.creationDate);
+                    _StdOut.putText(" Created: " + file.creationDate);
                     _StdOut.advanceLine();
-                    _StdOut.putText("-------------------------------------------");
+                    _StdOut.putText(" -------------------------------------------");
                     _StdOut.advanceLine();
                 }
             }
@@ -878,6 +887,40 @@ var TSOS;
             }
             else {
                 _StdOut.putText("Usage: ls <-a>");
+            }
+        }
+        shellGetSchedule() {
+            if (_Scheduler.schedulerType == "RR") {
+                _StdOut.putText("Round Robin Scheduling");
+            }
+            else if (_Scheduler.schedulerType == "FCFS") {
+                _StdOut.putText("First Come First Serve Scheduling");
+            }
+            else if (_Scheduler.schedulerType == "NPP") {
+                _StdOut.putText("Non-Preemptive Priority Scheduling");
+            }
+        }
+        shellSetSchedule(args) {
+            if (args.length == 1) {
+                const schedulingType = args[0];
+                if (schedulingType == "RR") {
+                    _Scheduler.schedulerType = "RR";
+                    _StdOut.putText("Round Robin Scheduling");
+                }
+                else if (schedulingType == "FCFS") {
+                    _Scheduler.schedulerType = "FCFS";
+                    _StdOut.putText("First Come First Serve Scheduling");
+                }
+                else if (schedulingType == "NPP") {
+                    _Scheduler.schedulerType = "NPP";
+                    _StdOut.putText("Non-Preemptive Priority Scheduling");
+                }
+                else {
+                    _StdOut.putText("Usage: setschedule <RR or FCFS or NPP>");
+                }
+            }
+            else {
+                _StdOut.putText("Usage: setschedule <RR or FCFS or NPP>");
             }
         }
     }

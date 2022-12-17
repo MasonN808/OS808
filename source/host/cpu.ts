@@ -361,6 +361,19 @@ module TSOS {
                     }
                     // Issue a context switch
                     else {
+                        // // If we are in a Round Robin scheduling scheme
+                        // if (_Scheduler.schedulerType == "RR") {
+                        //     // TODO: Finish this
+                        // }
+                        // // If we are in a Non-preemptive scheduling scheme
+                        // else if (_Scheduler.schedulerType == "NPP") {
+                            
+                        // }
+                        // // If we are in a First Come First Serve scheduling scheme
+                        // else {
+                            
+                        // }
+                        // type-2 indicates that we don't store the processes PCB
                         _Scheduler.issueContextSwitchInterrupt("type-2", this.PID);
                         contextSwitch = true;
                     }
@@ -391,9 +404,12 @@ module TSOS {
                     TSOS.MemoryAccessor.readMemory(this.PID, this.PC - 2).currentOperand = false;
                 }
                 opCode.currentOperator = false;
-                // Validate the current quantum and issue an interrupt if we hit the max quantum
-                _Scheduler.validateQuantum(this.PID);
-                this.incrementQuantum();
+                // If we are in a Round Robin scheduling scheme
+                if (_Scheduler.schedulerType == "RR") {
+                    // Validate the current quantum and issue an interrupt if we hit the max quantum
+                    _Scheduler.validateQuantum(this.PID);
+                    this.incrementQuantum();
+                }
             }
 
             

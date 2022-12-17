@@ -2,7 +2,8 @@
 
 html, body {
     /* background: #909193 url(https://cutewallpaper.org/21/nyan-cat-background-gif/Background-from-Nyan-Cat-Imgur.png) repeat; */
-    background: #22272e;
+    /* background: #22272e; */
+    background: #101820FF;
     background-size: 100vw, 100%;
     min-height: 100vh;
     min-width: 100vw;
@@ -33,6 +34,11 @@ html, body {
     font-size: 16pt;
     font-weight: normal;
     font-style: normal;
+  }
+
+  .navbar-custom {
+    background-color: #F2AA4CFF;
+    color: #101820FF;
   }
   
   #display {

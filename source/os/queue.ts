@@ -51,6 +51,19 @@ module TSOS {
             }
         }
         
+        public pop(element: any) {
+            const index = this.q.indexOf(element);
+            if (index > -1){ // the element is in the array
+                const poppedElement = this.q[index];
+                // now remove the popped element from the array
+                this.remove(element);
+                return poppedElement;
+            }
+            else {
+                return null;
+            }
+        }
+
         public remove(element: any) {
             const index = this.q.indexOf(element);
             if (index > -1){ // only splice array when item is found

@@ -1088,13 +1088,13 @@ module TSOS {
 
         public shellGetSchedule(): void {
             if (_Scheduler.schedulerType == "RR") {
-                _StdOut.putText("Round Robin Scheduling");
+                _StdOut.putText(" Round Robin Scheduling");
             }
             else if (_Scheduler.schedulerType == "FCFS") {
-                _StdOut.putText("First Come First Serve Scheduling");
+                _StdOut.putText(" First Come First Serve Scheduling");
             }
             else if (_Scheduler.schedulerType == "NPP") {
-                _StdOut.putText("Non-Preemptive Priority Scheduling");
+                _StdOut.putText(" Non-Preemptive Priority Scheduling");
             }
         }
 
@@ -1102,16 +1102,43 @@ module TSOS {
             if (args.length == 1) {
                 const schedulingType = args[0];
                 if (schedulingType  == "RR") {
+                    if (_Scheduler.schedulerType == "RR") {
+                        _StdOut.putText(" Round Robin Scheduling");
+                    }
+                    else if (_Scheduler.schedulerType == "FCFS") {
+                        _StdOut.putText(" First Come First Serve Scheduling");
+                    }
+                    else if (_Scheduler.schedulerType == "NPP") {
+                        _StdOut.putText(" Non-Preemptive Priority Scheduling");
+                    }
+                    _StdOut.putText(" -->Round Robin Scheduling");
                     _Scheduler.schedulerType = "RR";
-                    _StdOut.putText("Round Robin Scheduling");
                 }
                 else if (schedulingType == "FCFS") {
+                    if (_Scheduler.schedulerType == "RR") {
+                        _StdOut.putText(" Round Robin Scheduling");
+                    }
+                    else if (_Scheduler.schedulerType == "FCFS") {
+                        _StdOut.putText(" First Come First Serve Scheduling");
+                    }
+                    else if (_Scheduler.schedulerType == "NPP") {
+                        _StdOut.putText(" Non-Preemptive Priority Scheduling");
+                    }
+                    _StdOut.putText(" --> First Come First Serve Scheduling");
                     _Scheduler.schedulerType = "FCFS";
-                    _StdOut.putText("First Come First Serve Scheduling");
                 }
                 else if (schedulingType == "NPP") {
+                    if (_Scheduler.schedulerType == "RR") {
+                        _StdOut.putText(" Round Robin Scheduling");
+                    }
+                    else if (_Scheduler.schedulerType == "FCFS") {
+                        _StdOut.putText(" First Come First Serve Scheduling");
+                    }
+                    else if (_Scheduler.schedulerType == "NPP") {
+                        _StdOut.putText(" Non-Preemptive Priority Scheduling");
+                    }
+                    _StdOut.putText(" --> Non-Preemptive Priority Scheduling");
                     _Scheduler.schedulerType = "NPP";
-                    _StdOut.putText("Non-Preemptive Priority Scheduling");
                 }
                 else {
                     _StdOut.putText("Usage: setschedule <RR or FCFS or NPP>");

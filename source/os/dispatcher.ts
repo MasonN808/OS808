@@ -27,10 +27,11 @@ module TSOS {
                     const tempPriority = parseInt(_MemoryManager.PIDMap.get(_ReadyQueue.q[i])[1].priority, 10);
                     // get the pcb from the PID map and compare the priority
                     if (tempPriority < priority) {
-                        prioritizedPID = tempPriority;
+                        prioritizedPID = _ReadyQueue.q[i];
                         priority = tempPriority;
                     }
                 }
+                console.log(prioritizedPID)
                 const poppedPID = _ReadyQueue.pop(prioritizedPID);
                 // Log the context switch
                 _Kernel.krnTrace("Context Switch: process " + currentPID + " switched with process " + poppedPID);

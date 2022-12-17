@@ -53,7 +53,7 @@ module TSOS {
                 this.PID = _ReadyQueue.dequeue();
                 this.calibratePCBtoCPU(this.PID);
             }
-
+            console.log(this.PID)
             // For the very first running program
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
             // If the process is in the hard drive call roll-out and roll-in routines

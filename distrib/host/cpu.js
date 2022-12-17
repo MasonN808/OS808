@@ -69,11 +69,10 @@ var TSOS;
                         _krnDiskDriver.removeFileContents(PID_TSB, false);
                     }
                     else {
-                        // FIXME: I think the memory isn't getting wiped somewhere in here
                         // Now, clear a memory segment and save the relevant information before rolling in
                         // TODO: Use the last previously used PID; currently set to the 0th partition
                         const poppedMemory = _MemoryManager.popProgramInMemory(_MemoryManager.swappedMemoryPartition);
-                        _MemoryManager.swappedMemoryPartition = (_MemoryManager.swappedMemoryPartition + 1) % _MemoryManager.maxLoadedPrograms;
+                        _MemoryManager.swappedMemoryPartition = (((_MemoryManager.swappedMemoryPartition + 1) % _MemoryManager.maxLoadedPrograms) - 2) % _MemoryManager.maxLoadedPrograms;
                         // Do a Deep Clean
                         _krnDiskDriver.removeFileContents(PID_TSB, false);
                         // Roll in the program from the drive into memory

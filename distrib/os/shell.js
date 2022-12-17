@@ -117,6 +117,9 @@ var TSOS;
             // setschedule <type>
             sc = new TSOS.ShellCommand(this.shellSetSchedule, "setschedule", "- sets the current schedule");
             this.commandList[this.commandList.length] = sc;
+            // setpriority <PID> <priority>
+            sc = new TSOS.ShellCommand(this.shellSetPriority, "setpriority", "- sets the priority of a process");
+            this.commandList[this.commandList.length] = sc;
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -353,6 +356,12 @@ var TSOS;
                         break;
                     case "getschedule":
                         _StdOut.putText("Gets the currently active schduling algorithm");
+                        break;
+                    case "setschedule":
+                        _StdOut.putText("Gets the currently active schduling algorithm");
+                        break;
+                    case "setpriority":
+                        _StdOut.putText("Sets the priority of a process");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -948,6 +957,26 @@ var TSOS;
             }
             else {
                 _StdOut.putText("Usage: setschedule <RR or FCFS or NPP>");
+            }
+        }
+        shellSetPriority(args) {
+            if (args.length == 2) {
+                const PID = args[0];
+                const priority = args[1];
+                // Check that the PID is valid
+                if (_MemoryManager.PIDMap.get(PID) != null) {
+                    // Check if it's a number
+                    if (isFinite(priority)) {
+                        if (parseInt(priority, 10) < 0) {
+                        }
+                    }
+                }
+                else {
+                    _StdOut.putText("Given PID is invalid");
+                }
+            }
+            else {
+                _StdOut.putText("Usage: setpriority <PID> <priority>");
             }
         }
     }

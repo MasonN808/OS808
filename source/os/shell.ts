@@ -812,7 +812,7 @@ module TSOS {
                     _StdOut.putText("ERROR: file name too long");
                 }
                 // Check to see if the name is already taken
-                else if (_krnDiskDriver.fileNameInFiles(newFileName)) {
+                else if (_krnDiskDriver.isFileNameInFiles(newFileName)) {
                     _StdOut.putText("ERROR: file name [" + newFileName + "] already taken");
                 }
                 else {
@@ -852,14 +852,13 @@ module TSOS {
         }
 
         public shellWrite(args: string[], verbose = true) {
-            // TODO: The write commeand should reset the file contents everytime we type this command so do a reset contents first
             // Check that input is a string with no spaces
             const newArgs = Utils.smartArgsParsing(args);
             if (newArgs != null) {
                 const fileName = newArgs[0];
                 const data = newArgs[1];
                 // Check that it is the correct file name
-                if (!_krnDiskDriver.fileNameInFiles(fileName)) {
+                if (!_krnDiskDriver.isFileNameInFiles(fileName)) {
                     _StdOut.putText("ERROR: file name [" + fileName + "] not found");
                 }
                 else {
@@ -873,11 +872,16 @@ module TSOS {
                     const fileDiskValue = _krnDiskDriver.queryTSB(fileTSB);
                     // Get the next TSB from the DiskValue
                     var dataTSB = fileDiskValue.next;
-
+                    
                     // Convert the string of data to hex
                     const hexData = Utils.toHex(truncatedData);
                     // Fillin the data
                     _krnDiskDriver.fillData(hexData, dataTSB);
+
+                    // Update the size of the file
+                    const file = _krnDiskDriver.fileInFiles(fileName);
+                    console.log(args[1].length)
+                    file.size = hexData.length / 2;
 
                     // Update the display
                     Control.hostDisk();
@@ -885,24 +889,6 @@ module TSOS {
                         _StdOut.putText("File Updated: " + fileName);
                     }
                 }
-                
-                // // TODO: THIS IS FOR SWAPPING NOT FILE WRITING
-                // var dataTSB = fileDiskValue.next;
-                // //TODO: Put a while loop here to loop through all next values until there is none (i.e., 000)
-                // var leafFound = false;
-                // while (!leafFound) {
-                //     // Get the DiskValue associated with this TSB to get the next TSB
-                //     const dataDiskValue = _krnDiskDriver.queryTSB(dataTSB[0], dataTSB[1], dataTSB[2]);
-                //     // Get the next TSB from the DiskValue
-                //     const dataNextTSB = dataDiskValue.next;
-
-                //     dataTSB = dataNextTSB;
-                //     // Check if we hit the leaf
-                //     if (Utils.arrayEquals(dataNextTSB, [0, 0, 0])) {
-                //         leafFound = true;
-                //     }
-                // }
-
             } 
             else {
                 _StdOut.putText("Usage: write <file name> \"data\"");
@@ -917,7 +903,7 @@ module TSOS {
             else {
                 const fileName = args[0];
                 // Check if the filename exists
-                if (!_krnDiskDriver.fileNameInFiles(fileName)) {
+                if (!_krnDiskDriver.isFileNameInFiles(fileName)) {
                     _StdOut.putText("ERROR: file name [" + fileName + "] not found");
                 }
                 else {
@@ -944,7 +930,7 @@ module TSOS {
                 console.log(Utils.hex2a("7e33"))
                 const fileName = args[0];
                 // Check if the filename exists
-                if (!_krnDiskDriver.fileNameInFiles(fileName)) {
+                if (!_krnDiskDriver.isFileNameInFiles(fileName)) {
                     _StdOut.putText("ERROR: file name [" + fileName + "] not found");
                 }
                 else {
@@ -971,29 +957,20 @@ module TSOS {
                     _StdOut.putText("ERROR: file name too long");
                 }
                 // Check if the filename exists
-                if (!_krnDiskDriver.fileNameInFiles(currentFileName)) {
+                if (!_krnDiskDriver.isFileNameInFiles(currentFileName)) {
                     _StdOut.putText("ERROR: file name [" + currentFileName + "] not found");
                 }
                 
                 // Check if the new file name exists
-                else if (!_krnDiskDriver.fileNameInFiles(newFileName)) {
+                else if (!_krnDiskDriver.isFileNameInFiles(newFileName)) {
                     // We create a new file as a copy
                     _OsShell.shellCreate([newFileName]);
                     _StdOut.advanceLine();
 
-                    // Find the TSB associated with the file name
-                    const fileTSB = _krnDiskDriver.TSBInFileInFiles(newFileName);
-                    // Get the DiskValue associated with this TSB to get the next TSB
-                    const fileDiskValue = _krnDiskDriver.queryTSB(fileTSB);
-                    // Get the next TSB from the DiskValue
-                    var dataTSB = fileDiskValue.next;
-                    
-                    // Accumulate the string from each data block of the copied file
                     const strData = _krnDiskDriver.getDataFromFile(currentFileName);
-                    // Turn the text into hex
-                    const hexData = Utils.toHex(strData);
-                    // Fill in the data
-                    _krnDiskDriver.fillData(hexData, dataTSB);
+
+                    // Delete the file contents to override with a simple write command
+                    _OsShell.shellWrite([newFileName, "\"" + strData + "\""], false);
                 }
                 // Otherwise, we overwrite the exisitng file
                 else {
@@ -1005,7 +982,6 @@ module TSOS {
                 }
                 // Update the display
                 Control.hostDisk();
-                console.log(verbose);
                 if (verbose) {
                     _StdOut.putText("File Copied: " + currentFileName + " --> " + newFileName);
                 }
@@ -1024,22 +1000,28 @@ module TSOS {
                     _StdOut.putText("ERROR: file name too long");
                 }
                 // Check if the filename exists
-                if (!_krnDiskDriver.fileNameInFiles(currentFileName)) {
+                if (!_krnDiskDriver.isFileNameInFiles(currentFileName)) {
                     _StdOut.putText("ERROR: file name [" + currentFileName + "] not found");
                 }
                 else {
                     // Check if the new file name is not already taken
-                    if (_krnDiskDriver.fileNameInFiles(newFileName)) {
+                    if (_krnDiskDriver.isFileNameInFiles(newFileName)) {
                         _StdOut.putText("ERROR: file name [" + newFileName + "] already taken");
                     }
                     else {
                         // Get the TSB of the current file name
-                        const currentFileTSB = _krnDiskDriver.TSBInFileInFiles(currentFileName);
+                        // const currentFileTSB = _krnDiskDriver.TSBInFileInFiles(currentFileName);
+                        const currentfile = _krnDiskDriver.fileInFiles(currentFileName);
                         // Get the data value
-                        var fileDataValue = _krnDiskDriver.queryTSB(currentFileTSB);
+                        var fileDataValue = _krnDiskDriver.queryTSB(currentfile.TSB);
+                        
+                        // Transfer the pointers of the file
+                        const newFile = new File(newFileName, currentfile.TSB);
+                        newFile.creationDate = currentfile.creationDate;
+                        newFile.size = currentfile.size;
 
                         // Add the new file name to the list
-                        _krnDiskDriver.filesInUse.push(new File(newFileName, currentFileTSB));
+                        _krnDiskDriver.filesInUse.push();
                         // Remove the past file name from the list
                         _krnDiskDriver.removeFileInFilesInUse(currentFileName);
 
@@ -1058,16 +1040,27 @@ module TSOS {
         public shellList(args: string[]) {
             // Check if only one argument inserted
             if (args.length == 1 && args[0] == "-a") {
+                _StdOut.putText("-------------------------------------------")
+                _StdOut.advanceLine();
                 for (let fileIndex=0; fileIndex < _krnDiskDriver.filesInUse.length; fileIndex++) {
                     // print all files inlcuding hidden files
-                    _StdOut.putText('-' + _krnDiskDriver.filesInUse[fileIndex].name + ' ');
+                    const file = _krnDiskDriver.filesInUse[fileIndex]
+                    _StdOut.putText("Name: " + file.name)
+                    _StdOut.advanceLine();
+                    _StdOut.putText("Size: " + file.size + " bytes")
+                    _StdOut.advanceLine();
+                    _StdOut.putText("Created: " + file.creationDate);
+                    _StdOut.advanceLine();
+                    _StdOut.putText("-------------------------------------------")
+                    _StdOut.advanceLine();
                 }
             }
             else if (args.length == 0) {
+                _StdOut.putText(" ")
                 for (let fileIndex=0; fileIndex < _krnDiskDriver.filesInUse.length; fileIndex++) {
                     // Check if its a hidden file
                     if (_krnDiskDriver.filesInUse[fileIndex].name.substring(0,1) != "."){
-                        _StdOut.putText('-' + _krnDiskDriver.filesInUse[fileIndex].name + ' ');
+                        _StdOut.putText(_krnDiskDriver.filesInUse[fileIndex].name + '   ');
                     }
                 }
             }

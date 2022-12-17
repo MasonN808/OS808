@@ -95,7 +95,7 @@ module TSOS {
                 var PIDStr = _CPU.PID.toString();
                 PIDStr = '0'.repeat(3-PIDStr.length) + PIDStr;
                 // Also check that it isn't a file name in filesInUse
-                if (Utils.filePIDNametoString(diskValue.data) == PIDStr && !this.fileNameInFiles(PIDStr)) {
+                if (Utils.filePIDNametoString(diskValue.data) == PIDStr && !this.isFileNameInFiles(PIDStr)) {
                     // console.log("A: " + Utils.filePIDNametoString(diskValue.data));
                     // console.log("B: " + PIDStr);
                     return [TSB[0], TSB[1], TSB[2]];
@@ -105,13 +105,23 @@ module TSOS {
         }
 
         // Check if the queried file name is in the list of files in use
-        public fileNameInFiles(queriedfileName: string): boolean {
+        public isFileNameInFiles(queriedfileName: string): boolean {
             for (const file of this.filesInUse) {
                 if (file.name == queriedfileName) {
                     return true;
                 }
             }
             return false;
+        }
+
+        // Return the file if the queried file name is in the list of files in use
+        public fileInFiles(queriedfileName: string): File {
+            for (const file of this.filesInUse) {
+                if (file.name == queriedfileName) {
+                    return file;
+                }
+            }
+            return null;
         }
         
         public TSBInFileInFiles(queriedfileName: string): number[] {
@@ -271,7 +281,13 @@ module TSOS {
                     // Convert the data/hex into a string from OpCode objects
                     var data = '';
                     for (let i=0; i < diskValue.data.length; i++) {
-                        data += diskValue.data[i].codeString;
+                        // Check that we aren't copying over the parts with no data
+                        if (diskValue.data[i].codeString != "00") {
+                            data += diskValue.data[i].codeString;
+                        }
+                        else {
+                            break;
+                        }
                     }
                     // Add the block data to the accumulated data as ASCII
                     accumulatedData += Utils.hex2a(data);
@@ -302,11 +318,15 @@ module TSOS {
         public inUse: number;
         public name: string;
         public TSB: Array<number>;
+        public creationDate: string;
+        public size: number; // in Bytes
         
         constructor (name: string, TSB: number[]){
             this.inUse = 1;
             this.name = name;
             this.TSB = TSB;
+            this.creationDate = new Date().toLocaleString();
+            this.size = 0;
         }
     }
 }

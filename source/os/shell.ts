@@ -796,7 +796,15 @@ module TSOS {
                     }
                     _StdOut.putText("Process with PID " + pid + " has been terminated wtih memory wiped");
                     
+                    // Remove it from the hard drive if it's there
+                    const tsb = _krnDiskDriver.queryPID(pid);
+                    if (tsb != null) {
+                        // Do a deep delete
+                        _krnDiskDriver.removeFileContents(tsb, false);
+                    }
                     _MemoryManager.removePIDFromEverywhere(pid);
+
+
                     TSOS.Control.hostMemory();
                 }
             }
@@ -830,7 +838,11 @@ module TSOS {
             // Loop through all the possible files
             const PIDsInHardDrive = _krnDiskDriver.queryPIDsInDirectory();
             if (PIDsInHardDrive.length > 0) {
-                _StdOut.putText("Disk UNSUCCESSFULLY reset: processes on the ready queue are in the drive");
+                // If we found processes in the harddrive, we terminate and clear the PID
+                for (let pid of PIDsInHardDrive) {
+                    _OsShell.killLogic(parseInt(pid, 10));
+                }
+                _StdOut.putText("Disk SUCCESSFULLY reset: terminated process(es)");
             }
             else {
                 // resets values in the hashmap

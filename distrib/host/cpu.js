@@ -52,7 +52,7 @@ var TSOS;
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
             // If the process is in the hard drive call roll-out and roll-in routines
             if (pcb.location == "Hard Drive") {
-                const PID_TSB = _krnDiskDriver.queryPID_TSB();
+                const PID_TSB = _krnDiskDriver.queryPIDFromCPU();
                 if (PID_TSB != null) {
                     // Copy the data from the blocks
                     const opCodesStr = _krnDiskDriver.getOpCodesFromFile(PID_TSB);

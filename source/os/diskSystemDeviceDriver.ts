@@ -86,7 +86,7 @@ module TSOS {
         }
 
         // Query the TSB in the Directory partition to find a PID that matches the one found in the CPU
-        public queryPID_TSB(): number[] {
+        public queryPIDFromCPU(): number[] {
             for (let [key, diskValue] of this.diskMap) {
                 const TSB = key.split(':');
                 if (TSB[0] > 1) {
@@ -98,8 +98,25 @@ module TSOS {
                 PIDStr = '0'.repeat(3-PIDStr.length) + PIDStr;
                 // Also check that it isn't a file name in filesInUse
                 if (Utils.filePIDNametoString(diskValue.data) == PIDStr && !this.isFileNameInFiles(PIDStr)) {
-                    // console.log("A: " + Utils.filePIDNametoString(diskValue.data));
-                    // console.log("B: " + PIDStr);
+                    return [TSB[0], TSB[1], TSB[2]];
+                }
+            }
+            return null;
+        }
+
+        // Query the TSB in the Directory partition to find a PID that matches the one found in the CPU
+        public queryPID(pid: number): number[] {
+            for (let [key, diskValue] of this.diskMap) {
+                const TSB = key.split(':');
+                if (TSB[0] > 1) {
+                    // Not in Directory
+                    return null;
+                }
+                // At this point, the PID should be on the CPU
+                var PIDStr = pid.toString();
+                PIDStr = '0'.repeat(3-PIDStr.length) + PIDStr;
+                // Also check that it isn't a file name in filesInUse
+                if (Utils.filePIDNametoString(diskValue.data) == PIDStr && !this.isFileNameInFiles(PIDStr)) {
                     return [TSB[0], TSB[1], TSB[2]];
                 }
             }
@@ -124,11 +141,12 @@ module TSOS {
                     }
                 }
                 // Now check for in the CPU
-                PIDStr = _CPU.PID.toString();
+                const PID = _CPU.PID;
+                PIDStr = PID.toString();
                 PIDStr = '0'.repeat(3-PIDStr.length) + PIDStr;
                 // Also check that it isn't a file name in filesInUse
                 if (Utils.filePIDNametoString(diskValue.data) == PIDStr && !this.isFileNameInFiles(PIDStr)) {
-                    aggregatedPIDs.push(PIDStr);
+                    aggregatedPIDs.push(PID);
                 }
             }
             return null; // This should never occurk but just in case

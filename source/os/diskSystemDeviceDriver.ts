@@ -141,12 +141,14 @@ module TSOS {
                     }
                 }
                 // Now check for in the CPU
-                const PID = _CPU.PID;
-                PIDStr = PID.toString();
-                PIDStr = '0'.repeat(3-PIDStr.length) + PIDStr;
-                // Also check that it isn't a file name in filesInUse
-                if (Utils.filePIDNametoString(diskValue.data) == PIDStr && !this.isFileNameInFiles(PIDStr)) {
-                    aggregatedPIDs.push(PID);
+                if (_CPU.PID != null) {
+                    const PID = _CPU.PID;
+                    PIDStr = PID.toString();
+                    PIDStr = '0'.repeat(3-PIDStr.length) + PIDStr;
+                    // Also check that it isn't a file name in filesInUse
+                    if (Utils.filePIDNametoString(diskValue.data) == PIDStr && !this.isFileNameInFiles(PIDStr)) {
+                        aggregatedPIDs.push(PID);
+                    }
                 }
             }
             return null; // This should never occurk but just in case

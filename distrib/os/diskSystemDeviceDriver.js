@@ -24,6 +24,7 @@ var TSOS;
         }
         krnDiskFormat() {
             // Reformat the diskMap by clearing it and resetting structure
+            // Find any programs in the hard drive
             // Reset the filesInUse Array
             this.filesInUse = new Array();
             // Reset the Map
@@ -75,7 +76,7 @@ var TSOS;
             // Stop the interval that's simulating our clock pulse.
             clearInterval(_hardwareClockID);
         }
-        // Query the TSB of the closest available/unused DiskValue in either the Directory of Data partitions
+        // Query the TSB in the Directory partition to find a PID that matches the one found in the CPU
         queryPID_TSB() {
             for (let [key, diskValue] of this.diskMap) {
                 const TSB = key.split(':');
@@ -94,6 +95,33 @@ var TSOS;
                 }
             }
             return null;
+        }
+        // Query a list of PIDs from the Directory partition
+        queryPIDsInDirectory() {
+            var aggregatedPIDs = [];
+            for (let [key, diskValue] of this.diskMap) {
+                const TSB = key.split(':');
+                if (TSB[0] > 1) {
+                    return aggregatedPIDs;
+                }
+                // Loop through all processes on the ready queue
+                for (let PID of _ReadyQueue.q) {
+                    var PIDStr = PID.toString();
+                    PIDStr = '0'.repeat(3 - PIDStr.length) + PIDStr;
+                    // Also check that it isn't a file name in filesInUse
+                    if (TSOS.Utils.filePIDNametoString(diskValue.data) == PIDStr && !this.isFileNameInFiles(PIDStr)) {
+                        aggregatedPIDs.push(PIDStr);
+                    }
+                }
+                // Now check for in the CPU
+                PIDStr = _CPU.PID.toString();
+                PIDStr = '0'.repeat(3 - PIDStr.length) + PIDStr;
+                // Also check that it isn't a file name in filesInUse
+                if (TSOS.Utils.filePIDNametoString(diskValue.data) == PIDStr && !this.isFileNameInFiles(PIDStr)) {
+                    aggregatedPIDs.push(PIDStr);
+                }
+            }
+            return null; // This should never occurk but just in case
         }
         // Check if the queried file name is in the list of files in use
         isFileNameInFiles(queriedfileName) {

@@ -14,7 +14,8 @@ module TSOS {
                                     "trace", "rot13", "prompt", "date", "whereami",
                                     "howareu", "whoismason", "status", "bsod", "load", "run",
                                     "clearmem", "runall", "kill", "killall", "quantum",
-                                    "format", "create", "write", "read", "delete"];
+                                    "format", "create", "write", "read", "delete", "copy", "rename",
+                                    "ls", "getschedule", "setschedule", "setpriority"];
 
         constructor(public currentFont = _DefaultFontFamily,
                     public currentFontSize = _DefaultFontSize,
@@ -40,9 +41,6 @@ module TSOS {
 
         public resetXY(): void {
             this.currentXPosition = 0;
-            // this.currentYPosition = this.currentFontSize +
-            //                         _DrawingContext.fontDescent(_DefaultFontFamily, _DefaultFontSize) +
-            //                         _FontHeightMargin;
             this.currentYPosition = this.currentFontSize;
         }
 
@@ -161,7 +159,6 @@ module TSOS {
                         }
                     }
                 }
-                // TODO: Add a case for Ctrl-C that would allow the user to break the current program.
             }
         }
 

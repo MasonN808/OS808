@@ -826,11 +826,19 @@ module TSOS {
         }
 
         public shellFormat() {
-            // resets values in the hashmap
-            _krnDiskDriver.krnDiskFormat();
-            // Reset
-            Control.hostDisk();
-            _StdOut.putText("Disk SUCCESSFULLY reset");
+            // Check if any processes were saved onto the drive and in the ready queue
+            // Loop through all the possible files
+            const PIDsInHardDrive = _krnDiskDriver.queryPIDsInDirectory();
+            if (PIDsInHardDrive.length > 0) {
+                _StdOut.putText("Disk UNSUCCESSFULLY reset: processes on the ready queue are in the drive");
+            }
+            else {
+                // resets values in the hashmap
+                _krnDiskDriver.krnDiskFormat();
+                // Reset
+                Control.hostDisk();
+                _StdOut.putText("Disk SUCCESSFULLY reset");
+            }
         }
 
         public shellCreate(args: string[], verbose = true) {

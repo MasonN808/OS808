@@ -60,22 +60,24 @@
    
    <div class="contatiner">
       <!-- For Navigation bar -->
-      <nav class="navbar navbar-expand-lg bg-dark navbar-dark">
+      <nav class="navbar navbar-custom" >
          <div class="container">
             <a href=" "class="navbar-brand">
-               <!-- <span><img src="css/pylon.gif" height="30px"></span> -->
                <img src="css/gold_coin.gif" class="pixelated" height="50px">
-               <span style="font-size: 45px; vertical-align: -12px;"class="text-warning">OS808</span>
+               <span style="font-size: 45px; vertical-align: -12px; color: #101820FF;">
+                  <svg width="250px"height="auto"viewbox="0 0 160 45">
+                  <text class="svgText" x="2" y="34">OS808</text>
+               </svg></span>
             </a>
             <span class="navbar-text">
-               <div style="display: inline-block;" id="date">
-                  <span class="label">Date/Time:</span>
+               <div style="display: inline-block; color: #101820FF;" id="date">
+                  <span style="color: #101820FF;" class="label">Date/Time:</span>
                   <div style="display: inline-block;" id="taDate"></div>
                </div>
                <div id="status">
                   <label class="label">
-                     <span class="label">Status:</span>
-                     <div id="taStatus"></div>
+                     <span style="color: #101820FF;" class="label">Status:</span>
+                     <div style="display: inline-block;" id="taStatus"></div> 
                   </label>
                </div>
             </span>
@@ -241,14 +243,15 @@
                      <div class="card-header">
                         <svg width="100px"height="auto"viewbox="0 0 100 22">
                            <text class="svgText" x="2" y="15">Memory</text>
-                         </svg></div>
-                        <div class="card-body overflow-auto">
-                           <span>
-                              <table name="taMemory"
-                              id="taMemory">
-                              </table>
-                           </span>
-                        </div>
+                        </svg>
+                     </div>
+                     <div class="card-body overflow-auto">
+                        <span>
+                           <table name="taMemory"
+                           id="taMemory">
+                           </table>
+                        </span>
+                     </div>
                   </div>
                </div>
 

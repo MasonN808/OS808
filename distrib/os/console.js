@@ -24,7 +24,8 @@ var TSOS;
                 "trace", "rot13", "prompt", "date", "whereami",
                 "howareu", "whoismason", "status", "bsod", "load", "run",
                 "clearmem", "runall", "kill", "killall", "quantum",
-                "format", "create", "write", "read", "delete"];
+                "format", "create", "write", "read", "delete", "copy", "rename",
+                "ls", "getschedule", "setschedule", "setpriority"];
         }
         init() {
             this.clearScreen();
@@ -35,9 +36,6 @@ var TSOS;
         }
         resetXY() {
             this.currentXPosition = 0;
-            // this.currentYPosition = this.currentFontSize +
-            //                         _DrawingContext.fontDescent(_DefaultFontFamily, _DefaultFontSize) +
-            //                         _FontHeightMargin;
             this.currentYPosition = this.currentFontSize;
         }
         handleInput() {
@@ -139,7 +137,6 @@ var TSOS;
                         }
                     }
                 }
-                // TODO: Add a case for Ctrl-C that would allow the user to break the current program.
             }
         }
         putText(text) {

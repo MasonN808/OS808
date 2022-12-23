@@ -185,10 +185,8 @@ var TSOS;
             row.insertCell(12).innerHTML = pcb.segment;
             row.insertCell(13).innerHTML = pcb.currentQuantum;
         }
-        static hostProcesses(inputPid) {
+        static hostProcesses() {
             const table = document.getElementById("taProcesses");
-            // Get the PCB from the input PID in the hashtable
-            // const pcb = _MemoryManager.PIDMap.get(inputPid)[1];
             // give the appropriate rowIndex
             var addedRowIndex = 1;
             // loop through hash map to get key-value pairs

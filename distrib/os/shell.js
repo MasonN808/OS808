@@ -111,6 +111,15 @@ var TSOS;
             // ls
             sc = new TSOS.ShellCommand(this.shellList, "ls", "- list the files currently stored on the disk");
             this.commandList[this.commandList.length] = sc;
+            // getschedule
+            sc = new TSOS.ShellCommand(this.shellGetSchedule, "getschedule", "- gets the current scheduler");
+            this.commandList[this.commandList.length] = sc;
+            // setschedule <type>
+            sc = new TSOS.ShellCommand(this.shellSetSchedule, "setschedule", "- sets the current scheduler");
+            this.commandList[this.commandList.length] = sc;
+            // setpriority <PID> <priority>
+            sc = new TSOS.ShellCommand(this.shellSetPriority, "setpriority", "- sets the priority of a process");
+            this.commandList[this.commandList.length] = sc;
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -344,6 +353,15 @@ var TSOS;
                         break;
                     case "ls":
                         _StdOut.putText("list the files currently stored on the disk");
+                        break;
+                    case "getschedule":
+                        _StdOut.putText("Gets the currently active schduling algorithm");
+                        break;
+                    case "setschedule":
+                        _StdOut.putText("Gets the currently active schduling algorithm");
+                        break;
+                    case "setpriority":
+                        _StdOut.putText("Sets the priority of a process");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -603,6 +621,12 @@ var TSOS;
                         _ReadyQueue.remove(pid);
                     }
                     _StdOut.putText("Process with PID " + pid + " has been terminated wtih memory wiped");
+                    // Remove it from the hard drive if it's there
+                    const tsb = _krnDiskDriver.queryPID(pid);
+                    if (tsb != null) {
+                        // Do a deep delete
+                        _krnDiskDriver.removeFileContents(tsb, false);
+                    }
                     _MemoryManager.removePIDFromEverywhere(pid);
                     TSOS.Control.hostMemory();
                 }
@@ -631,11 +655,23 @@ var TSOS;
             }
         }
         shellFormat() {
-            // resets values in the hashmap
-            _krnDiskDriver.krnDiskFormat();
-            // Reset
-            TSOS.Control.hostDisk();
-            _StdOut.putText("Disk SUCCESSFULLY reset");
+            // Check if any processes were saved onto the drive and in the ready queue
+            // Loop through all the possible files
+            const PIDsInHardDrive = _krnDiskDriver.queryPIDsInDirectory();
+            if (PIDsInHardDrive.length > 0) {
+                // If we found processes in the harddrive, we terminate and clear the PID
+                for (let pid of PIDsInHardDrive) {
+                    _OsShell.killLogic(parseInt(pid, 10));
+                }
+                _StdOut.putText("Disk SUCCESSFULLY reset: terminated process(es)");
+            }
+            else {
+                // resets values in the hashmap
+                _krnDiskDriver.krnDiskFormat();
+                // Reset
+                TSOS.Control.hostDisk();
+                _StdOut.putText("Disk SUCCESSFULLY reset");
+            }
         }
         shellCreate(args, verbose = true) {
             // Check that input is a string with no spaces
@@ -646,7 +682,7 @@ var TSOS;
                     _StdOut.putText("ERROR: file name too long");
                 }
                 // Check to see if the name is already taken
-                else if (_krnDiskDriver.fileNameInFiles(newFileName)) {
+                else if (_krnDiskDriver.isFileNameInFiles(newFileName)) {
                     _StdOut.putText("ERROR: file name [" + newFileName + "] already taken");
                 }
                 else {
@@ -680,14 +716,13 @@ var TSOS;
             }
         }
         shellWrite(args, verbose = true) {
-            // TODO: The write commeand should reset the file contents everytime we type this command so do a reset contents first
             // Check that input is a string with no spaces
             const newArgs = TSOS.Utils.smartArgsParsing(args);
             if (newArgs != null) {
                 const fileName = newArgs[0];
                 const data = newArgs[1];
                 // Check that it is the correct file name
-                if (!_krnDiskDriver.fileNameInFiles(fileName)) {
+                if (!_krnDiskDriver.isFileNameInFiles(fileName)) {
                     _StdOut.putText("ERROR: file name [" + fileName + "] not found");
                 }
                 else {
@@ -705,27 +740,16 @@ var TSOS;
                     const hexData = TSOS.Utils.toHex(truncatedData);
                     // Fillin the data
                     _krnDiskDriver.fillData(hexData, dataTSB);
+                    // Update the size of the file
+                    const file = _krnDiskDriver.fileInFiles(fileName);
+                    console.log(args[1].length);
+                    file.size = hexData.length / 2;
                     // Update the display
                     TSOS.Control.hostDisk();
                     if (verbose) {
                         _StdOut.putText("File Updated: " + fileName);
                     }
                 }
-                // // TODO: THIS IS FOR SWAPPING NOT FILE WRITING
-                // var dataTSB = fileDiskValue.next;
-                // //TODO: Put a while loop here to loop through all next values until there is none (i.e., 000)
-                // var leafFound = false;
-                // while (!leafFound) {
-                //     // Get the DiskValue associated with this TSB to get the next TSB
-                //     const dataDiskValue = _krnDiskDriver.queryTSB(dataTSB[0], dataTSB[1], dataTSB[2]);
-                //     // Get the next TSB from the DiskValue
-                //     const dataNextTSB = dataDiskValue.next;
-                //     dataTSB = dataNextTSB;
-                //     // Check if we hit the leaf
-                //     if (Utils.arrayEquals(dataNextTSB, [0, 0, 0])) {
-                //         leafFound = true;
-                //     }
-                // }
             }
             else {
                 _StdOut.putText("Usage: write <file name> \"data\"");
@@ -739,7 +763,7 @@ var TSOS;
             else {
                 const fileName = args[0];
                 // Check if the filename exists
-                if (!_krnDiskDriver.fileNameInFiles(fileName)) {
+                if (!_krnDiskDriver.isFileNameInFiles(fileName)) {
                     _StdOut.putText("ERROR: file name [" + fileName + "] not found");
                 }
                 else {
@@ -764,7 +788,7 @@ var TSOS;
                 console.log(TSOS.Utils.hex2a("7e33"));
                 const fileName = args[0];
                 // Check if the filename exists
-                if (!_krnDiskDriver.fileNameInFiles(fileName)) {
+                if (!_krnDiskDriver.isFileNameInFiles(fileName)) {
                     _StdOut.putText("ERROR: file name [" + fileName + "] not found");
                 }
                 else {
@@ -790,26 +814,17 @@ var TSOS;
                     _StdOut.putText("ERROR: file name too long");
                 }
                 // Check if the filename exists
-                if (!_krnDiskDriver.fileNameInFiles(currentFileName)) {
+                if (!_krnDiskDriver.isFileNameInFiles(currentFileName)) {
                     _StdOut.putText("ERROR: file name [" + currentFileName + "] not found");
                 }
                 // Check if the new file name exists
-                else if (!_krnDiskDriver.fileNameInFiles(newFileName)) {
+                else if (!_krnDiskDriver.isFileNameInFiles(newFileName)) {
                     // We create a new file as a copy
                     _OsShell.shellCreate([newFileName]);
                     _StdOut.advanceLine();
-                    // Find the TSB associated with the file name
-                    const fileTSB = _krnDiskDriver.TSBInFileInFiles(newFileName);
-                    // Get the DiskValue associated with this TSB to get the next TSB
-                    const fileDiskValue = _krnDiskDriver.queryTSB(fileTSB);
-                    // Get the next TSB from the DiskValue
-                    var dataTSB = fileDiskValue.next;
-                    // Accumulate the string from each data block of the copied file
                     const strData = _krnDiskDriver.getDataFromFile(currentFileName);
-                    // Turn the text into hex
-                    const hexData = TSOS.Utils.toHex(strData);
-                    // Fill in the data
-                    _krnDiskDriver.fillData(hexData, dataTSB);
+                    // Delete the file contents to override with a simple write command
+                    _OsShell.shellWrite([newFileName, "\"" + strData + "\""], false);
                 }
                 // Otherwise, we overwrite the exisitng file
                 else {
@@ -820,14 +835,13 @@ var TSOS;
                 }
                 // Update the display
                 TSOS.Control.hostDisk();
-                console.log(verbose);
                 if (verbose) {
                     _StdOut.putText("File Copied: " + currentFileName + " --> " + newFileName);
                 }
             }
         }
         shellRename(args) {
-            // Check if only one argument inserted
+            // Check if only two argument inserted
             if (args.length != 2) {
                 _StdOut.putText("Usage: rename <file name> <new file name>");
             }
@@ -838,21 +852,26 @@ var TSOS;
                     _StdOut.putText("ERROR: file name too long");
                 }
                 // Check if the filename exists
-                if (!_krnDiskDriver.fileNameInFiles(currentFileName)) {
+                if (!_krnDiskDriver.isFileNameInFiles(currentFileName)) {
                     _StdOut.putText("ERROR: file name [" + currentFileName + "] not found");
                 }
                 else {
                     // Check if the new file name is not already taken
-                    if (_krnDiskDriver.fileNameInFiles(newFileName)) {
+                    if (_krnDiskDriver.isFileNameInFiles(newFileName)) {
                         _StdOut.putText("ERROR: file name [" + newFileName + "] already taken");
                     }
                     else {
                         // Get the TSB of the current file name
-                        const currentFileTSB = _krnDiskDriver.TSBInFileInFiles(currentFileName);
+                        // const currentFileTSB = _krnDiskDriver.TSBInFileInFiles(currentFileName);
+                        const currentfile = _krnDiskDriver.fileInFiles(currentFileName);
                         // Get the data value
-                        var fileDataValue = _krnDiskDriver.queryTSB(currentFileTSB);
+                        var fileDataValue = _krnDiskDriver.queryTSB(currentfile.TSB);
+                        // Transfer the pointers of the file
+                        const newFile = new TSOS.File(newFileName, currentfile.TSB);
+                        newFile.creationDate = currentfile.creationDate;
+                        newFile.size = currentfile.size;
                         // Add the new file name to the list
-                        _krnDiskDriver.filesInUse.push(new TSOS.File(newFileName, currentFileTSB));
+                        _krnDiskDriver.filesInUse.push();
                         // Remove the past file name from the list
                         _krnDiskDriver.removeFileInFilesInUse(currentFileName);
                         // Convert the file name to hex
@@ -866,9 +885,125 @@ var TSOS;
                 }
             }
         }
-        shellList() {
-            for (let fileIndex = 0; fileIndex < _krnDiskDriver.filesInUse.length; fileIndex++) {
-                _StdOut.putText('-' + _krnDiskDriver.filesInUse[fileIndex].name + ' ');
+        shellList(args) {
+            // Check if only one argument inserted
+            if (args.length == 1 && args[0] == "-a") {
+                _StdOut.putText(" -------------------------------------------");
+                _StdOut.advanceLine();
+                for (let fileIndex = 0; fileIndex < _krnDiskDriver.filesInUse.length; fileIndex++) {
+                    // print all files inlcuding hidden files
+                    const file = _krnDiskDriver.filesInUse[fileIndex];
+                    _StdOut.putText(" Name: " + file.name);
+                    _StdOut.advanceLine();
+                    _StdOut.putText(" Size: " + file.size + " bytes");
+                    _StdOut.advanceLine();
+                    _StdOut.putText(" Created: " + file.creationDate);
+                    _StdOut.advanceLine();
+                    _StdOut.putText(" -------------------------------------------");
+                    _StdOut.advanceLine();
+                }
+            }
+            else if (args.length == 0) {
+                _StdOut.putText(" ");
+                for (let fileIndex = 0; fileIndex < _krnDiskDriver.filesInUse.length; fileIndex++) {
+                    // Check if its a hidden file
+                    if (_krnDiskDriver.filesInUse[fileIndex].name.substring(0, 1) != ".") {
+                        _StdOut.putText(_krnDiskDriver.filesInUse[fileIndex].name + '   ');
+                    }
+                }
+            }
+            else {
+                _StdOut.putText("Usage: ls <-a>");
+            }
+        }
+        shellGetSchedule() {
+            if (_Scheduler.schedulerType == "RR") {
+                _StdOut.putText(" Round Robin Scheduling");
+            }
+            else if (_Scheduler.schedulerType == "FCFS") {
+                _StdOut.putText(" First Come First Serve Scheduling");
+            }
+            else if (_Scheduler.schedulerType == "NPP") {
+                _StdOut.putText(" Non-Preemptive Priority Scheduling");
+            }
+        }
+        shellSetSchedule(args) {
+            if (args.length == 1) {
+                const schedulingType = args[0];
+                if (schedulingType == "RR") {
+                    if (_Scheduler.schedulerType == "RR") {
+                        _StdOut.putText(" Round Robin Scheduling");
+                    }
+                    else if (_Scheduler.schedulerType == "FCFS") {
+                        _StdOut.putText(" First Come First Serve Scheduling");
+                    }
+                    else if (_Scheduler.schedulerType == "NPP") {
+                        _StdOut.putText(" Non-Preemptive Priority Scheduling");
+                    }
+                    _StdOut.putText(" -->Round Robin Scheduling");
+                    _Scheduler.schedulerType = "RR";
+                }
+                else if (schedulingType == "FCFS") {
+                    if (_Scheduler.schedulerType == "RR") {
+                        _StdOut.putText(" Round Robin Scheduling");
+                    }
+                    else if (_Scheduler.schedulerType == "FCFS") {
+                        _StdOut.putText(" First Come First Serve Scheduling");
+                    }
+                    else if (_Scheduler.schedulerType == "NPP") {
+                        _StdOut.putText(" Non-Preemptive Priority Scheduling");
+                    }
+                    _StdOut.putText(" --> First Come First Serve Scheduling");
+                    _Scheduler.schedulerType = "FCFS";
+                }
+                else if (schedulingType == "NPP") {
+                    if (_Scheduler.schedulerType == "RR") {
+                        _StdOut.putText(" Round Robin Scheduling");
+                    }
+                    else if (_Scheduler.schedulerType == "FCFS") {
+                        _StdOut.putText(" First Come First Serve Scheduling");
+                    }
+                    else if (_Scheduler.schedulerType == "NPP") {
+                        _StdOut.putText(" Non-Preemptive Priority Scheduling");
+                    }
+                    _StdOut.putText(" --> Non-Preemptive Priority Scheduling");
+                    _Scheduler.schedulerType = "NPP";
+                }
+                else {
+                    _StdOut.putText("Usage: setschedule <RR or FCFS or NPP>");
+                }
+            }
+            else {
+                _StdOut.putText("Usage: setschedule <RR or FCFS or NPP>");
+            }
+        }
+        shellSetPriority(args) {
+            if (args.length == 2) {
+                const PID = parseInt(args[0], 10);
+                const priority = args[1];
+                // Check that the PID is valid
+                if (_MemoryManager.PIDMap.get(PID) != null) {
+                    // Check if it's a number
+                    if (TSOS.Utils.isInt(priority)) {
+                        if (parseInt(priority, 10) >= 0) {
+                            const pcb = _MemoryManager.PIDMap.get(PID)[1];
+                            pcb.priority = priority;
+                            TSOS.Control.hostProcesses();
+                        }
+                        else {
+                            _StdOut.putText("Given priority is less than zero");
+                        }
+                    }
+                    else {
+                        _StdOut.putText("Given priority is not a number");
+                    }
+                }
+                else {
+                    _StdOut.putText("Given PID is invalid");
+                }
+            }
+            else {
+                _StdOut.putText("Usage: setpriority <PID> <priority>");
             }
         }
     }

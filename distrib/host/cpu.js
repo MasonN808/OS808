@@ -47,11 +47,12 @@ var TSOS;
                 this.PID = _ReadyQueue.dequeue();
                 this.calibratePCBtoCPU(this.PID);
             }
+            console.log(this.PID);
             // For the very first running program
             const pcb = _MemoryManager.PIDMap.get(this.PID)[1];
             // If the process is in the hard drive call roll-out and roll-in routines
             if (pcb.location == "Hard Drive") {
-                const PID_TSB = _krnDiskDriver.queryPID_TSB();
+                const PID_TSB = _krnDiskDriver.queryPIDFromCPU();
                 if (PID_TSB != null) {
                     // Copy the data from the blocks
                     const opCodesStr = _krnDiskDriver.getOpCodesFromFile(PID_TSB);
@@ -68,11 +69,9 @@ var TSOS;
                         _krnDiskDriver.removeFileContents(PID_TSB, false);
                     }
                     else {
-                        // FIXME: I think the memory isn't getting wiped somewhere in here
                         // Now, clear a memory segment and save the relevant information before rolling in
-                        // TODO: Use the last previously used PID; currently set to the 0th partition
                         const poppedMemory = _MemoryManager.popProgramInMemory(_MemoryManager.swappedMemoryPartition);
-                        _MemoryManager.swappedMemoryPartition = (_MemoryManager.swappedMemoryPartition + 1) % _MemoryManager.maxLoadedPrograms;
+                        _MemoryManager.swappedMemoryPartition = (((_MemoryManager.swappedMemoryPartition + 1) % _MemoryManager.maxLoadedPrograms) - 2) % _MemoryManager.maxLoadedPrograms;
                         // Do a Deep Clean
                         _krnDiskDriver.removeFileContents(PID_TSB, false);
                         // Roll in the program from the drive into memory
@@ -86,7 +85,7 @@ var TSOS;
             }
             // Now update the displayed PCB
             pcb.processState = "Running";
-            TSOS.Control.hostProcesses(this.PID);
+            TSOS.Control.hostProcesses();
             TSOS.Control.hostDisk();
             // Get the Op code given the pid and pc
             var opCode = TSOS.MemoryAccessor.readMemory(this.PID, this.PC);
@@ -290,6 +289,7 @@ var TSOS;
                     }
                     // Issue a context switch
                     else {
+                        // type-2 indicates that we don't store the processes PCB
                         _Scheduler.issueContextSwitchInterrupt("type-2", this.PID);
                         contextSwitch = true;
                     }
@@ -317,13 +317,16 @@ var TSOS;
                     TSOS.MemoryAccessor.readMemory(this.PID, this.PC - 2).currentOperand = false;
                 }
                 opCode.currentOperator = false;
-                // Validate the current quantum and issue an interrupt if we hit the max quantum
-                _Scheduler.validateQuantum(this.PID);
-                this.incrementQuantum();
+                // If we are in a Round Robin scheduling scheme
+                if (_Scheduler.schedulerType == "RR") {
+                    // Validate the current quantum and issue an interrupt if we hit the max quantum
+                    _Scheduler.validateQuantum(this.PID);
+                    this.incrementQuantum();
+                }
             }
             // Now update the displayed PCB
             if (!exitProgram && this.PID !== null && !contextSwitch) {
-                TSOS.Control.hostProcesses(this.PID);
+                TSOS.Control.hostProcesses();
             }
         }
         calibratePCBtoCPU(targetPID) {

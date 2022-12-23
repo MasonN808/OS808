@@ -29,6 +29,8 @@ module TSOS {
 
         public krnDiskFormat() {
             // Reformat the diskMap by clearing it and resetting structure
+            // Find any programs in the hard drive
+            
             // Reset the filesInUse Array
             this.filesInUse = new Array<File>();
             // Reset the Map
@@ -83,8 +85,8 @@ module TSOS {
             clearInterval(_hardwareClockID);
         }
 
-        // Query the TSB of the closest available/unused DiskValue in either the Directory of Data partitions
-        public queryPID_TSB(): number[] {
+        // Query the TSB in the Directory partition to find a PID that matches the one found in the CPU
+        public queryPIDFromCPU(): number[] {
             for (let [key, diskValue] of this.diskMap) {
                 const TSB = key.split(':');
                 if (TSB[0] > 1) {
@@ -95,23 +97,81 @@ module TSOS {
                 var PIDStr = _CPU.PID.toString();
                 PIDStr = '0'.repeat(3-PIDStr.length) + PIDStr;
                 // Also check that it isn't a file name in filesInUse
-                if (Utils.filePIDNametoString(diskValue.data) == PIDStr && !this.fileNameInFiles(PIDStr)) {
-                    // console.log("A: " + Utils.filePIDNametoString(diskValue.data));
-                    // console.log("B: " + PIDStr);
+                if (Utils.filePIDNametoString(diskValue.data) == PIDStr && !this.isFileNameInFiles(PIDStr)) {
                     return [TSB[0], TSB[1], TSB[2]];
                 }
             }
             return null;
         }
 
+        // Query the TSB in the Directory partition to find a PID that matches the one found in the CPU
+        public queryPID(pid: number): number[] {
+            for (let [key, diskValue] of this.diskMap) {
+                const TSB = key.split(':');
+                if (TSB[0] > 1) {
+                    // Not in Directory
+                    return null;
+                }
+                // At this point, the PID should be on the CPU
+                var PIDStr = pid.toString();
+                PIDStr = '0'.repeat(3-PIDStr.length) + PIDStr;
+                // Also check that it isn't a file name in filesInUse
+                if (Utils.filePIDNametoString(diskValue.data) == PIDStr && !this.isFileNameInFiles(PIDStr)) {
+                    return [TSB[0], TSB[1], TSB[2]];
+                }
+            }
+            return null;
+        }
+
+        // Query a list of PIDs from the Directory partition
+        public queryPIDsInDirectory(): string[] {
+            var aggregatedPIDs = [];
+            for (let [key, diskValue] of this.diskMap) {
+                const TSB = key.split(':');
+                if (TSB[0] > 1) {
+                    return aggregatedPIDs;
+                }
+                // Loop through all processes on the ready queue
+                for (let PID of _ReadyQueue.q) {
+                    var PIDStr = PID.toString();
+                    PIDStr = '0'.repeat(3-PIDStr.length) + PIDStr;
+                    // Also check that it isn't a file name in filesInUse
+                    if (Utils.filePIDNametoString(diskValue.data) == PIDStr && !this.isFileNameInFiles(PIDStr)) {
+                        aggregatedPIDs.push(PIDStr);
+                    }
+                }
+                // Now check for in the CPU
+                if (_CPU.PID != null) {
+                    const PID = _CPU.PID;
+                    PIDStr = PID.toString();
+                    PIDStr = '0'.repeat(3-PIDStr.length) + PIDStr;
+                    // Also check that it isn't a file name in filesInUse
+                    if (Utils.filePIDNametoString(diskValue.data) == PIDStr && !this.isFileNameInFiles(PIDStr)) {
+                        aggregatedPIDs.push(PID);
+                    }
+                }
+            }
+            return null; // This should never occurk but just in case
+        }
+
         // Check if the queried file name is in the list of files in use
-        public fileNameInFiles(queriedfileName: string): boolean {
+        public isFileNameInFiles(queriedfileName: string): boolean {
             for (const file of this.filesInUse) {
                 if (file.name == queriedfileName) {
                     return true;
                 }
             }
             return false;
+        }
+
+        // Return the file if the queried file name is in the list of files in use
+        public fileInFiles(queriedfileName: string): File {
+            for (const file of this.filesInUse) {
+                if (file.name == queriedfileName) {
+                    return file;
+                }
+            }
+            return null;
         }
         
         public TSBInFileInFiles(queriedfileName: string): number[] {
@@ -271,7 +331,13 @@ module TSOS {
                     // Convert the data/hex into a string from OpCode objects
                     var data = '';
                     for (let i=0; i < diskValue.data.length; i++) {
-                        data += diskValue.data[i].codeString;
+                        // Check that we aren't copying over the parts with no data
+                        if (diskValue.data[i].codeString != "00") {
+                            data += diskValue.data[i].codeString;
+                        }
+                        else {
+                            break;
+                        }
                     }
                     // Add the block data to the accumulated data as ASCII
                     accumulatedData += Utils.hex2a(data);
@@ -302,11 +368,15 @@ module TSOS {
         public inUse: number;
         public name: string;
         public TSB: Array<number>;
+        public creationDate: string;
+        public size: number; // in Bytes
         
         constructor (name: string, TSB: number[]){
             this.inUse = 1;
             this.name = name;
             this.TSB = TSB;
+            this.creationDate = new Date().toLocaleString();
+            this.size = 0;
         }
     }
 }

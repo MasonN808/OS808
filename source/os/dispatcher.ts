@@ -13,22 +13,52 @@ module TSOS {
                 pcb1.processState = "Ready";
                 
                 // Update the displayed PCB
-                TSOS.Control.hostProcesses(currentPID);
+                TSOS.Control.hostProcesses();
             }
             console.log(_MemoryManager.PIDMap)
             
-            const dequeuedPID = _ReadyQueue.dequeue();
-            // Log the context switch
-            _Kernel.krnTrace("Context Switch: process " + currentPID + " switched with process " + dequeuedPID);
-
-            const pcb2 = _MemoryManager.PIDMap.get(dequeuedPID)[1];
-            pcb2.processState = "Running";
-            
-            _CPU.PID = dequeuedPID;
-            _CPU.calibratePCBtoCPU(_CPU.PID);
-
-            // Update the displayed PCB
-            TSOS.Control.hostProcesses(dequeuedPID);
+            // If we have different scheduling schemes we act on that here
+            // For Non-preempive priority scheduling
+            if (_Scheduler.schedulerType == "NPP") {
+                // We have to find the next prioritized process from the ready queue
+                var prioritizedPID = -1;
+                var priority = 1000000;
+                for (let i=0; i < _ReadyQueue.q.length; i++) {
+                    const tempPriority = parseInt(_MemoryManager.PIDMap.get(_ReadyQueue.q[i])[1].priority, 10);
+                    // get the pcb from the PID map and compare the priority
+                    if (tempPriority < priority) {
+                        prioritizedPID = _ReadyQueue.q[i];
+                        priority = tempPriority;
+                    }
+                }
+                console.log(prioritizedPID)
+                const poppedPID = _ReadyQueue.pop(prioritizedPID);
+                // Log the context switch
+                _Kernel.krnTrace("Context Switch: process " + currentPID + " switched with process " + poppedPID);
+                const pcb2 = _MemoryManager.PIDMap.get(poppedPID)[1];
+                pcb2.processState = "Running";
+                
+                _CPU.PID = poppedPID;
+                _CPU.calibratePCBtoCPU(_CPU.PID);
+    
+                // Update the displayed PCB
+                TSOS.Control.hostProcesses();
+            }
+            // For First Come First Serve
+            else {
+                const dequeuedPID = _ReadyQueue.dequeue();
+                // Log the context switch
+                _Kernel.krnTrace("Context Switch: process " + currentPID + " switched with process " + dequeuedPID);
+    
+                const pcb2 = _MemoryManager.PIDMap.get(dequeuedPID)[1];
+                pcb2.processState = "Running";
+                
+                _CPU.PID = dequeuedPID;
+                _CPU.calibratePCBtoCPU(_CPU.PID);
+    
+                // Update the displayed PCB
+                TSOS.Control.hostProcesses();
+            }
         }
     }
 }
